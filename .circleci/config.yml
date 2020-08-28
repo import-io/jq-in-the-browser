@@ -1,0 +1,40 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:10.13.0-browsers
+    working_directory: ~/app
+    steps:
+      - checkout
+      - run:
+          name: pre
+          command: |
+            curl -u${CIRCLECI_ARTIFACTORY_USER}:${CIRCLECI_ARTIFACTORY_PASSWORD} "https://importio.jfrog.io/importio/api/npm/npm-virtual/auth/import" > ~/.npmrc
+      - restore_cache:
+          key: dependency-cache-{{ arch }}-{{ checksum "package.json" }}-v1
+      - run: npm ci
+      - save_cache:
+          key: dependency-cache-{{ arch }}-{{ checksum "package.json" }}-v1
+          paths:
+            - ./node_modules
+      - run:
+          name: test
+          command: |
+            npm test
+            npm run build
+      - run:
+          name: deploy
+          command: |
+            if [[ ${CIRCLE_TAG} =~ ^release-.* ]]; then
+              npm publish
+            fi
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only:
+                - /^release-.*/
