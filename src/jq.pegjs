@@ -87,7 +87,13 @@
       "reverse": input => ([].concat(input).reverse()),
       "tonumber": input => input * 1,
       "tostring": input => ((typeof input === "object") ? JSON.stringify(input) : String(input)),
-      "sort": input => {return unpack(input).sort()}
+      "sort": input => {return unpack(input).sort()},
+      "ascii_downcase": input => {
+        return input.replace(/[A-Z]/g, x => String.fromCharCode(x.charCodeAt(0) + 32))
+      },
+      "ascii_upcase": input => {
+        return input.replace(/[a-z]/g, x => String.fromCharCode(x.charCodeAt(0) - 32))
+      },
     }
 
     const function1_map = {
