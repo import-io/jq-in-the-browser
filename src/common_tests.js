@@ -12,6 +12,24 @@ describe('Single quote String literal', () => {
   })
 })
 
+describe('Extension functions', () => {
+  it('downcase', () => {
+    const query = '.greeting | downcase'
+    const input = { "greeting": "Hello, МИР! © 2020\nПривет, WORLD!" }
+    const output = "hello, мир! © 2020\nпривет, world!"
+
+    assert.deepStrictEqual(parser(query)(input), output)
+  })
+
+  it('upcase', () => {
+    const query = '.greeting | upcase'
+    const input = { "greeting": "Hello, МИР! © 2020\nПривет, WORLD!" }
+    const output = "HELLO, МИР! © 2020\nПРИВЕТ, WORLD!"
+
+    assert.deepStrictEqual(parser(query)(input), output)
+  })
+})
+
 describe('Other tests', () => {
   it('handle example code correctly', () => {
     const query = '{"names": .[] | .name}'

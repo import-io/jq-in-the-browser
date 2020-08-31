@@ -94,6 +94,12 @@
       "ascii_upcase": input => {
         return input.replace(/[a-z]/g, x => String.fromCharCode(x.charCodeAt(0) - 32))
       },
+      "downcase": input => {
+        return input.toLowerCase()
+      },
+      "upcase": input => {
+        return input.toUpperCase()
+      },
     }
 
     const function1_map = {
