@@ -265,7 +265,11 @@ bracket_transforms
     / '[' _ '"' _ key:double_quote_string_core _ '"' _ ']' {return i => i[key]}
     / '[' _ "'" _ key:single_quote_string_core _ "'" _ ']' {return i => i[key]}
     / "[" _ start:index _ ":" _ end:index _ "]" {return i => i.slice(start, end)}
-    / "[" _ index:index _ "]" {return i => i[index]}
+    / "[" _ index:index _ "]" {
+        return input => {
+            return input.hasOwnProperty(index) ? input[index] : null
+        }
+    }
     / "[" _ "-" _ index:index _ "]" {return i => i[i.length - index]}
 
 identity
@@ -290,4 +294,4 @@ name
     = name:([a-zA-Z_$][0-9a-zA-Z_$]*) {return text()}
 
 index
-    = index:[0-9]+ {return index}
+    = index:[0-9]+ {return index.join('')}
