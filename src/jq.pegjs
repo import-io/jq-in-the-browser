@@ -134,7 +134,7 @@ multiplicative
         const f = (k) => ({
             '*': (a, b) => a * b,
             '/': (a, b) => a / b,
-            '%': (a, b) => a % b,
+            '%': (a, b) => a % b + 0, // must return 0 instead of -0
         }[k])
         return right.reduce(
             (result, element) => f(element[1])(result, element[3](input)),

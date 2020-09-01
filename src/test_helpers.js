@@ -11,7 +11,7 @@ const test_with_node_jq = ([feature, queries, inputs]) => {
           it(`Input: ${JSON.stringify(input)}`, async () => {
             const parser_result = jq(query)(input)
             const jq_result = await node_jq.run(query, input, {input: 'json', output: 'json'})
-            assert.deepEqual(parser_result, jq_result)
+            assert.deepStrictEqual(parser_result, jq_result)
           })
         })
       })
@@ -27,7 +27,7 @@ const test_with_jq_web = ([feature, queries, inputs]) => {
           it(`Input: ${JSON.stringify(input)}`, () => {
             const parser_result = jq(query)(input)
             const jq_result = jq_web(input, query)
-            assert.deepEqual(parser_result, jq_result)
+            assert.deepStrictEqual(parser_result, jq_result)
           })
         })
       })

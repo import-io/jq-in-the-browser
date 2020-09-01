@@ -8,7 +8,7 @@ describe('Single quote String literal', () => {
   })
 
   it('as key', () => {
-    assert.deepEqual(parser("{'a': false}")(null), {'a': false})
+    assert.deepStrictEqual(parser("{'a': false}")(null), {'a': false})
   })
 })
 
@@ -35,7 +35,7 @@ describe('Other tests', () => {
         "names": "John"
       },
     ]
-    assert.deepEqual(parser(query)(input), output)
+    assert.deepStrictEqual(parser(query)(input), output)
   })
 
   it('handle example code correctly 2', () => {
@@ -55,7 +55,7 @@ describe('Other tests', () => {
       ]
     }
 
-    assert.deepEqual(parser(query)(input), output)
+    assert.deepStrictEqual(parser(query)(input), output)
   })
 })
 
