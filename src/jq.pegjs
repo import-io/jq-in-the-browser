@@ -226,12 +226,18 @@ pair
     / key:name _ ':' _ value:additive {return construct_pair(key, value)}
 
 float_literal
-    = "-" number:float_literal {return input => -number(input)}
-    / ([0-9]*) "." ([0-9]+) {const v = (text() * 1); return input => v}
+    = "-" _ number:float_literal {return input => -number(input)}
+    / [0-9]* "." [0-9]+ {
+        const number = text() * 1
+        return input => number
+    }
 
 integer_literal
-    = "-" number:integer_literal {return input => -number(input)}
-    / number:([0-9]+) {return input => number.join() * 1}
+    = "-" _ number:integer_literal {return input => -number(input)}
+    / [0-9]+ {
+        const number = text() * 1
+        return input => number
+    }
 
 filter
     = head_filter:head_filter transforms:transforms {return i => transforms(head_filter(i))}
@@ -264,13 +270,20 @@ bracket_transforms
     }
     / '[' _ '"' _ key:double_quote_string_core _ '"' _ ']' {return i => i[key]}
     / '[' _ "'" _ key:single_quote_string_core _ "'" _ ']' {return i => i[key]}
-    / "[" _ start:index _ ":" _ end:index _ "]" {return i => i.slice(start, end)}
-    / "[" _ index:index _ "]" {
+    / "[" _ start:integer_literal _ ":" _ end:integer_literal _ "]" {
         return input => {
-            return input.hasOwnProperty(index) ? input[index] : null
+            const startValue = start(input)
+            const endValue = end(input)
+            return input.slice(startValue, endValue)
         }
     }
-    / "[" _ "-" _ index:index _ "]" {return i => i[i.length - index]}
+    / "[" _ index:integer_literal _ "]" {
+        return input => {
+            let indexValue = index(input)
+            if (indexValue < 0) indexValue += input.length
+            return input.hasOwnProperty(indexValue) ? input[indexValue] : null
+        }
+    }
 
 identity
     = "." {return identity}
@@ -292,6 +305,3 @@ single_quote_string_char
 
 name
     = name:([a-zA-Z_$][0-9a-zA-Z_$]*) {return text()}
-
-index
-    = index:[0-9]+ {return index.join('')}
