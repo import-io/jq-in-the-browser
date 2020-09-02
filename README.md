@@ -1,3 +1,50 @@
+# Import.io notes
+
+**Test**
+```
+npm test
+```
+**Build**
+```
+npm run build
+```
+**Publish**
+
+Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will build and publish the package.
+
+## Supported functions
+
+* ascii_downcase
+* ascii_upcase
+* downcase (non-standard extension, see below)
+* from_entries
+* join
+* keys
+* keys_unsorted
+* length
+* map
+* map_values
+* reverse
+* sort
+* sort_by
+* to_entries
+* tonumber
+* tostring
+* with_entries
+* upcase (non-standard extension, see below)
+
+The extension functions "downcase" and "upcase" are not present in standard JQ. They differ from "ascii_downcase" and "ascii_upcase"
+in that they change casing for all Unicode letters, not only for ASCII letters (A-Z).
+
+## Operator precedence
+
+It is not documented in the [offical manual](https://stedolan.github.io/jq/manual/) but can be found here:
+http://rosettacode.org/wiki/Operator_precedence#jq.
+
+Note that it's broken in current implementation. For example `1 + 1 | 2` returns 3 while it must return 2.
+
+<hr>
+
 # DISCONTINUED in favor of [emuto](https://github.com/kantord/emuto)
 
 # jq-in-the-browser
