@@ -270,10 +270,12 @@ bracket_transforms
     }
     / '[' _ '"' _ key:double_quote_string_core _ '"' _ ']' {return i => i[key]}
     / '[' _ "'" _ key:single_quote_string_core _ "'" _ ']' {return i => i[key]}
-    / "[" _ start:integer_literal _ ":" _ end:integer_literal _ "]" {
+    / "[" _ start:integer_literal? _ ":" _ end:integer_literal? _ "]" & {
+        return start || end // for JQ compliance
+    } {
         return input => {
-            const startValue = start(input)
-            const endValue = end(input)
+            const startValue = start ? start(input) : 0
+            const endValue = end ? end(input) : undefined
             return input.slice(startValue, endValue)
         }
     }
