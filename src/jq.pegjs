@@ -1,13 +1,6 @@
 {
     const identity = f => f
     const flow = funcs => funcs.reduce((result, element) => (input => element(result(input))), identity)
-    const mapf = func => function(input) {
-        if (input instanceof Stream) {
-            return input.map(func)
-        }
-
-        return func(input)
-    }
     const construct_pair_simple = (key, value) => input => {
         let obj = {};
         obj[key] = value(input);
@@ -131,6 +124,23 @@ _
     = [ ]*
 
 expr
+    = left:addsub right:(_ "|" _ addsub)* {
+        if (!right.length) return left
+
+        return input => {
+            let result = left(input)
+            for (const element of right) {
+                const filter = element[3]
+                result = result instanceof Stream
+                    ? result.map(filter)
+                    : filter(result)
+            }
+
+            return result
+        }
+    }
+
+addsub
     = left:muldiv right:(_ [+-] _ muldiv)* {
         if (!right.length) return left
 
@@ -180,10 +190,6 @@ negation
 
 parens
     = "(" _ expr:expr _ ")" { return expr }
-    / pipeline
-
-pipeline
-    = left:filter _ "|" _ right:expr {return input => mapf(right)(left(input))}
     / filter
 
 head_filter
@@ -314,7 +320,7 @@ identity
     = "." {return identity}
 
 object_identifier_index
-    = "." name:name {return mapf(x => x[name])}
+    = "." name:name {return input => input[name]}
 
 double_quote_string_core
     = double_quote_string_char* {return text()}
