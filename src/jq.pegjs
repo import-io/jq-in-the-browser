@@ -126,41 +126,64 @@
 }
 
 value
-    = _ additive:additive _ {return input => unpack(additive(input))}
-
-additive
-    = left:multiplicative right:((_ ('+'/ '-') _ additive)+) {return input => {
-        const f = (k) => ({
-            '+': (a, b) => a + b,
-            '-': (a, b) => a - b,
-        }[k])
-        return right.reduce(
-            (result, element) => f(element[1])(result, element[3](input)),
-            left(input))
-    }}
-    / "-" _ additive:additive {return input => 0 - additive(input)}
-    / multiplicative
-
-multiplicative
-    = left:pipeline right:((_ ('*'/ '/' / '%') _ pipeline)+) {return input => {
-        const f = (k) => ({
-            '*': (a, b) => a * b,
-            '/': (a, b) => a / b,
-            '%': (a, b) => a % b + 0, // must return 0 instead of -0
-        }[k])
-        return right.reduce(
-            (result, element) => f(element[1])(result, element[3](input)),
-            left(input))
-    }}
-    / pipeline
-
+    = _ expr:expr _ {return input => unpack(expr(input))}
 _
     = [ ]*
 
+expr
+    = left:muldiv right:(_ [+-] _ muldiv)* {
+        if (!right.length) return left
+
+        const ops = {
+            '+': (a, b) => a + b,
+            '-': (a, b) => a - b,
+        }
+
+        return input => {
+            let result = left(input)
+            for (const element of right) {
+                const op = ops[element[1]]
+                const value = element[3](input)
+                result = op(result, value)
+            }
+
+            return result
+        }
+    }
+
+muldiv
+    = left:negation right:(_ [*/%] _ negation)* {
+        if (!right.length) return left
+
+        const ops = {
+            '*': (a, b) => a * b,
+            '/': (a, b) => a / b,
+            '%': (a, b) => a % b + 0, // must return 0 instead of -0
+        }
+
+        return input => {
+            let result = left(input)
+            for (const element of right) {
+                const op = ops[element[1]]
+                const value = element[3](input)
+                result = op(result, value)
+            }
+
+            return result
+        }
+    }
+
+negation
+    = minuses:("-" _)* right:parens {
+        return minuses.length % 2 ? input => -right(input) : right
+    }
+
+parens
+    = "(" _ expr:expr _ ")" { return expr }
+    / pipeline
+
 pipeline
-    = "(" _ pipeline:value _ ")" {return pipeline}
-    / "-" _ "(" _ pipeline:value _ ")" {return input => 0 - pipeline(input)}
-    / left:filter _ "|" _ right:pipeline {return input => mapf(right)(left(input))}
+    = left:filter _ "|" _ right:expr {return input => mapf(right)(left(input))}
     / filter
 
 head_filter
@@ -177,7 +200,7 @@ head_filter
     / function0
 
 function1
-  = name:name _ "(" _ arg:value _ ")" {return get_function_1(name)(arg)}
+  = name:name _ "(" _ arg:expr _ ")" {return get_function_1(name)(arg)}
 
 function0
     = name:name {return get_function_0(name)}
@@ -202,15 +225,15 @@ false
 
 array_construction
     = "[" _ "]" {return input => []}
-    / "[" array_inside:array_inside "]" {return input => unpack(array_inside(input))}
+    / "[" _ array_inside:array_inside _ "]" {return input => unpack(array_inside(input))}
 
 object_construction
     = "{" _ "}" {return input => ({})}
     / "{" object_inside:object_inside "}" {return input => object_inside(input)}
 
 array_inside
-    = left:value _ "," _ right:array_inside {return input => [left(input)].concat(right(input))}
-    / value:additive {return input => {
+    = left:expr _ "," _ right:array_inside {return input => [left(input)].concat(right(input))}
+    / value:expr {return input => {
         const v = value(input);
         return (v instanceof Stream) ? unpack(v) : [v]
     }}
@@ -220,10 +243,10 @@ object_inside
     / pair:pair {return input => pair(input)}
 
 pair
-    = '"' key:double_quote_string_core '"' _ ':' _ value:additive {return construct_pair(key, value)}
-    / "'" key:single_quote_string_core "'" _ ':' _ value:additive {return construct_pair(key, value)}
-    / "(" _ key:value _  ")" _ ':' _ value:additive {return input => construct_pair(key(input), value)(input)}
-    / key:name _ ':' _ value:additive {return construct_pair(key, value)}
+    = '"' key:double_quote_string_core '"' _ ':' _ value:expr {return construct_pair(key, value)}
+    / "'" key:single_quote_string_core "'" _ ':' _ value:expr {return construct_pair(key, value)}
+    / "(" _ key:expr _ ")" _ ':' _ value:expr {return input => construct_pair(key(input), value)(input)}
+    / key:name _ ':' _ value:expr {return construct_pair(key, value)}
 
 float_literal
     = "-" _ number:float_literal {return input => -number(input)}
