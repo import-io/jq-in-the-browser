@@ -4,11 +4,11 @@ import should from 'should'
 
 describe('Single quote String literal', () => {
   it('per se', () => {
-    assert.equal(parser("'Hello \"World\"!'")(null), 'Hello "World"!')
+    assert.deepStrictEqual(parser("'Hello \"World\"!'")(null), ['Hello "World"!'])
   })
 
   it('as key', () => {
-    assert.deepStrictEqual(parser("{'a': false}")(null), {'a': false})
+    assert.deepStrictEqual(parser("{'a': false}")(null), [{'a': false}])
   })
 })
 
@@ -16,7 +16,7 @@ describe('Extension functions', () => {
   it('downcase', () => {
     const query = '.greeting | downcase'
     const input = { "greeting": "Hello, МИР! © 2020\nПривет, WORLD!" }
-    const output = "hello, мир! © 2020\nпривет, world!"
+    const output = ["hello, мир! © 2020\nпривет, world!"]
 
     assert.deepStrictEqual(parser(query)(input), output)
   })
@@ -24,7 +24,7 @@ describe('Extension functions', () => {
   it('upcase', () => {
     const query = '.greeting | upcase'
     const input = { "greeting": "Hello, МИР! © 2020\nПривет, WORLD!" }
-    const output = "HELLO, МИР! © 2020\nПРИВЕТ, WORLD!"
+    const output = ["HELLO, МИР! © 2020\nПРИВЕТ, WORLD!"]
 
     assert.deepStrictEqual(parser(query)(input), output)
   })
@@ -64,14 +64,14 @@ describe('Other tests', () => {
       {"name": "Jane", "age": 11},
       {"name": "John", "age": 42}
     ]
-    const output = {
+    const output = [{
       "names": [
         "Mary",
         "Rupert",
         "Jane",
         "John"
       ]
-    }
+    }]
 
     assert.deepStrictEqual(parser(query)(input), output)
   })

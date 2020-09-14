@@ -1,338 +1,364 @@
 {
-    const identity = f => f
-    const flow = funcs => funcs.reduce((result, element) => (input => element(result(input))), identity)
-    const construct_pair_simple = (key, value) => input => {
-        let obj = {};
-        obj[key] = value(input);
-        return obj;
+  const get_function_0 = name => {
+    const f = function0_map[name]
+    if (f === undefined) throw new Error(`function ${name}/0 is not defined`)
+    return f
+  }
+
+  const get_function_1 = name => {
+    const f = function1_map[name]
+    if (f === undefined) throw new Error(`function ${name}/1 is not defined`)
+    return f
+  }
+
+  const function0_map = {
+    "length": input => input.length,
+    "keys": input => Object.keys(input).sort(),
+    "keys_unsorted": input => Object.keys(input),
+    "to_entries": input => Object.entries(input).map(([key, value]) => ({ key, value })),
+    "from_entries": input => input.reduce(
+      (result, element) => Object.assign({}, result, {[element.key]: element.value}), {}),
+    "reverse": input => ([].concat(input).reverse()),
+    "tonumber": input => input * 1,
+    "tostring": input => ((typeof input === "object") ? JSON.stringify(input) : String(input)),
+    "ascii_downcase": input => {
+      return input.replace(/[A-Z]/g, x => String.fromCharCode(x.charCodeAt(0) + 32))
+    },
+    "ascii_upcase": input => {
+      return input.replace(/[a-z]/g, x => String.fromCharCode(x.charCodeAt(0) - 32))
+    },
+    "downcase": input => {
+      return input.toLowerCase()
+    },
+    "sort": input => {
+      return [...input].sort()
+    },
+    "upcase": input => {
+      return input.toUpperCase()
+    },
+  }
+
+  const function1_map = {
+    "map": arg => input => input.map(i => arg(i)),
+    "map_values": arg => input => {
+      const pairs = Object.keys(input).map(key => ({[key]: arg(input[key])}))
+      return Object.assign({}, ...pairs)
+    },
+    "with_entries": arg => input => {
+      const from_entries = function0_map["from_entries"]
+      const to_entries = function0_map["to_entries"]
+      const mapped = to_entries(input).map(arg)
+      return from_entries(mapped)
+    },
+    "join": arg => input => input.join(arg(input)),
+    "sort_by": arg => input => [...input].sort((a, b) => {
+      const va = arg(a)
+      const vb = arg(b)
+      if (va < vb) return -1
+      if (va > vb) return 1
+      return 0
+    })
+  }
+
+  class Stream {
+    constructor(items) {
+      this.items = items
     }
-    const construct_pair = (key, value) => input => {
-        const value_results = value(input)
-        if (value_results instanceof Stream) {
-            return value_results.map(i => construct_pair_simple(key, f => f)(i))
+  }
+
+  const iterate = (array) => {
+    if (array.some(value => value === undefined || value instanceof Stream)) {
+      array = array.flatMap(value => {
+        if (value === undefined) {
+          return []
         }
-        return construct_pair_simple(key, value)(input)
-    }
-
-    const flatten = (arr) => [].concat.apply([], arr);
-
-    const product = (...sets) =>
-      sets.reduce((acc, set) =>
-        flatten(acc.map(x => set.map(y => [ ...x, y ]))),
-        [[]]);
-
-    const combine_pairs = (left, right, input) => {
-        const left_value = left(input)
-        const right_value = right(input)
-        if (left_value instanceof Stream) {
-            if (right_value instanceof Stream) {
-                return left_value.product(right_value).map((a, _) => Object.assign({}, ...a))
-            } else {
-                return combine_pairs(left, i => new Stream([right(i)]), input)
-            }
+        if (Array.isArray(value)) {
+          return [value] // escape flattening
+        }
+        if (value instanceof Stream) {
+          return value.items
         }
 
-        if (right_value instanceof Stream) {
-            return combine_pairs(right, i => new Stream([left(i)]), input)
-        }
-        return Object.assign(left_value, right_value)
-    }
-    const unpack = a => (a instanceof Stream) ? (unpack(a.unpack())) : a
-
-    class Stream {
-    // Simulates multiple "lines" of output
-      constructor(items) {
-        this.items = items;
-      }
-
-      unpack() {
-        return this.items
-      }
-
-      map(f) {
-        return new Stream(this.items.map(f))
-      }
-
-      product(other) {
-        return new Stream(product(this.items, unpack(other)))
-      }
-    }
-
-    const get_function_0 = name => {
-        const f = function0_map[name]
-        if (f === undefined) throw new Error(`function ${name}/0 is not defined`)
-        return f
-    }
-
-    const get_function_1 = name => {
-        const f = function1_map[name]
-        if (f === undefined) throw new Error(`function ${name}/1 is not defined`)
-        return f
-    }
-
-    const function0_map = {
-      "length": input => input.length,
-      "keys": input => Object.keys(input).sort(),
-      "keys_unsorted": input => Object.keys(input),
-      "to_entries": input => Object.entries(input).map(([key, value]) => ({ key, value })),
-      "from_entries": input => input.reduce(
-        (result, element) => Object.assign({}, result, {[element.key]: element.value}), {}),
-      "reverse": input => ([].concat(input).reverse()),
-      "tonumber": input => input * 1,
-      "tostring": input => ((typeof input === "object") ? JSON.stringify(input) : String(input)),
-      "sort": input => {return unpack(input).sort()},
-      "ascii_downcase": input => {
-        return input.replace(/[A-Z]/g, x => String.fromCharCode(x.charCodeAt(0) + 32))
-      },
-      "ascii_upcase": input => {
-        return input.replace(/[a-z]/g, x => String.fromCharCode(x.charCodeAt(0) - 32))
-      },
-      "downcase": input => {
-        return input.toLowerCase()
-      },
-      "upcase": input => {
-        return input.toUpperCase()
-      },
-    }
-
-    const function1_map = {
-      "map": arg => input => input.map(i => arg(i)),
-      "map_values": arg => input => {
-        const pairs = Object.keys(input).map(key => ({[key]: arg(input[key])}))
-        return Object.assign({}, ...pairs)
-      },
-      "with_entries": arg => input => {
-        const from_entries = function0_map["from_entries"]
-        const to_entries = function0_map["to_entries"]
-        const mapped = to_entries(input).map(arg)
-        return from_entries(mapped)
-      },
-      "join": arg => input => input.join(arg(input)),
-      "sort_by": arg => input => unpack(input).sort((a, b) => {
-        const va = arg(a)
-        const vb = arg(b)
-        if (va < vb) return -1
-        if (va > vb) return 1
-        return 0
+        return value
       })
     }
+
+    if (array.length <= 1) {
+      return array[0]
+    }
+
+    return new Stream(array)
+  }
+
+  const map = (value, fn) => {
+    if (value === undefined) {
+      return undefined
+    }
+    if (!(value instanceof Stream)) {
+      return fn(value)
+    }
+
+    return iterate(value.items.map(fn))
+  }
+
+  const product = (value1, value2, fn) => {
+    if (value1 === undefined || value2 === undefined) {
+      return undefined
+    }
+    if (!(value1 instanceof Stream)) {
+      return map(value2, b => fn(value1, b))
+    }
+    if (!(value2 instanceof Stream)) {
+      return map(value1, a => fn(a, value2))
+    }
+
+    return iterate(
+      value2.items.flatMap(b =>
+      value1.items.map(a => fn(a, b))))
+  }
+
+  const toArray = (value) => {
+    if (value === undefined) {
+      return []
+    }
+    if (!(value instanceof Stream)) {
+      return [value]
+    }
+
+    return value.items
+  }
+
+  const processPipe = (first, rest) => {
+    if (!rest.length) {
+      return first
+    }
+
+    rest = rest.map(([,,, expr]) => expr)
+    return input => rest.reduce(map, first(input))
+  }
 }
 
 value
-    = _ expr:expr _ {return input => unpack(expr(input))}
+  = _ expr: expr _ {
+    return input => {
+      if (input === undefined) {
+        return []
+      }
+
+      return toArray(expr(input))
+    }
+  }
+
 _
-    = [ ]*
+  = [ ]*
 
 expr
-    = left:addsub right:(_ "|" _ addsub)* {
-        if (!right.length) return left
+  = left: stream right: (_ "|" _ stream)* {
+    return processPipe(left, right)
+  }
 
-        return input => {
-            let result = left(input)
-            for (const element of right) {
-                const filter = element[3]
-                result = result instanceof Stream
-                    ? result.map(filter)
-                    : filter(result)
-            }
+expr_no_comma // for object construction (where, actually, JQ supports only "negation | negation")
+  = left: addsub right: (_ "|" _ addsub)* {
+    return processPipe(left, right)
+  }
 
-            return result
-        }
+stream
+  = first: addsub rest: (_ "," _ addsub)* {
+    if (!rest.length) {
+      return first
     }
+
+    rest = rest.map(([,,, expr]) => expr)
+    const all = [first, ...rest]
+    return input => iterate(all.map(expr => expr(input)))
+  }
 
 addsub
-    = left:muldiv right:(_ [+-] _ muldiv)* {
-        if (!right.length) return left
-
-        const ops = {
-            '+': (a, b) => a + b,
-            '-': (a, b) => a - b,
-        }
-
-        return input => {
-            let result = left(input)
-            for (const element of right) {
-                const op = ops[element[1]]
-                const value = element[3](input)
-                result = op(result, value)
-            }
-
-            return result
-        }
+  = first: muldiv rest: (_ addsub_op _ muldiv)* {
+    if (!rest.length) {
+      return first
     }
+
+    rest = rest.map(([, op,, expr]) => ({ op, expr }))
+    return input => rest.reduce((result, { op, expr }) =>
+      product(result, expr(input), op),
+      first(input))
+  }
+
+addsub_op
+  = "+" { return (a, b) => a + b }
+  / "-" { return (a, b) => a - b }
 
 muldiv
-    = left:negation right:(_ [*/%] _ negation)* {
-        if (!right.length) return left
-
-        const ops = {
-            '*': (a, b) => a * b,
-            '/': (a, b) => a / b,
-            '%': (a, b) => a % b + 0, // must return 0 instead of -0
-        }
-
-        return input => {
-            let result = left(input)
-            for (const element of right) {
-                const op = ops[element[1]]
-                const value = element[3](input)
-                result = op(result, value)
-            }
-
-            return result
-        }
+  = first: negation rest: (_ muldiv_op _ negation)* {
+    if (!rest.length) {
+      return first
     }
+
+    rest = rest.map(([, op,, expr]) => ({ op, expr }))
+    return input => rest.reduce((result, { op, expr }) =>
+      product(result, expr(input), op),
+      first(input))
+  }
+
+muldiv_op
+  = "*" { return (a, b) => a * b }
+  / "/" { return (a, b) => a / b }
+  / "%" { return (a, b) => a % b + 0 } // must return 0 instead of -0
 
 negation
-    = minuses:("-" _)* right:parens {
-        return minuses.length % 2 ? input => -right(input) : right
+  = minuses: ("-" _)* expr: parens {
+    if (!(minuses.length % 2)) {
+      return expr
     }
+
+    return input => map(expr(input), value => -value)
+  }
 
 parens
-    = "(" _ expr:expr _ ")" { return expr }
-    / filter
-
-head_filter
-    = float_literal
-    / boolean_literal
-    / object_identifier_index
-    / identity
-    / array_construction
-    / object_construction
-    / integer_literal
-    / single_quote_string_literal
-    / double_quote_string_literal
-    / function1
-    / function0
-
-function1
-  = name:name _ "(" _ arg:expr _ ")" {return get_function_1(name)(arg)}
-
-function0
-    = name:name {return get_function_0(name)}
-
-double_quote_string_literal
-    = '"' core:double_quote_string_core '"' {return input => core}
-
-single_quote_string_literal
-    = '\'' core:single_quote_string_core '\'' {return input => core}
-
-boolean_literal
-    = true
-    / false
-
-true
-    = "true" {return input => true}
-
-false
-    = "false" {return input => false}
-
-
-
-array_construction
-    = "[" _ "]" {return input => []}
-    / "[" _ array_inside:array_inside _ "]" {return input => unpack(array_inside(input))}
-
-object_construction
-    = "{" _ "}" {return input => ({})}
-    / "{" object_inside:object_inside "}" {return input => object_inside(input)}
-
-array_inside
-    = left:expr _ "," _ right:array_inside {return input => [left(input)].concat(right(input))}
-    / value:expr {return input => {
-        const v = value(input);
-        return (v instanceof Stream) ? unpack(v) : [v]
-    }}
-
-object_inside
-    = left:pair _ "," _ right:object_inside {return input => combine_pairs(left, right, input)}
-    / pair:pair {return input => pair(input)}
-
-pair
-    = '"' key:double_quote_string_core '"' _ ':' _ value:expr {return construct_pair(key, value)}
-    / "'" key:single_quote_string_core "'" _ ':' _ value:expr {return construct_pair(key, value)}
-    / "(" _ key:expr _ ")" _ ':' _ value:expr {return input => construct_pair(key(input), value)(input)}
-    / key:name _ ':' _ value:expr {return construct_pair(key, value)}
-
-float_literal
-    = "-" _ number:float_literal {return input => -number(input)}
-    / [0-9]* "." [0-9]+ {
-        const number = text() * 1
-        return input => number
-    }
-
-integer_literal
-    = "-" _ number:integer_literal {return input => -number(input)}
-    / [0-9]+ {
-        const number = text() * 1
-        return input => number
-    }
+  = "(" _ expr: expr _ ")" { return expr }
+  / filter
 
 filter
-    = head_filter:head_filter transforms:transforms {return i => transforms(head_filter(i))}
-    / head_filter
+  = first: head_filter rest: transform* {
+    if (!rest.length) {
+      return first
+    }
 
-transforms
-    = funcs:(transform +) {return input => flow(funcs)(input)}
+    return input => rest.reduce(map, first(input))
+  }
+
+head_filter
+  = literal
+  / dot_name
+  / identity
+  / array_construction
+  / object_construction
+  / function1
+  / function0
+
+function1
+  = name: name _ "(" _ arg: expr _ ")" {return get_function_1(name)(arg)}
+
+function0
+  = name: name {return get_function_0(name)}
+
+array_construction
+  = "[" _ "]" {
+    return input => []
+  }
+  / "[" _ expr: expr _ "]" {
+    return input => toArray(expr(input))
+  }
+
+object_construction
+  = "{" _ "}" {
+    return input => ({})
+  }
+  / "{" _ first: object_prop rest: (_ "," _ object_prop)* (_ ",")? _ "}" {
+    if (!rest.length) {
+      return first
+    }
+
+    rest = rest.map(([,,, expr]) => expr)
+    return input => rest.reduce((result, expr) =>
+      product(expr(input), result, (prop, object) => Object.assign({}, object, prop)),
+      first(input))
+  }
+
+object_prop
+  = key: object_key _ ":" _ value: expr_no_comma {
+    return input => product(value(input), key(input), (value, key) => {
+      // TODO: check key validity (strings only)
+      return { [key]: value }
+    })
+  }
+
+object_key
+  = name: (name / string) {
+    return input => name
+  }
+  / parens
 
 transform
-    = bracket_transforms
-    / object_identifier_index
+  = bracket_transforms
+  / dot_name
 
 bracket_transforms
-    = "[" _ "]" {
-        return function(input) {
-            const handle_array = function(array) {
-                if (array.length == 0) return []
-                if (array.length == 1) return array[0]
-                return new Stream(array)
-            }
+  = "[" _ "]" {
+    return input => {
+      if (typeof input === 'object') {
+        input = Object.values(input)
+      }
+      else if (!Array.isArray(input)) {
+        throw new Error(`Cannot iterate over ${typeof input} (${input})`)
+      }
 
-            if (input instanceof Array) {
-                return handle_array(input)
-            } else {
-                if (typeof input === 'object') return handle_array(Object.values(input))
-            }
+      return iterate(input)
+    }
+  }
+  / "[" _ key: string _ "]" {return i => i[key]}
+  / "[" _ start: integer_literal? _ ":" _ end: integer_literal? _ "]" & {
+    return start || end // for JQ compliance
+  } {
+    return input => {
+      const startIndex = start ? start() : 0 // TODO: expession indices
+      const endIndex = end ? end() : undefined // TODO: expession indices
+      return input.slice(startIndex, endIndex)
+    }
+  }
+  / "[" _ index: integer_literal _ "]" {
+    return input => {
+      index = index() // TODO: expession indices
+      if (index < 0) {
+        index += input.length
+      }
 
-            return input
-        }
+      return input.hasOwnProperty(index) ? input[index] : null
     }
-    / '[' _ '"' _ key:double_quote_string_core _ '"' _ ']' {return i => i[key]}
-    / '[' _ "'" _ key:single_quote_string_core _ "'" _ ']' {return i => i[key]}
-    / "[" _ start:integer_literal? _ ":" _ end:integer_literal? _ "]" & {
-        return start || end // for JQ compliance
-    } {
-        return input => {
-            const startValue = start ? start(input) : 0
-            const endValue = end ? end(input) : undefined
-            return input.slice(startValue, endValue)
-        }
-    }
-    / "[" _ index:integer_literal _ "]" {
-        return input => {
-            let indexValue = index(input)
-            if (indexValue < 0) indexValue += input.length
-            return input.hasOwnProperty(indexValue) ? input[indexValue] : null
-        }
-    }
+  }
+
+integer_literal // TODO: remove when we support exression indices
+  = "-" _ number: integer_literal {return input => -number(input)}
+  / [0-9]+ {
+    const number = +text()
+    return input => number
+  }
 
 identity
-    = "." {return identity}
+  = "." {
+    return input => input
+  }
 
-object_identifier_index
-    = "." name:name {return input => input[name]}
+dot_name
+  = "." name: name {
+    return input => {
+      if (input === null) {
+        return null
+      }
+      if (typeof input !== 'object') {
+        throw new Error(`Cannot index ${typeof input} with string "${name}"`)
+      }
 
-double_quote_string_core
-    = double_quote_string_char* {return text()}
+      return input.hasOwnProperty(name) ? input[name] : null
+    }
+  }
 
-double_quote_string_char
-    = [^"] {return text()}
+literal
+  = value: (boolean / number / string) {
+    return input => value
+  }
 
-single_quote_string_core
-    = single_quote_string_char* {return text()}
+boolean
+  = "false" { return false }
+  / "true" { return true }
 
-single_quote_string_char
-    = [^\'] {return text()}
+number
+  = ([0-9]* ".")? [0-9]+ { return +text() }
+
+string
+  = '"' core: $[^"]* '"' { return core }
+  / "'" core: $[^']* "'" { return core }
 
 name
-    = name:([a-zA-Z_$][0-9a-zA-Z_$]*) {return text()}
+  = $([a-zA-Z_$][0-9a-zA-Z_$]*)
