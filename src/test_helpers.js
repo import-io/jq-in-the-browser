@@ -1,7 +1,6 @@
 import jq from './index.js'
 import assert from 'assert'
 import jq_web from 'jq-web'
-import node_jq from 'node-jq'
 
 // A fixed version of jq_web.json, which resolves the following issues:
 //
@@ -23,22 +22,6 @@ const jq_web_fixed = (json, filter) => {
   return result.split('\n').filter(x => x).map(JSON.parse)
 }
 
-const test_with_node_jq = ([feature, queries, inputs]) => {
-  describe(feature, () =>
-    queries.forEach((query) =>
-      describe(`Query: ${query}`, () => {
-        inputs.forEach((input) => {
-          it(`Input: ${JSON.stringify(input)}`, async () => {
-            const parser_result = jq(query)(input)
-            const jq_result = await node_jq.run(query, input, {input: 'json', output: 'json'})
-            assert.deepStrictEqual(parser_result, jq_result)
-          })
-        })
-      })
-    )
-  )
-}
-
 const test_with_jq_web = ([feature, queries, inputs]) => {
   describe(feature, () =>
     queries.forEach((query) =>
@@ -55,4 +38,4 @@ const test_with_jq_web = ([feature, queries, inputs]) => {
   )
 }
 
-export { test_with_jq_web, test_with_node_jq }
+export { test_with_jq_web }
