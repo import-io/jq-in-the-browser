@@ -12,6 +12,22 @@ npm run build
 
 Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will build and publish the package.
 
+## Supported syntax constructs
+
+* Identity: `.`
+* Object identifier-index: `.foo`, `.foo.bar`
+* Generic object index: `.["foo"]` (string literal indices only)
+* Array index: `.[2]` (integer literal indices only)
+* Array/string slice: `.[10:15]` (integer literal indices only)
+* Array/object value iterator: `.[]`
+* Comma: `,`
+* Pipe: `|`
+* Parenthesis: `(. + 2) * 5`
+* Array construction: `[1, 2, 3]`
+* Object construction: `{"a": 42, "b": 17}` (shortcut syntax not supported: `{a, b}` instead of `{a: .a, b: .b}`)
+* Arithmetics: `+`, `-`, `*`, `/`, `%`
+* Boolean literals: `false`, `true`
+
 ## Supported functions
 
 * ascii_downcase
