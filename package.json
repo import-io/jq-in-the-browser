@@ -1,6 +1,6 @@
 {
   "name": "@import/jq-in-the-browser",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "jq-compatible query language for the web",
   "main": "lib/jq-in-the-browser.js",
   "scripts": {
