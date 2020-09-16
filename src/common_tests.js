@@ -80,6 +80,10 @@ describe('Other tests', () => {
 
 describe('Error messages', () => {
   const tests = [
+    ['. | ..1', 'Invalid numeric literal \'..1\''],
+    ['. | 1..', 'Invalid numeric literal \'1..\''],
+    ['. | 1..2', 'Invalid numeric literal \'1..2\''],
+    ['. | 1.2.3', 'Invalid numeric literal \'1.2.3\''],
     ['. | foo', 'function foo/0 is not defined'],
     ['. | bar', 'function bar/0 is not defined'],
     ['. | bar(4)', 'function bar/1 is not defined'],
@@ -88,7 +92,7 @@ describe('Error messages', () => {
 
   tests.forEach(([query, error]) =>
     it(`Error '${error}' for '${query}'`, () => {
-      (() => parser(query)(input)).should.throw(error)
+      (() => parser(query)).should.throw(error)
     })
   )
 })

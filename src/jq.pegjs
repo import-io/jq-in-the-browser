@@ -385,8 +385,17 @@ boolean
   = "false" { return false }
   / "true" { return true }
 
-number // TODO: must be [0-9.]+
-  = ([0-9]* ".")? [0-9]+ { return +text() }
+number
+  = [.]*[0-9][.0-9]* {
+    const chars = text()
+    const value = +chars
+
+    if (Number.isNaN(value)) {
+      error(`Invalid numeric literal '${chars}'`)
+    }
+
+    return value
+  }
 
 string
   = '"' core: $[^"]* '"' { return core }
