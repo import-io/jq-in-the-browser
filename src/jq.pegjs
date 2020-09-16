@@ -279,8 +279,8 @@ array_construction
   = "[" _ "]" {
     return input => []
   }
-  / "[" _ expr: expr _ "]" {
-    return input => toArray(expr(input))
+  / "[" _ items: expr _ "]" {
+    return input => toArray(items(input))
   }
 
 object_construction
@@ -330,32 +330,48 @@ bracket_transforms
     }
   }
   / "[" _ key: string _ "]" {return i => i[key]}
-  / "[" _ start: integer_literal? _ ":" _ end: integer_literal? _ "]" & {
+  / "[" _ start: numeric_index? _ ":" _ end: numeric_index? _ "]" & {
     return start || end // for JQ compliance
   } {
     return input => {
-      const startIndex = start ? start() : 0 // TODO: expession indices
-      const endIndex = end ? end() : undefined // TODO: expession indices
+      if (input === null) {
+        return null
+      }
+      if (!Array.isArray(input) && typeof input !== 'string') {
+        throw new Error(`Cannot index ${_mtype(input)} with object`)
+      }
+      if (start !== null && typeof start !== 'number' || end !== null && typeof end !== 'number') {
+        throw new Error(`Start and end indices of an ${_mtype(input)} slice must be numbers`)
+      }
+
+      const startIndex = start ? Math.floor(start) : 0 // TODO: expression indices
+      const endIndex = end ? Math.ceil(end) : undefined // TODO: expression indices
       return input.slice(startIndex, endIndex)
     }
   }
-  / "[" _ index: integer_literal _ "]" {
+  / "[" _ index_expr: numeric_index _ "]" {
     return input => {
-      index = index() // TODO: expession indices
-      if (index < 0) {
-        index += input.length
+      let index = index_expr // TODO: expression indices
+      if (input !== null && !Array.isArray(input) || typeof index !== 'number') {
+        throw new Error(`Cannot index ${_mtype(input)} with ${_mtype(index)}`)
+      }
+      if (input === null || !Number.isInteger(index)) {
+        return null
+      }
+      if (index < 0 && (index += input.length) < 0) {
+        return null
+      }
+      if (index >= input.length) {
+        return null
       }
 
-      return input.hasOwnProperty(index) ? input[index] : null
+      return input[index]
     }
   }
 
-integer_literal // TODO: remove when we support exression indices
-  = "-" _ number: integer_literal {return input => -number(input)}
-  / [0-9]+ {
-    const number = +text()
-    return input => number
-  }
+numeric_index // TODO: remove when we support expression indices
+  = "-" _ number: number { return -number }
+  / number
 
 identity
   = "." {

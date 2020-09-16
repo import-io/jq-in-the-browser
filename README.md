@@ -17,8 +17,8 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * Identity: `.`
 * Object identifier-index: `.foo`, `.foo.bar`
 * Generic object index: `.["foo"]` (string literal indices only)
-* Array index: `.[2]` (integer literal indices only)
-* Array/string slice: `.[10:15]` (integer literal indices only)
+* Array index: `.[2]` (numeric literal indices only)
+* Array/string slice: `.[10:15]` (numeric literal indices only)
 * Array/object value iterator: `.[]`
 * Comma: `,`
 * Pipe: `|`
