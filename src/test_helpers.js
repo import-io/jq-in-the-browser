@@ -25,15 +25,28 @@ const jq_web_fixed = (json, filter) => {
 const test_with_jq_web = ([feature, queries, inputs]) => {
   describe(feature, () =>
     queries.forEach((query) =>
-      describe(`Query: ${query}`, () => {
-        inputs.forEach((input) => {
+      describe(`Query: ${query}`, () =>
+        inputs.forEach((input) =>
           it(`Input: ${JSON.stringify(input)}`, () => {
-            const parser_result = jq(query)(input)
-            const jq_result = jq_web_fixed(input, query)
-            assert.deepStrictEqual(parser_result, jq_result)
+            if (query.startsWith('# ')) {
+              const realQuery = query.slice(2)
+
+              let message
+              assert.throws(() => jq_web_fixed(input, realQuery), e => { message = e.message; return true })
+              message = message.trimRight()
+              message = message.replace(/^jq: error \(at <stdin>:0\): /, '')
+
+              const compiledQuery = jq(realQuery)
+              assert.throws(() => compiledQuery(input), { message })
+            }
+            else {
+              const ourOutput = jq(query)(input)
+              const refOutput = jq_web_fixed(input, query)
+              assert.deepStrictEqual(ourOutput, refOutput)
+            }
           })
-        })
-      })
+        )
+      )
     )
   )
 }

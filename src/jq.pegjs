@@ -66,6 +66,14 @@
     }
   }
 
+  const isObject = (value) => {
+    if (value === null || Array.isArray(value)) {
+      return false
+    }
+
+    return typeof value === 'object'
+  }
+
   const iterate = (array) => {
     if (array.some(value => value === undefined || value instanceof Stream)) {
       array = array.flatMap(value => {
@@ -135,6 +143,30 @@
 
     rest = rest.map(([,,, expr]) => expr)
     return input => rest.reduce(map, first(input))
+  }
+
+  // Message formatting helpers. Don't use for other purposes.
+
+  const _mtype = (value) => {
+    if (value === null) {
+      return 'null'
+    }
+    if (Array.isArray(value)) {
+      return 'array'
+    }
+
+    return typeof value
+  }
+
+  const _mtype_v = (value) => {
+    const type = _mtype(value)
+    value = JSON.stringify(value)
+
+    if (value.length > 14) {
+      value = value.slice(0, 14 - 3) + '...'
+    }
+
+    return `${type} (${value})`
   }
 }
 
@@ -287,11 +319,11 @@ transform
 bracket_transforms
   = "[" _ "]" {
     return input => {
-      if (typeof input === 'object') {
+      if (isObject(input)) {
         input = Object.values(input)
       }
       else if (!Array.isArray(input)) {
-        throw new Error(`Cannot iterate over ${typeof input} (${input})`)
+        throw new Error(`Cannot iterate over ${_mtype_v(input)}`)
       }
 
       return iterate(input)
@@ -336,8 +368,8 @@ dot_name
       if (input === null) {
         return null
       }
-      if (typeof input !== 'object') {
-        throw new Error(`Cannot index ${typeof input} with string "${name}"`)
+      if (!isObject(input)) {
+        throw new Error(`Cannot index ${_mtype(input)} with string "${name}"`)
       }
 
       return input.hasOwnProperty(name) ? input[name] : null
@@ -353,7 +385,7 @@ boolean
   = "false" { return false }
   / "true" { return true }
 
-number
+number // TODO: must be [0-9.]+
   = ([0-9]* ".")? [0-9]+ { return +text() }
 
 string
