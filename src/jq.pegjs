@@ -461,13 +461,22 @@ dot_name
   }
 
 literal
-  = value: (boolean / number / string) {
+  = value:
+    ( string
+    / number
+    / "false" { return false }
+    / "true"  { return true }
+    / "null"  { return null }
+    ) {
     return input => value
   }
 
-boolean
-  = "false" { return false }
-  / "true" { return true }
+string
+  = '"' core: $[^"]* '"' { return core }
+  / "'" core: $[^']* "'" { return core }
+
+name
+  = $([a-zA-Z_$][0-9a-zA-Z_$]*)
 
 number
   = [.]*[0-9][.0-9]* {
@@ -480,10 +489,3 @@ number
 
     return value
   }
-
-string
-  = '"' core: $[^"]* '"' { return core }
-  / "'" core: $[^']* "'" { return core }
-
-name
-  = $([a-zA-Z_$][0-9a-zA-Z_$]*)
