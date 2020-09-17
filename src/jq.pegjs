@@ -66,6 +66,17 @@
     }
   }
 
+  const dotName = (value, name) => {
+    if (value === null) {
+      return null
+    }
+    if (!isObject(value)) {
+      throw new Error(`Cannot index ${_mtype(value)} with string "${name}"`)
+    }
+
+    return value.hasOwnProperty(name) ? value[name] : null
+  }
+
   const isObject = (value) => {
     if (value === null || Array.isArray(value)) {
       return false
@@ -170,7 +181,7 @@
   }
 }
 
-value
+output
   = _ expr: expr _ {
     return input => {
       if (input === undefined) {
@@ -329,7 +340,28 @@ bracket_transforms
       return iterate(input)
     }
   }
-  / "[" _ key: string _ "]" {return i => i[key]}
+  / "[" _ index_expr: (numeric_index / string) _ "]" {
+    return input => {
+      let index = index_expr // TODO: expression indices
+      if (typeof index === 'string') {
+        return dotName(input, index)
+      }
+      if (input !== null && !Array.isArray(input) || typeof index !== 'number') {
+        throw new Error(`Cannot index ${_mtype(input)} with ${_mtype(index)}`)
+      }
+      if (input === null || !Number.isInteger(index)) {
+        return null
+      }
+      if (index < 0 && (index += input.length) < 0) {
+        return null
+      }
+      if (index >= input.length) {
+        return null
+      }
+
+      return input[index]
+    }
+  }
   / "[" _ start: numeric_index? _ ":" _ end: numeric_index? _ "]" & {
     return start || end // for JQ compliance
   } {
@@ -349,25 +381,6 @@ bracket_transforms
       return input.slice(startIndex, endIndex)
     }
   }
-  / "[" _ index_expr: numeric_index _ "]" {
-    return input => {
-      let index = index_expr // TODO: expression indices
-      if (input !== null && !Array.isArray(input) || typeof index !== 'number') {
-        throw new Error(`Cannot index ${_mtype(input)} with ${_mtype(index)}`)
-      }
-      if (input === null || !Number.isInteger(index)) {
-        return null
-      }
-      if (index < 0 && (index += input.length) < 0) {
-        return null
-      }
-      if (index >= input.length) {
-        return null
-      }
-
-      return input[index]
-    }
-  }
 
 numeric_index // TODO: remove when we support expression indices
   = "-" _ number: number { return -number }
@@ -380,16 +393,7 @@ identity
 
 dot_name
   = "." name: name {
-    return input => {
-      if (input === null) {
-        return null
-      }
-      if (!isObject(input)) {
-        throw new Error(`Cannot index ${_mtype(input)} with string "${name}"`)
-      }
-
-      return input.hasOwnProperty(name) ? input[name] : null
-    }
+    return input => dotName(input, name)
   }
 
 literal
