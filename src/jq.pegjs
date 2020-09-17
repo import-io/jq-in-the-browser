@@ -77,6 +77,14 @@
     return value.hasOwnProperty(name) ? value[name] : null
   }
 
+  const isNumber = (value) => {
+    if (value === null) {
+      return false
+    }
+
+    return typeof value === 'number'
+  }
+
   const isObject = (value) => {
     if (value === null || Array.isArray(value)) {
       return false
@@ -229,8 +237,30 @@ addsub
   }
 
 addsub_op
-  = "+" { return (a, b) => a + b }
-  / "-" { return (a, b) => a - b }
+  = "+" {
+    return (a, b) => {
+      if (a === null) {
+        return b
+      }
+      if (b === null) {
+        return a
+      }
+      if (isNumber(a) && isNumber(b)) {
+        return a + b
+      }
+
+      throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be added`)
+    }
+  }
+  / "-" {
+    return (a, b) => {
+      if (isNumber(a) && isNumber(b)) {
+        return a - b
+      }
+
+      throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be subtracted`)
+    }
+  }
 
 muldiv
   = first: negation rest: (_ muldiv_op _ negation)* {
@@ -245,17 +275,51 @@ muldiv
   }
 
 muldiv_op
-  = "*" { return (a, b) => a * b }
-  / "/" { return (a, b) => a / b }
-  / "%" { return (a, b) => a % b + 0 } // must return 0 instead of -0
+  = "*" {
+    return (a, b) => {
+      if (isNumber(a) && isNumber(b)) {
+        return a * b
+      }
+
+      throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be multiplied`)
+    }
+  }
+  / "/" {
+    return (a, b) => {
+      if (isNumber(a) && isNumber(b)) {
+        return a / b
+      }
+
+      throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be divided`)
+    }
+  }
+  / "%" {
+    return (a, b) => {
+      if (isNumber(a) && isNumber(b)) {
+        return a % b + 0 // must return 0 instead of -0
+      }
+
+      throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be divided (remainder)`)
+    }
+  }
 
 negation
   = minuses: ("-" _)* expr: parens {
-    if (!(minuses.length % 2)) {
+    const count = minuses.length
+    if (!count) {
       return expr
     }
 
-    return input => map(expr(input), value => -value)
+    return input => map(expr(input), value => {
+      if (!isNumber(value)) {
+        throw new Error(`${_mtype_v(value)} cannot be negated`)
+      }
+      if (!(count % 2)) {
+        return value
+      }
+
+      return -value
+    })
   }
 
 parens
@@ -346,7 +410,7 @@ bracket_transforms
       if (typeof index === 'string') {
         return dotName(input, index)
       }
-      if (input !== null && !Array.isArray(input) || typeof index !== 'number') {
+      if (input !== null && !Array.isArray(input) || !isNumber(index)) {
         throw new Error(`Cannot index ${_mtype(input)} with ${_mtype(index)}`)
       }
       if (input === null || !Number.isInteger(index)) {
@@ -372,7 +436,7 @@ bracket_transforms
       if (!Array.isArray(input) && typeof input !== 'string') {
         throw new Error(`Cannot index ${_mtype(input)} with object`)
       }
-      if (start !== null && typeof start !== 'number' || end !== null && typeof end !== 'number') {
+      if (start !== null && !isNumber(start) || end !== null && !isNumber(end)) {
         throw new Error(`Start and end indices of an ${_mtype(input)} slice must be numbers`)
       }
 
