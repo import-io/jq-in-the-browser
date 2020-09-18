@@ -155,7 +155,7 @@
     return value.items
   }
 
-  const processPipe = (first, rest) => {
+  const parsePipe = (first, rest) => {
     if (!rest.length) {
       return first
     }
@@ -204,13 +204,13 @@ _
   = [ ]*
 
 expr
-  = left: stream right: (_ "|" _ stream)* {
-    return processPipe(left, right)
+  = first: stream rest: (_ "|" _ stream)* {
+    return parsePipe(first, rest)
   }
 
-expr_no_comma // for object construction (where, actually, JQ supports only "negation | negation")
-  = left: addsub right: (_ "|" _ addsub)* {
-    return processPipe(left, right)
+expr_simple // for object construction
+  = first: addsub rest: (_ "|" _ addsub)* {
+    return parsePipe(first, rest)
   }
 
 stream
@@ -374,7 +374,7 @@ object_construction
   }
 
 object_prop
-  = key: object_key _ ":" _ value: expr_no_comma {
+  = key: object_key _ ":" _ value: expr_simple {
     return input => product(value(input), key(input), (value, key) => {
       // TODO: check key validity (strings only)
       return { [key]: value }
