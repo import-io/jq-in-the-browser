@@ -147,6 +147,8 @@
         ".a / -(.a, .b[])",
         "(.a, 10) * .b[]",
         "(.a, 10) / .b[:2][] / (4, 5)",
+        "(.a, -.a, 3) == .b[]",
+        "(.a, -.a, 3) != .b[]",
         "{foo: .b}",
         "{foo: .b[]}",
         "{foo: [][]}",
@@ -182,6 +184,33 @@
           "a": -5
         }
       ]
+    ],
+    [
+      "Comparison",
+      [
+        "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a == .b), a: .a | tostring, b: .b | tostring}",
+        "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a != .b), a: .a | tostring, b: .b | tostring}"
+      ],
+      [{
+        "a": [
+          null, false, true,
+          0, -0, 5, 30,
+          "null", "false", "true", "12",
+          "foo", "bar", "foobar", "Foo",
+          [], [1, "foo"], [1, "bar", "foo"], ["bar", 1, "foo"],
+          {}, { "foo": 1 }, { "foo": 1, "bar": 2 },
+          { "foo": [true, "bar"], "baz": 3 }
+        ],
+        "b": [
+          null, false, true,
+          0, -0, 5, 30,
+          "null", "false", "true", "12",
+          "foo", "bar", "foobar", "Foo",
+          [], [1, "foo"], [1, "bar", "foo"], ["bar", 1, "foo"],
+          {}, { "foo": 1 }, { "foo": 1, "bar": 2 },
+          { "foo": [true, "bar"], "baz": 3 }
+        ]
+      }]
     ],
     [
       "Addition (numbers)",

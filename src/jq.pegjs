@@ -66,6 +66,56 @@
     }
   }
 
+  const compareForEquality = (a, b) => {
+    if (a === b) {
+      return true
+    }
+
+    // arrays
+
+    if (Array.isArray(a)) {
+      if (!Array.isArray(b) || a.length !== b.length) {
+        return false
+      }
+
+      for (let i = 0; i < a.length; ++i) {
+        if (!compareForEquality(a[i], b[i])) {
+          return false
+        }
+      }
+
+      return true
+    }
+
+    // objects
+
+    if (!isObject(a) || !isObject(b)) {
+      return false
+    }
+
+    a = Object.entries(a)
+    b = Object.entries(b)
+
+    if (a.length !== b.length) {
+      return false
+    }
+
+    const keyComparer = ([a], [b]) => a === b ? 0 : a < b ? -1 : 1
+    a.sort(keyComparer)
+    b.sort(keyComparer)
+
+    for (let i = 0; i < a.length; ++i) {
+      const [ka, va] = a[i]
+      const [kb, vb] = b[i]
+
+      if (ka !== kb || !compareForEquality(va, vb)) {
+        return false
+      }
+    }
+
+    return true
+  }
+
   const dotName = (value, name) => {
     if (value === null) {
       return null
@@ -117,42 +167,42 @@
     return new Stream(array)
   }
 
-  const map = (value, fn) => {
-    if (value === undefined) {
+  const map = (stream, fn) => {
+    if (stream === undefined) {
       return undefined
     }
-    if (!(value instanceof Stream)) {
-      return fn(value)
+    if (!(stream instanceof Stream)) {
+      return fn(stream)
     }
 
-    return iterate(value.items.map(fn))
+    return iterate(stream.items.map(fn))
   }
 
-  const product = (value1, value2, fn) => {
-    if (value1 === undefined || value2 === undefined) {
+  const product = (stream1, stream2, fn) => {
+    if (stream1 === undefined || stream2 === undefined) {
       return undefined
     }
-    if (!(value1 instanceof Stream)) {
-      return map(value2, b => fn(value1, b))
+    if (!(stream1 instanceof Stream)) {
+      return map(stream2, b => fn(stream1, b))
     }
-    if (!(value2 instanceof Stream)) {
-      return map(value1, a => fn(a, value2))
+    if (!(stream2 instanceof Stream)) {
+      return map(stream1, a => fn(a, stream2))
     }
 
     return iterate(
-      value2.items.flatMap(b =>
-      value1.items.map(a => fn(a, b))))
+      stream2.items.flatMap(b =>
+      stream1.items.map(a => fn(a, b))))
   }
 
-  const toArray = (value) => {
-    if (value === undefined) {
+  const toArray = (stream) => {
+    if (stream === undefined) {
       return []
     }
-    if (!(value instanceof Stream)) {
-      return [value]
+    if (!(stream instanceof Stream)) {
+      return [stream]
     }
 
-    return value.items
+    return stream.items
   }
 
   const parsePipe = (first, rest) => {
@@ -214,7 +264,7 @@ expr_simple // for object construction
   }
 
 stream
-  = first: addsub rest: (_ "," _ addsub)* {
+  = first: comparison rest: (_ "," _ comparison)* {
     if (!rest.length) {
       return first
     }
@@ -224,6 +274,24 @@ stream
     return input => iterate(all.map(expr => expr(input)))
   }
 
+comparison
+  = left: addsub tail: (_ compare_op _ addsub)? {
+    if (!tail) {
+      return left
+    }
+
+    const [, op,, right] = tail
+    return input => product(left(input), right(input), op)
+  }
+
+compare_op
+  = "==" {
+    return compareForEquality
+  }
+  / "!=" {
+    return (a, b) => !compareForEquality(a, b)
+  }
+
 addsub
   = first: muldiv rest: (_ addsub_op _ muldiv)* {
     if (!rest.length) {
@@ -231,8 +299,8 @@ addsub
     }
 
     rest = rest.map(([, op,, expr]) => ({ op, expr }))
-    return input => rest.reduce((result, { op, expr }) =>
-      product(result, expr(input), op),
+    return input => rest.reduce((result, next) =>
+      product(result, next.expr(input), next.op),
       first(input))
   }
 
@@ -269,8 +337,8 @@ muldiv
     }
 
     rest = rest.map(([, op,, expr]) => ({ op, expr }))
-    return input => rest.reduce((result, { op, expr }) =>
-      product(result, expr(input), op),
+    return input => rest.reduce((result, next) =>
+      product(result, next.expr(input), next.op),
       first(input))
   }
 
