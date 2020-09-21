@@ -27,8 +27,7 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * Object construction: `{"a": 42, "b": 17}` (shortcut syntax not supported: `{a, b}` instead of `{a: .a, b: .b}`)
 * Arithmetics: `+`, `-`, `*`, `/`, `%`
 * Comparisons: `==`, `!=`, `<`, `<=`, `>`, `>=`
-* Boolean literals: `false`, `true`
-* Null literal: `null`
+* Literals: `false`, `true`, `null`, `empty`
 
 ## Supported functions
 

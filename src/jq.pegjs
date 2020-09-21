@@ -21,31 +21,43 @@
     "reverse": input => ([].concat(input).reverse()),
     "tonumber": input => input * 1,
     "tostring": input => ((typeof input === "object") ? JSON.stringify(input) : String(input)),
-    "ascii_downcase": input => {
+    'ascii_downcase': input => {
       if (!isString(input)) {
         throw new Error('ascii_downcase input must be a string.')
       }
 
       return input.replace(/[A-Z]/g, x => String.fromCharCode(x.charCodeAt(0) + 32))
     },
-    "ascii_upcase": input => {
+    'ascii_upcase': input => {
       if (!isString(input)) {
         throw new Error('ascii_upcase input must be a string.')
       }
 
       return input.replace(/[a-z]/g, x => String.fromCharCode(x.charCodeAt(0) - 32))
     },
-    "downcase": input => {
+    'downcase': input => {
       if (!isString(input)) {
         throw new Error('downcase input must be a string.')
       }
 
       return input.toLowerCase()
     },
-    "sort": input => {
+    'empty': input => {
+      return undefined // an empty stream
+    },
+    'false': input => {
+      return false
+    },
+    'null': input => {
+      return null
+    },
+    'sort': input => {
       return [...input].sort()
     },
-    "upcase": input => {
+    'true': input => {
+      return true
+    },
+    'upcase': input => {
       if (!isString(input)) {
         throw new Error('upcase input must be a string.')
       }
@@ -630,13 +642,7 @@ dot_name
   }
 
 literal
-  = value:
-    ( string
-    / number
-    / "false" { return false }
-    / "true"  { return true }
-    / "null"  { return null }
-    ) {
+  = value: (string / number) {
     return input => value
   }
 

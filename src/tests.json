@@ -413,10 +413,23 @@
       ]
     ],
     [
-      "Null literal",
+      "Literal 'null'",
       [
         "null",
         "# .null"
+      ],
+      [
+        1
+      ]
+    ],
+    [
+      "Literal 'empty'",
+      [
+        "empty",
+        "empty[]",
+        "[empty]",
+        "[empty][]",
+        "# .empty"
       ],
       [
         1
