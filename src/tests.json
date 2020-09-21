@@ -149,6 +149,10 @@
         "(.a, 10) / .b[:2][] / (4, 5)",
         "(.a, -.a, 3) == .b[]",
         "(.a, -.a, 3) != .b[]",
+        "(.a, -.a, 3) < .b[]",
+        "(.a, -.a, 3) <= .b[]",
+        "(.a, -.a, 3) > .b[]",
+        "(.a, -.a, 3) >= .b[]",
         "{foo: .b}",
         "{foo: .b[]}",
         "{foo: [][]}",
@@ -189,7 +193,11 @@
       "Comparison",
       [
         "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a == .b), a: .a | tostring, b: .b | tostring}",
-        "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a != .b), a: .a | tostring, b: .b | tostring}"
+        "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a != .b), a: .a | tostring, b: .b | tostring}",
+        "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a <  .b), a: .a | tostring, b: .b | tostring}",
+        "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a <= .b), a: .a | tostring, b: .b | tostring}",
+        "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a >  .b), a: .a | tostring, b: .b | tostring}",
+        "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a >= .b), a: .a | tostring, b: .b | tostring}"
       ],
       [{
         "a": [

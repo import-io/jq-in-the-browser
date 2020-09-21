@@ -66,6 +66,71 @@
     }
   }
 
+  const compare = (a, b) => {
+    if (a === b) {
+      return 0
+    }
+
+    const typeOrder = (value) => {
+      let i = 0; value === null
+        || (++i, value === false)
+        || (++i, value === true)
+        || (++i, isNumber(value))
+        || (++i, isString(value))
+        || (++i, Array.isArray(value))
+        || (++i)
+
+      return i
+    }
+
+    const result = typeOrder(a) - typeOrder(b)
+    if (result) {
+      return result
+    }
+
+    // arrays
+
+    if (Array.isArray(a)) {
+      for (let i = 0; i < a.length && i < b.length; ++i) {
+        const result = compare(a[i], b[i])
+        if (result) {
+          return result
+        }
+      }
+
+      return a.length - b.length
+    }
+
+    // objects
+
+    if (!isObject(a)) {
+      return a < b ? -1 : 1
+    }
+
+    a = Object.entries(a)
+    b = Object.entries(b)
+
+    const keyComparer = ([a], [b]) => a === b ? 0 : a < b ? -1 : 1
+    a.sort(keyComparer)
+    b.sort(keyComparer)
+
+    for (let i = 0; i < a.length && i < b.length; ++i) {
+      const [ka, va] = a[i]
+      const [kb, vb] = b[i]
+
+      if (ka !== kb) {
+        return ka < kb ? -1 : 1
+      }
+
+      const result = compare(va, vb)
+      if (result) {
+        return result
+      }
+    }
+
+    return a.length - b.length
+  }
+
   const compareForEquality = (a, b) => {
     if (a === b) {
       return true
@@ -141,6 +206,14 @@
     }
 
     return typeof value === 'object'
+  }
+
+  const isString = (value) => {
+    if (value === null) {
+      return false
+    }
+
+    return typeof value === 'string'
   }
 
   const iterate = (array) => {
@@ -291,6 +364,18 @@ compare_op
   / "!=" {
     return (a, b) => !compareForEquality(a, b)
   }
+  / "<=" {
+    return (a, b) => compare(a, b) <= 0
+  }
+  / "<" {
+    return (a, b) => compare(a, b) < 0
+  }
+  / ">=" {
+    return (a, b) => compare(a, b) >= 0
+  }
+  / ">" {
+    return (a, b) => compare(a, b) > 0
+  }
 
 addsub
   = first: muldiv rest: (_ addsub_op _ muldiv)* {
@@ -390,7 +475,7 @@ negation
     })
   }
 
-parens
+parens // TODO: "({}).name" shouldn't fail
   = "(" _ expr: expr _ ")" { return expr }
   / filter
 
@@ -475,7 +560,7 @@ bracket_transforms
   / "[" _ index_expr: (numeric_index / string) _ "]" {
     return input => {
       let index = index_expr // TODO: expression indices
-      if (typeof index === 'string') {
+      if (isString(index)) {
         return dotName(input, index)
       }
       if (input !== null && !Array.isArray(input) || !isNumber(index)) {
@@ -501,7 +586,7 @@ bracket_transforms
       if (input === null) {
         return null
       }
-      if (!Array.isArray(input) && typeof input !== 'string') {
+      if (!Array.isArray(input) && !isString(input)) {
         throw new Error(`Cannot index ${_mtype(input)} with object`)
       }
       if (start !== null && !isNumber(start) || end !== null && !isNumber(end)) {
