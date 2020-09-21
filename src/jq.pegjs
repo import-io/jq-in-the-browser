@@ -1,13 +1,13 @@
 {
   const get_function_0 = name => {
     const f = function0_map[name]
-    if (f === undefined) throw new Error(`function ${name}/0 is not defined`)
+    if (f === undefined) throw new Error(`function ${name}/0 is not defined.`)
     return f
   }
 
   const get_function_1 = name => {
     const f = function1_map[name]
-    if (f === undefined) throw new Error(`function ${name}/1 is not defined`)
+    if (f === undefined) throw new Error(`function ${name}/1 is not defined.`)
     return f
   }
 
@@ -22,18 +22,34 @@
     "tonumber": input => input * 1,
     "tostring": input => ((typeof input === "object") ? JSON.stringify(input) : String(input)),
     "ascii_downcase": input => {
+      if (!isString(input)) {
+        throw new Error('ascii_downcase input must be a string.')
+      }
+
       return input.replace(/[A-Z]/g, x => String.fromCharCode(x.charCodeAt(0) + 32))
     },
     "ascii_upcase": input => {
+      if (!isString(input)) {
+        throw new Error('ascii_upcase input must be a string.')
+      }
+
       return input.replace(/[a-z]/g, x => String.fromCharCode(x.charCodeAt(0) - 32))
     },
     "downcase": input => {
+      if (!isString(input)) {
+        throw new Error('downcase input must be a string.')
+      }
+
       return input.toLowerCase()
     },
     "sort": input => {
       return [...input].sort()
     },
     "upcase": input => {
+      if (!isString(input)) {
+        throw new Error('upcase input must be a string.')
+      }
+
       return input.toUpperCase()
     },
   }
@@ -186,7 +202,7 @@
       return null
     }
     if (!isObject(value)) {
-      throw new Error(`Cannot index ${_mtype(value)} with string "${name}"`)
+      throw new Error(`Cannot index ${_mtype(value)} with string "${name}".`)
     }
 
     return value.hasOwnProperty(name) ? value[name] : null
@@ -402,7 +418,7 @@ addsub_op
         return a + b
       }
 
-      throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be added`)
+      throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be added.`)
     }
   }
   / "-" {
@@ -411,7 +427,7 @@ addsub_op
         return a - b
       }
 
-      throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be subtracted`)
+      throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be subtracted.`)
     }
   }
 
@@ -434,7 +450,7 @@ muldiv_op
         return a * b
       }
 
-      throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be multiplied`)
+      throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be multiplied.`)
     }
   }
   / "/" {
@@ -443,7 +459,7 @@ muldiv_op
         return a / b
       }
 
-      throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be divided`)
+      throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be divided.`)
     }
   }
   / "%" {
@@ -452,7 +468,7 @@ muldiv_op
         return a % b + 0 // must return 0 instead of -0
       }
 
-      throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be divided (remainder)`)
+      throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be divided (remainder).`)
     }
   }
 
@@ -465,7 +481,7 @@ negation
 
     return input => map(expr(input), value => {
       if (!isNumber(value)) {
-        throw new Error(`${_mtype_v(value)} cannot be negated`)
+        throw new Error(`${_mtype_v(value)} cannot be negated.`)
       }
       if (!(count % 2)) {
         return value
@@ -551,7 +567,7 @@ bracket_transforms
         input = Object.values(input)
       }
       else if (!Array.isArray(input)) {
-        throw new Error(`Cannot iterate over ${_mtype_v(input)}`)
+        throw new Error(`Cannot iterate over ${_mtype_v(input)}.`)
       }
 
       return iterate(input)
@@ -564,7 +580,7 @@ bracket_transforms
         return dotName(input, index)
       }
       if (input !== null && !Array.isArray(input) || !isNumber(index)) {
-        throw new Error(`Cannot index ${_mtype(input)} with ${_mtype(index)}`)
+        throw new Error(`Cannot index ${_mtype(input)} with ${_mtype(index)}.`)
       }
       if (input === null || !Number.isInteger(index)) {
         return null
@@ -587,10 +603,10 @@ bracket_transforms
         return null
       }
       if (!Array.isArray(input) && !isString(input)) {
-        throw new Error(`Cannot index ${_mtype(input)} with object`)
+        throw new Error(`Cannot index ${_mtype(input)} with object.`)
       }
       if (start !== null && !isNumber(start) || end !== null && !isNumber(end)) {
-        throw new Error(`Start and end indices of an ${_mtype(input)} slice must be numbers`)
+        throw new Error(`Start and end indices of an ${_mtype(input)} slice must be numbers.`)
       }
 
       const startIndex = start ? Math.floor(start) : 0 // TODO: expression indices
@@ -637,7 +653,7 @@ number
     const value = +chars
 
     if (Number.isNaN(value)) {
-      error(`Invalid numeric literal '${chars}'`)
+      error(`Invalid numeric literal '${chars}'.`)
     }
 
     return value

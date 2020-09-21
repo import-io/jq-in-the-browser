@@ -1,6 +1,5 @@
 import assert from 'assert'
 import parser from './jq.js'
-import should from 'should'
 
 describe('Single quote String literal', () => {
   it('per se', () => {
@@ -80,19 +79,21 @@ describe('Other tests', () => {
 
 describe('Error messages', () => {
   const tests = [
-    ['. | ..1', 'Invalid numeric literal \'..1\''],
-    ['. | 1..', 'Invalid numeric literal \'1..\''],
-    ['. | 1..2', 'Invalid numeric literal \'1..2\''],
-    ['. | 1.2.3', 'Invalid numeric literal \'1.2.3\''],
-    ['. | foo', 'function foo/0 is not defined'],
-    ['. | bar', 'function bar/0 is not defined'],
-    ['. | bar(4)', 'function bar/1 is not defined'],
-    ['. | baz(4)', 'function baz/1 is not defined']
+    ['. | ..1', 'Invalid numeric literal \'..1\'.'],
+    ['. | 1..', 'Invalid numeric literal \'1..\'.'],
+    ['. | 1..2', 'Invalid numeric literal \'1..2\'.'],
+    ['. | 1.2.3', 'Invalid numeric literal \'1.2.3\'.'],
+    ['. | foo', 'function foo/0 is not defined.'],
+    ['. | bar', 'function bar/0 is not defined.'],
+    ['. | bar(4)', 'function bar/1 is not defined.'],
+    ['. | baz(4)', 'function baz/1 is not defined.'],
+    ['. | downcase', 'downcase input must be a string.'],
+    ['. | upcase', 'upcase input must be a string.']
   ]
 
   tests.forEach(([query, error]) =>
     it(`Error '${error}' for '${query}'`, () => {
-      (() => parser(query)).should.throw(error)
+      assert.throws(() => parser(query)(null), { message: error })
     })
   )
 })

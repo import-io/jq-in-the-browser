@@ -525,9 +525,14 @@
     ]],
     ["tonumber", ["tonumber"], [1, -1, "1", "-1", "1.23", "-.1"]],
     ["tostring", ["tostring"], [1, -1, "1", "-1", "1.23", "-.1", [1], {"a": 2}]],
-    ["ascii_downcase, ascii_upcase",
-      [".greeting | ascii_downcase", ".greeting | ascii_upcase"],
-      [{ "greeting": "Hello, МИР! © 2020\nПривет, WORLD!" }]
+    [
+      "ascii_downcase, ascii_upcase",
+      [
+        ".greeting | ascii_downcase", ".greeting | ascii_upcase",
+        "# .a | ascii_downcase", "# .a | ascii_upcase",
+        "# .b | ascii_downcase", "# .b | ascii_upcase"
+      ],
+      [{ "greeting": "Hello, МИР! © 2020\nПривет, WORLD!", "a": 1, "b": null }]
     ],
     ["sort", ["sort", "[4, 5, 6] | sort"], [[1, -1], ["1", "-1", "1.23", "-.1"]]],
     ["sort_by", ["sort_by(-.)", "sort_by(1 + .)", "sort_by(1)"], [[1, -1], [4.12, 42.3, -342, 0, 32, 1, 2, 3, 6, 6]]],

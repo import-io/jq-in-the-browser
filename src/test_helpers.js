@@ -22,6 +22,16 @@ const jq_web_fixed = (json, filter) => {
   return result.split('\n').filter(x => x).map(JSON.parse)
 }
 
+const substMessage = (query, input) => {
+  try {
+    return query(input)
+  }
+  catch (e) {
+    e.message = e.message.replace(/\bascii_(downcase|upcase)\b/, 'explode')
+    throw e
+  }
+}
+
 const test_with_jq_web = ([feature, queries, inputs]) => {
   describe(feature, () =>
     queries.forEach((query) =>
@@ -35,9 +45,10 @@ const test_with_jq_web = ([feature, queries, inputs]) => {
               assert.throws(() => jq_web_fixed(input, realQuery), e => { message = e.message; return true })
               message = message.trimRight()
               message = message.replace(/^jq: error \(at <stdin>:0\): /, '')
+              message += '.'
 
               const compiledQuery = jq(realQuery)
-              assert.throws(() => compiledQuery(input), { message })
+              assert.throws(() => substMessage(compiledQuery, input), { message })
             }
             else {
               const ourOutput = jq(query)(input)
