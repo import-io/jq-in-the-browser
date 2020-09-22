@@ -22,6 +22,7 @@
     "tonumber": input => input * 1,
     "tostring": input => ((typeof input === "object") ? JSON.stringify(input) : String(input)),
     'ascii_downcase': input => {
+      // as 'explode | map(if 65 <= . and . <= 90 then . + 32 else . end) | implode'
       if (!isString(input)) {
         throw new Error('ascii_downcase input must be a string.')
       }
@@ -29,6 +30,7 @@
       return input.replace(/[A-Z]/g, x => String.fromCharCode(x.charCodeAt(0) + 32))
     },
     'ascii_upcase': input => {
+      // as 'explode | map(if 97 <= . and . <= 122 then . - 32 else . end) | implode'
       if (!isString(input)) {
         throw new Error('ascii_upcase input must be a string.')
       }
@@ -67,7 +69,6 @@
   }
 
   const function1_map = {
-    "map": arg => input => input.map(i => arg(i)),
     "map_values": arg => input => {
       const pairs = Object.keys(input).map(key => ({[key]: arg(input[key])}))
       return Object.assign({}, ...pairs)
@@ -85,7 +86,15 @@
       if (va < vb) return -1
       if (va > vb) return 1
       return 0
-    })
+    }),
+    'map': arg => input => {
+      // as '[.[] | arg]'
+      return toArray(map(iterate(input), arg))
+    },
+    'select': arg => input => {
+      // as 'if arg then . else empty end'
+      return map(arg(input), arg => isTrue(arg) ? input : undefined)
+    },
   }
 
   class Stream {
@@ -209,6 +218,56 @@
     return true
   }
 
+  const concat = (streams) => {
+    let length = 0
+    let scalarCount = 0
+    let streamCount = 0
+    let last
+
+    for (const value of streams) {
+      if (value === undefined) {
+        continue
+      }
+
+      if (!(value instanceof Stream)) {
+        length += 1
+        ++scalarCount
+      }
+      else {
+        length += value.items.length
+        ++streamCount
+      }
+
+      last = value
+    }
+
+    if (scalarCount + streamCount <= 1) {
+      // a single scalar/stream or none at all
+      return last
+    }
+
+    let array = streams
+    if (array.length > scalarCount) {
+      // there are some non-scalars
+      array = new Array(length)
+
+      let i = 0
+      for (const value of streams) {
+        if (value === undefined) {
+          continue
+        }
+        if (!(value instanceof Stream)) {
+          array[i++] = value
+        }
+        else for (const item of value.items) {
+          array[i++] = item
+        }
+      }
+    }
+
+    return toStream(array)
+  }
+
   const dotName = (value, name) => {
     if (value === null) {
       return null
@@ -244,28 +303,19 @@
     return typeof value === 'string'
   }
 
-  const iterate = (array) => {
-    if (array.some(value => value === undefined || value instanceof Stream)) {
-      array = array.flatMap(value => {
-        if (value === undefined) {
-          return []
-        }
-        if (Array.isArray(value)) {
-          return [value] // escape flattening
-        }
-        if (value instanceof Stream) {
-          return value.items
-        }
+  const isTrue = (value) => {
+    return value !== null && value !== false
+  }
 
-        return value
-      })
+  const iterate = (value) => {
+    if (isObject(value)) {
+      value = Object.values(value)
+    }
+    else if (!Array.isArray(value)) {
+      throw new Error(`Cannot iterate over ${_mtype_v(value)}.`)
     }
 
-    if (array.length <= 1) {
-      return array[0]
-    }
-
-    return new Stream(array)
+    return toStream(value)
   }
 
   const map = (stream, fn) => {
@@ -276,7 +326,7 @@
       return fn(stream)
     }
 
-    return iterate(stream.items.map(fn))
+    return concat(stream.items.map(fn))
   }
 
   const product = (stream1, stream2, fn) => {
@@ -290,9 +340,18 @@
       return map(stream1, a => fn(a, stream2))
     }
 
-    return iterate(
-      stream2.items.flatMap(b =>
-      stream1.items.map(a => fn(a, b))))
+    stream1 = stream1.items
+    stream2 = stream2.items
+
+    const streams = new Array(stream1.length * stream2.length)
+
+    let i = 0
+    for (const b of stream2)
+    for (const a of stream1) {
+      streams[i++] = fn(a, b)
+    }
+
+    return concat(streams)
   }
 
   const toArray = (stream) => {
@@ -304,6 +363,17 @@
     }
 
     return stream.items
+  }
+
+  const toStream = (array) => {
+    if (array.length == 0) {
+      return undefined
+    }
+    if (array.length == 1) {
+      return array[0]
+    }
+
+    return new Stream(array)
   }
 
   const parsePipe = (first, rest) => {
@@ -372,7 +442,7 @@ stream
 
     rest = rest.map(([,,, expr]) => expr)
     const all = [first, ...rest]
-    return input => iterate(all.map(expr => expr(input)))
+    return input => concat(all.map(expr => expr(input)))
   }
 
 comparison
@@ -574,16 +644,7 @@ transform
 
 bracket_transforms
   = "[" _ "]" {
-    return input => {
-      if (isObject(input)) {
-        input = Object.values(input)
-      }
-      else if (!Array.isArray(input)) {
-        throw new Error(`Cannot iterate over ${_mtype_v(input)}.`)
-      }
-
-      return iterate(input)
-    }
+    return input => iterate(input)
   }
   / "[" _ index_expr: (numeric_index / string) _ "]" {
     return input => {

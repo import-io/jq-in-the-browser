@@ -521,10 +521,6 @@
       [3, 1, 2],
       [3, "foo", 2, false, "bar", -3.14]
     ]],
-    ["map", ["map(.+1 )", ". | map( {foo: .})"], [
-      [1, 2, 3, 4],
-      [4, 2]
-    ]],
     ["map_values", ["map_values(.+1 )", ". | map_values( {foo: .})"], [
       {"a": 4, "b": 2},
       {"a": 4, "b": -1, "c": 0}
@@ -546,6 +542,38 @@
         "# .b | ascii_downcase", "# .b | ascii_upcase"
       ],
       [{ "greeting": "Hello, МИР! © 2020\nПривет, WORLD!", "a": 1, "b": null }]
+    ],
+    [
+      "map",
+      [
+        "map(.)",
+        "map(. + 10)",
+        "map(., . + 10)",
+        "map(empty)",
+        "map(.) | map(.)",
+        "# .[] | map(.)"
+      ],
+      [
+        [1, 2, 3, 0],
+        { "a": 1, "b": 2, "c": 3, "d": 0 }
+      ]
+    ],
+    [
+      "select",
+      [
+        "select(.)",
+        "select(. > 2)",
+        ".[] | select(.)",
+        ".[] | select(. > 2)",
+        ".[] | select(. < 2)",
+        ".[] | select(. < 0)",
+        ".[] | select(. < 2, . > 2)",
+        ".[] | select(. < 2, . > 0)",
+        ".[] | select(. == false)",
+        ".[] | select(. == true)",
+        ".[] | select([.][])"
+      ],
+      [[1, 2, 3, 0, false, "false", null, "null", "", [], {}]]
     ],
     ["sort", ["sort", "[4, 5, 6] | sort"], [[1, -1], ["1", "-1", "1.23", "-.1"]]],
     ["sort_by", ["sort_by(-.)", "sort_by(1 + .)", "sort_by(1)"], [[1, -1], [4.12, 42.3, -342, 0, 32, 1, 2, 3, 6, 6]]],
