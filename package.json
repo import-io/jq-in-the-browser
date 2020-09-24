@@ -29,5 +29,18 @@
     "uglifyjs-webpack-plugin": "^1.3.0",
     "webpack": "^3.12.0"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "babel": {
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+          "targets": "node 10",
+          "include": [
+            "@babel/plugin-proposal-object-rest-spread"
+          ]
+        }
+      ]
+    ]
+  }
 }

@@ -54,7 +54,7 @@
       return null
     },
     'sort': input => {
-      return [...input].sort()
+      return sortBy(input, identity)
     },
     'true': input => {
       return true
@@ -80,13 +80,6 @@
       return from_entries(mapped)
     },
     "join": arg => input => input.join(arg(input)),
-    "sort_by": arg => input => [...input].sort((a, b) => {
-      const va = arg(a)
-      const vb = arg(b)
-      if (va < vb) return -1
-      if (va > vb) return 1
-      return 0
-    }),
     'map': arg => input => {
       // as '[.[] | arg]'
       return toArray(map(iterate(input), arg))
@@ -94,6 +87,9 @@
     'select': arg => input => {
       // as 'if arg then . else empty end'
       return map(arg(input), arg => isTrue(arg) ? input : undefined)
+    },
+    'sort_by': arg => input => {
+      return sortBy(input, arg)
     },
   }
 
@@ -229,7 +225,7 @@
         continue
       }
 
-      if (!(value instanceof Stream)) {
+      if (!isStream(value)) {
         length += 1
         ++scalarCount
       }
@@ -256,7 +252,7 @@
         if (value === undefined) {
           continue
         }
-        if (!(value instanceof Stream)) {
+        if (!isStream(value)) {
           array[i++] = value
         }
         else for (const item of value.items) {
@@ -268,6 +264,12 @@
     return toStream(array)
   }
 
+  const convert = (array, fn) => {
+    for (let i = 0; i < array.length; ++i) {
+      array[i] = fn(array[i])
+    }
+  }
+
   const dotName = (value, name) => {
     if (value === null) {
       return null
@@ -277,6 +279,10 @@
     }
 
     return value.hasOwnProperty(name) ? value[name] : null
+  }
+
+  const identity = (value) => {
+    return value
   }
 
   const isNumber = (value) => {
@@ -293,6 +299,14 @@
     }
 
     return typeof value === 'object'
+  }
+
+  const isStream = (value) => {
+    if (value === null) {
+      return false
+    }
+
+    return value.constructor === Stream
   }
 
   const isString = (value) => {
@@ -322,7 +336,7 @@
     if (stream === undefined) {
       return undefined
     }
-    if (!(stream instanceof Stream)) {
+    if (!isStream(stream)) {
       return fn(stream)
     }
 
@@ -333,10 +347,10 @@
     if (stream1 === undefined || stream2 === undefined) {
       return undefined
     }
-    if (!(stream1 instanceof Stream)) {
+    if (!isStream(stream1)) {
       return map(stream2, b => fn(stream1, b))
     }
-    if (!(stream2 instanceof Stream)) {
+    if (!isStream(stream2)) {
       return map(stream1, a => fn(a, stream2))
     }
 
@@ -354,11 +368,42 @@
     return concat(streams)
   }
 
+  const sortBy = (value, fn) => {
+    if (!Array.isArray(value)) {
+      throw new Error(`${_mtype_v(value)} cannot be sorted, as it is not an array.`)
+    }
+    if (value.length <= 1) {
+      return value
+    }
+    if (fn === identity) {
+      return [...value].sort(compare)
+    }
+
+    const indexes = new Array(value.length)
+    const keys = new Array(value.length)
+    let someKeysAreStreams = false
+
+    for (let i = 0; i < value.length; ++i) {
+      const key = fn(value[i])
+      indexes[i] = i
+      keys[i] = key
+      someKeysAreStreams ||= key === undefined || isStream(key)
+    }
+
+    if (someKeysAreStreams) {
+      convert(keys, toArray)
+    }
+
+    indexes.sort((a, b) => compare(keys[a], keys[b]))
+    convert(indexes, i => value[i])
+    return indexes
+  }
+
   const toArray = (stream) => {
     if (stream === undefined) {
       return []
     }
-    if (!(stream instanceof Stream)) {
+    if (!isStream(stream)) {
       return [stream]
     }
 
@@ -620,7 +665,7 @@ object_construction
 
     rest = rest.map(([,,, expr]) => expr)
     return input => rest.reduce((result, expr) =>
-      product(expr(input), result, (prop, object) => Object.assign({}, object, prop)),
+      product(expr(input), result, (prop, object) => ({ ...object, ...prop })),
       first(input))
   }
 
@@ -694,7 +739,7 @@ numeric_index // TODO: remove when we support expression indices
 
 identity
   = "." {
-    return input => input
+    return identity
   }
 
 dot_name

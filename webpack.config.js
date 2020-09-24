@@ -1,9 +1,6 @@
-var webpack = require('webpack');
-var path = require('path');
-var libraryName = 'jq-in-the-browser';
-var outputFile = libraryName + '.js';
+const libraryName = 'jq-in-the-browser';
+const outputFile = libraryName + '.js';
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
-
 
 module.exports = {
   entry: './src/jq.js',
@@ -19,16 +16,16 @@ module.exports = {
   target: 'node',
   plugins: [new UglifyJsPlugin()],
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.pegjs$/,
-        loader: 'pegjs-loader?trace=false&cache=true'
+        use: ['babel-loader', 'pegjs-loader'],
       },
       {
-        test: /(\.jsx|\.js)$/,
-        loader: 'babel-loader',
-        exclude: /(node_modules|bower_components)/
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: 'babel-loader',
       },
     ]
   }
-};
+}

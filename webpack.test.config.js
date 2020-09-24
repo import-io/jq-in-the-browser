@@ -5,11 +5,11 @@ module.exports = {
     filename: './lib/jq.js'
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.pegjs$/,
-        loader: 'pegjs-loader?trace=false&cache=true'
+        use: ['babel-loader', 'pegjs-loader'],
       }
     ]
   }
-};
+}
