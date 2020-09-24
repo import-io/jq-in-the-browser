@@ -1,15 +1,6 @@
-module.exports = {
-  entry: './src/jq.js',
-  target: 'node',
-  output: {
-    filename: './lib/jq.js'
-  },
-  module: {
-    rules: [
-      {
-        test: /\.pegjs$/,
-        use: ['babel-loader', 'pegjs-loader'],
-      }
-    ]
-  }
-}
+const config = require('./webpack.config.js')
+module.exports = config
+
+config.entry = ['./src/test.js', './src/common_tests.js']
+config.output.path = __dirname + '/test'
+delete config.plugins // [UglifyJsPlugin]

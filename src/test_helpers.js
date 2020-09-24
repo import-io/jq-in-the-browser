@@ -1,6 +1,6 @@
-import jq from './index.js'
 import assert from 'assert'
 import jq_web from 'jq-web'
+import jq from './index.js'
 
 // A fixed version of jq_web.json, which resolves the following issues:
 //

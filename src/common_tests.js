@@ -1,13 +1,13 @@
 import assert from 'assert'
-import parser from './jq.js'
+import jq from './index.js'
 
 describe('Single quote String literal', () => {
   it('per se', () => {
-    assert.deepStrictEqual(parser("'Hello \"World\"!'")(null), ['Hello "World"!'])
+    assert.deepStrictEqual(jq("'Hello \"World\"!'")(null), ['Hello "World"!'])
   })
 
   it('as key', () => {
-    assert.deepStrictEqual(parser("{'a': false}")(null), [{'a': false}])
+    assert.deepStrictEqual(jq("{'a': false}")(null), [{'a': false}])
   })
 })
 
@@ -17,7 +17,7 @@ describe('Extension functions', () => {
     const input = { "greeting": "Hello, МИР! © 2020\nПривет, WORLD!" }
     const output = ["hello, мир! © 2020\nпривет, world!"]
 
-    assert.deepStrictEqual(parser(query)(input), output)
+    assert.deepStrictEqual(jq(query)(input), output)
   })
 
   it('upcase', () => {
@@ -25,7 +25,7 @@ describe('Extension functions', () => {
     const input = { "greeting": "Hello, МИР! © 2020\nПривет, WORLD!" }
     const output = ["HELLO, МИР! © 2020\nПРИВЕТ, WORLD!"]
 
-    assert.deepStrictEqual(parser(query)(input), output)
+    assert.deepStrictEqual(jq(query)(input), output)
   })
 })
 
@@ -52,7 +52,7 @@ describe('Other tests', () => {
         "names": "John"
       },
     ]
-    assert.deepStrictEqual(parser(query)(input), output)
+    assert.deepStrictEqual(jq(query)(input), output)
   })
 
   it('handle example code correctly 2', () => {
@@ -72,7 +72,7 @@ describe('Other tests', () => {
       ]
     }]
 
-    assert.deepStrictEqual(parser(query)(input), output)
+    assert.deepStrictEqual(jq(query)(input), output)
   })
 })
 
@@ -93,7 +93,7 @@ describe('Error messages', () => {
 
   tests.forEach(([query, error]) =>
     it(`Error '${error}' for '${query}'`, () => {
-      assert.throws(() => parser(query)(null), { message: error })
+      assert.throws(() => jq(query)(null), { message: error })
     })
   )
 })

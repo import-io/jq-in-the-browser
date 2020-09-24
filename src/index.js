@@ -1,5 +1,2 @@
-import parse from './jq.js'
-
-const jq = parse
-
-export default jq
+import parser from './jq.pegjs'
+export default parser.parse

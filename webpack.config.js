@@ -3,8 +3,7 @@ const outputFile = libraryName + '.js';
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 module.exports = {
-  entry: './src/jq.js',
-  entry: __dirname + '/src/index.js',
+  entry: './src/index.js',
   devtool: 'source-map',
   output: {
     path: __dirname + '/lib',
