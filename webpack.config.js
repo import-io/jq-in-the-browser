@@ -1,10 +1,8 @@
 const libraryName = 'jq-in-the-browser';
 const outputFile = libraryName + '.js';
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 module.exports = {
   entry: './src/index.js',
-  devtool: 'source-map',
   output: {
     path: __dirname + '/lib',
     filename: outputFile,
@@ -13,7 +11,7 @@ module.exports = {
     umdNamedDefine: true
   },
   target: 'node',
-  plugins: [new UglifyJsPlugin()],
+  mode: 'production',
   module: {
     rules: [
       {
