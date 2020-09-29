@@ -270,12 +270,14 @@
     }
   }
 
-  const dotName = (value, name) => {
+  const dotName = (value, name, optional) => {
     if (value === null) {
       return null
     }
     if (!isObject(value)) {
-      throw new Error(`Cannot index ${_mtype(value)} with string "${name}".`)
+      return optional
+        ? undefined
+        : throw new Error(`Cannot index ${_mtype(value)} with string "${name}".`)
     }
 
     return value.hasOwnProperty(name) ? value[name] : null
@@ -283,6 +285,17 @@
 
   const identity = (value) => {
     return value
+  }
+
+  const isEmpty = (stream) => {
+    if (stream === undefined) {
+      return true
+    }
+    if (!isStream(stream)) {
+      return false
+    }
+
+    return !stream.items.length
   }
 
   const isNumber = (value) => {
@@ -321,12 +334,14 @@
     return value !== null && value !== false
   }
 
-  const iterate = (value) => {
+  const iterate = (value, optional) => {
     if (isObject(value)) {
       value = Object.values(value)
     }
     else if (!Array.isArray(value)) {
-      throw new Error(`Cannot iterate over ${_mtype_v(value)}.`)
+      return optional
+        ? undefined
+        : throw new Error(`Cannot iterate over ${_mtype_v(value)}.`)
     }
 
     return toStream(value)
@@ -366,6 +381,21 @@
     }
 
     return concat(streams)
+  }
+
+  const reduce = (left, rest, stop, fn) => {
+    if (!rest.length || stop(left)) {
+      return left
+    }
+
+    for (const next of rest) {
+      left = fn(left, next)
+      if (stop(left)) {
+        break
+      }
+    }
+
+    return left
   }
 
   const sortBy = (value, fn) => {
@@ -421,13 +451,13 @@
     return new Stream(array)
   }
 
-  const parsePipe = (first, rest) => {
+  const parsePipe = (left, rest) => {
     if (!rest.length) {
-      return first
+      return left
     }
 
     rest = rest.map(([,,, expr]) => expr)
-    return input => rest.reduce(map, first(input))
+    return input => reduce(left(input), rest, isEmpty, map)
   }
 
   // Message formatting helpers. Don't use for other purposes.
@@ -466,38 +496,45 @@ output
     }
   }
 
-_
-  = [ ]*
+_ 'whitespace'
+  = $[ ]*
 
 expr
-  = first: stream rest: (_ "|" _ stream)* {
-    return parsePipe(first, rest)
+  = left: stream rest: (_ "|" _ stream)* {
+    return parsePipe(left, rest)
   }
 
 expr_simple // for object construction
-  = first: addsub rest: (_ "|" _ addsub)* {
-    return parsePipe(first, rest)
+  = left: addsub rest: (_ "|" _ addsub)* {
+    return parsePipe(left, rest)
   }
 
 stream
-  = first: comparison rest: (_ "," _ comparison)* {
+  = left: comparison rest: (_ "," _ comparison)* {
     if (!rest.length) {
-      return first
+      return left
     }
 
     rest = rest.map(([,,, expr]) => expr)
-    const all = [first, ...rest]
+    const all = [left, ...rest]
     return input => concat(all.map(expr => expr(input)))
   }
 
 comparison
-  = left: addsub tail: (_ compare_op _ addsub)? {
-    if (!tail) {
+  = left: addsub right: (_ compare_op _ addsub)? {
+    if (!right) {
       return left
     }
 
-    const [, op,, right] = tail
-    return input => product(left(input), right(input), op)
+    const [, op,, next] = right
+    return input => {
+      const first = left(input)
+      if (isEmpty(first)) {
+        return undefined
+      }
+
+      return product(first, next(input), op)
+    }
   }
 
 compare_op
@@ -521,15 +558,18 @@ compare_op
   }
 
 addsub
-  = first: muldiv rest: (_ addsub_op _ muldiv)* {
+  = left: muldiv rest: (_ addsub_op _ muldiv)* {
     if (!rest.length) {
-      return first
+      return left
     }
 
     rest = rest.map(([, op,, expr]) => ({ op, expr }))
-    return input => rest.reduce((result, next) =>
-      product(result, next.expr(input), next.op),
-      first(input))
+
+    const reducer = input => (left, next) =>
+      product(left, next.expr(input), next.op)
+
+    return input => reduce(
+      left(input), rest, isEmpty, reducer(input))
   }
 
 addsub_op
@@ -559,15 +599,18 @@ addsub_op
   }
 
 muldiv
-  = first: negation rest: (_ muldiv_op _ negation)* {
+  = left: negation rest: (_ muldiv_op _ negation)* {
     if (!rest.length) {
-      return first
+      return left
     }
 
     rest = rest.map(([, op,, expr]) => ({ op, expr }))
-    return input => rest.reduce((result, next) =>
-      product(result, next.expr(input), next.op),
-      first(input))
+
+    const reducer = input => (left, next) =>
+      product(left, next.expr(input), next.op)
+
+    return input => reduce(
+      left(input), rest, isEmpty, reducer(input))
   }
 
 muldiv_op
@@ -623,12 +666,13 @@ parens // TODO: "({}).name" shouldn't fail
   / filter
 
 filter
-  = first: head_filter rest: transform* {
+  = left: head_filter rest: (_ transform)* {
     if (!rest.length) {
-      return first
+      return left
     }
 
-    return input => rest.reduce(map, first(input))
+    rest = rest.map(([, expr]) => expr)
+    return input => reduce(left(input), rest, isEmpty, map)
   }
 
 head_filter
@@ -658,23 +702,33 @@ object_construction
   = "{" _ "}" {
     return input => ({})
   }
-  / "{" _ first: object_prop rest: (_ "," _ object_prop)* (_ ",")? _ "}" {
+  / "{" _ left: object_prop rest: (_ "," _ object_prop)* (_ ",")? _ "}" {
     if (!rest.length) {
-      return first
+      return left
     }
 
     rest = rest.map(([,,, expr]) => expr)
-    return input => rest.reduce((result, expr) =>
-      product(expr(input), result, (prop, object) => ({ ...object, ...prop })),
-      first(input))
+
+    const reducer = input => (left, next) =>
+      product(next(input), left, (next, left) => ({ ...left, ...next }))
+
+    return input => reduce(
+      left(input), rest, isEmpty, reducer(input))
   }
 
 object_prop
   = key: object_key _ ":" _ value: expr_simple {
-    return input => product(value(input), key(input), (value, key) => {
-      // TODO: check key validity (strings only)
-      return { [key]: value }
-    })
+    return input => {
+      const keys = key(input)
+      if (isEmpty(keys)) {
+        return undefined
+      }
+
+      return product(value(input), keys, (value, key) => {
+        // TODO: check key validity (strings only)
+        return { [key]: value }
+      })
+    }
   }
 
 object_key
@@ -688,17 +742,21 @@ transform
   / dot_name
 
 bracket_transforms
-  = "[" _ "]" {
-    return input => iterate(input)
+  = "[" _ "]" optional: (_ "?")? {
+    optional = optional !== null
+    return input => iterate(input, optional)
   }
-  / "[" _ index_expr: (numeric_index / string) _ "]" {
+  / "[" _ index_expr: (numeric_index / string) _ "]" optional: (_ "?")? {
+    optional = optional !== null
     return input => {
       let index = index_expr // TODO: expression indices
       if (isString(index)) {
-        return dotName(input, index)
+        return dotName(input, index, optional)
       }
       if (input !== null && !Array.isArray(input) || !isNumber(index)) {
-        throw new Error(`Cannot index ${_mtype(input)} with ${_mtype(index)}.`)
+        return optional
+          ? undefined
+          : throw new Error(`Cannot index ${_mtype(input)} with ${_mtype(index)}.`)
       }
       if (input === null || !Number.isInteger(index)) {
         return null
@@ -713,18 +771,23 @@ bracket_transforms
       return input[index]
     }
   }
-  / "[" _ start: numeric_index? _ ":" _ end: numeric_index? _ "]" & {
+  / "[" _ start: numeric_index? _ ":" _ end: numeric_index? _ "]" optional: (_ "?")? & {
     return start || end // for JQ compliance
   } {
+    optional = optional !== null
     return input => {
       if (input === null) {
         return null
       }
       if (!Array.isArray(input) && !isString(input)) {
-        throw new Error(`Cannot index ${_mtype(input)} with object.`)
+        return optional
+          ? undefined
+          : throw new Error(`Cannot index ${_mtype(input)} with object.`)
       }
       if (start !== null && !isNumber(start) || end !== null && !isNumber(end)) {
-        throw new Error(`Start and end indices of an ${_mtype(input)} slice must be numbers.`)
+        return optional
+          ? undefined
+          : throw new Error(`Start and end indices of an ${_mtype(input)} slice must be numbers.`)
       }
 
       const startIndex = start ? Math.floor(start) : 0 // TODO: expression indices
@@ -743,8 +806,9 @@ identity
   }
 
 dot_name
-  = "." name: name {
-    return input => dotName(input, name)
+  = "." name: name optional: (_ "?")? {
+    optional = optional !== null
+    return input => dotName(input, name, optional)
   }
 
 literal

@@ -19,7 +19,9 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * Generic object index: `.["foo"]` (string literal indices only)
 * Array index: `.[2]` (numeric literal indices only)
 * Array/string slice: `.[10:15]` (numeric literal indices only)
+* Optional index/slice: `.foo?`, `.["foo"]?`, `.[2]?`, `.[10:15]?`
 * Array/object value iterator: `.[]`
+* Optional iterator: `.[]?`
 * Comma: `,`
 * Pipe: `|`
 * Parenthesis: `(. + 2) * 5`
@@ -34,21 +36,21 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * ascii_downcase
 * ascii_upcase
 * downcase (non-standard extension, see below)
-* from_entries
-* join
-* keys
-* keys_unsorted
-* length
+* from_entries (incomplete)
+* join (incomplete)
+* keys (incomplete)
+* keys_unsorted (incomplete)
+* length (incomplete)
 * map
-* map_values
-* reverse
+* map_values (incomplete)
+* reverse (incomplete)
 * select
 * sort
 * sort_by
-* to_entries
-* tonumber
-* tostring
-* with_entries
+* to_entries (incomplete)
+* tonumber (incomplete)
+* tostring (incomplete)
+* with_entries (incomplete)
 * upcase (non-standard extension, see below)
 
 The extension functions "downcase" and "upcase" are not present in standard JQ. They differ from "ascii_downcase" and "ascii_upcase"
