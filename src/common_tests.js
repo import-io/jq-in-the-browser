@@ -1,6 +1,53 @@
 import assert from 'assert'
 import jq from './index.js'
 
+describe('Multi-line queries', () => {
+  const queries = [
+    '1\n+\n2',
+    '1\n\n+2',
+    '1\n+\n2\n',
+    '\n1\n+\n2',
+    '4\n\t-1',
+    '4\n-\t1',
+    '4\n-1\t',
+    '\t4\n-1',
+  ]
+
+  const output = [3]
+
+  queries.forEach(query =>
+    it('Query: ' + JSON.stringify(query), () => {
+      assert.deepStrictEqual(jq(query)(null), output)
+    })
+  )
+})
+
+describe('Error location', () => {
+  const errors = [
+    {
+      query: '1!',
+      start: { offset: 1, line: 1, column: 2 },
+      end:   { offset: 2, line: 1, column: 3 },
+    },
+    {
+      query: '1\n!',
+      start: { offset: 2, line: 2, column: 1 },
+      end:   { offset: 3, line: 2, column: 2 },
+    },
+    {
+      query: '1\t!',
+      start: { offset: 2, line: 1, column: 3 },
+      end:   { offset: 3, line: 1, column: 4 },
+    },
+  ]
+
+  errors.forEach(({ query, start, end }) =>
+    it('Query: ' + JSON.stringify(query), () => {
+      assert.throws(() => jq(query), { location: { start, end } })
+    })
+  )
+})
+
 describe('Single quote String literal', () => {
   it('per se', () => {
     assert.deepStrictEqual(jq("'Hello \"World\"!'")(null), ['Hello "World"!'])

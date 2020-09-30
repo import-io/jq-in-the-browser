@@ -497,7 +497,7 @@ output
   }
 
 _ 'whitespace'
-  = $[ ]*
+  = $[ \n\t]*
 
 expr
   = left: stream rest: (_ "|" _ stream)* {
