@@ -287,6 +287,17 @@
     return value
   }
 
+  const includes = (stream, value) => {
+    if (stream === undefined) {
+      return false
+    }
+    if (!isStream(stream)) {
+      return stream === value
+    }
+
+    return stream.items.includes(value)
+  }
+
   const isEmpty = (stream) => {
     if (stream === undefined) {
       return true
@@ -496,8 +507,11 @@ output
     }
   }
 
-_ 'whitespace'
-  = $[ \n\t]*
+_
+  = $ws_char*
+
+ws_char 'a space'
+  = [ \n\t]
 
 expr
   = left: stream rest: (_ "|" _ stream)* {
@@ -505,12 +519,12 @@ expr
   }
 
 expr_simple // for object construction
-  = left: addsub rest: (_ "|" _ addsub)* {
+  = left: and rest: (_ "|" _ and)* {
     return parsePipe(left, rest)
   }
 
 stream
-  = left: comparison rest: (_ "," _ comparison)* {
+  = left: and rest: (_ "," _ and)* {
     if (!rest.length) {
       return left
     }
@@ -519,6 +533,32 @@ stream
     const all = [left, ...rest]
     return input => concat(all.map(expr => expr(input)))
   }
+
+and
+  = left: comparison rest: (_ and_op _ comparison)* {
+    if (!rest.length) {
+      return left
+    }
+
+    rest = rest.map(([,,, expr]) => expr)
+
+    const prep = (input, expr) =>
+      map(expr(input), isTrue)
+
+    const stop = left =>
+      !includes(left, true)
+
+    const reducer = input => (left, next) => {
+      next = prep(input, next)
+      return map(left, left => left && next)
+    }
+
+    return input => reduce(
+      prep(input, left), rest, stop, reducer(input))
+  }
+
+and_op
+  = "and" (!name_char / ws_char)
 
 comparison
   = left: addsub right: (_ compare_op _ addsub)? {
@@ -821,10 +861,13 @@ string
   / "'" core: $[^']* "'" { return core }
 
 name
-  = $([a-zA-Z_$][0-9a-zA-Z_$]*)
+  = $([a-zA-Z_$] name_char*)
+
+name_char
+  = [0-9a-zA-Z_$]
 
 number
-  = [.]*[0-9][.0-9]* {
+  = [.]*[0-9][.0-9]* (!name_char / ws_char) {
     const chars = text()
     const value = +chars
 

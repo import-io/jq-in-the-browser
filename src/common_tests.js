@@ -130,12 +130,15 @@ describe('Error messages', () => {
     ['. | 1..', 'Invalid numeric literal \'1..\'.'],
     ['. | 1..2', 'Invalid numeric literal \'1..2\'.'],
     ['. | 1.2.3', 'Invalid numeric literal \'1.2.3\'.'],
+    ['. | 1foo', 'Expected [.0-9] or a space but "f" found.'],
+    ['. | 1 and234', 'Expected a space but "2" found.'],
+    ['. | 1 andfoo', 'Expected a space but "f" found.'],
     ['. | foo', 'function foo/0 is not defined.'],
     ['. | bar', 'function bar/0 is not defined.'],
     ['. | bar(4)', 'function bar/1 is not defined.'],
     ['. | baz(4)', 'function baz/1 is not defined.'],
     ['. | downcase', 'downcase input must be a string.'],
-    ['. | upcase', 'upcase input must be a string.']
+    ['. | upcase', 'upcase input must be a string.'],
   ]
 
   tests.forEach(([query, error]) =>
