@@ -528,25 +528,6 @@
       ]
     ],
     [
-      "length",
-      [
-        "[] | length",
-        "length"
-      ],
-      [
-        [],
-        [
-          1
-        ],
-        [
-          3,
-          [
-            3
-          ]
-        ]
-      ]
-    ],
-    [
       "keys",
       [
         "keys"
@@ -622,6 +603,26 @@
         "# .b | ascii_downcase", "# .b | ascii_upcase"
       ],
       [{ "greeting": "Hello, МИР! © 2020\nПривет, WORLD!", "a": 1, "b": null }]
+    ],
+    [
+      "length",
+      [
+        "length"
+      ],
+      [
+        null, 0, -0, 1, -1, 25, -25, "", "foo",
+        [], [0], [1, 2],
+        {}, { "a": 0 }, { "a": 0, "b": 1 }, { "length": 25 }
+      ]
+    ],
+    [
+      "length - errors",
+      [
+        "# length"
+      ],
+      [
+        false, true
+      ]
     ],
     [
       "map",

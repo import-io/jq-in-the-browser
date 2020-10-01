@@ -12,7 +12,6 @@
   }
 
   const function0_map = {
-    "length": input => input.length,
     "keys": input => Object.keys(input).sort(),
     "keys_unsorted": input => Object.keys(input),
     "to_entries": input => Object.entries(input).map(([key, value]) => ({ key, value })),
@@ -49,6 +48,22 @@
     },
     'false': input => {
       return false
+    },
+    'length': input => {
+      if (input === null) {
+        return 0
+      }
+      if (Array.isArray(input) || isString(input)) {
+        return input.length
+      }
+      if (isObject(input)) {
+        return Object.keys(input).length
+      }
+      if (isNumber(input)) {
+        return Math.abs(input)
+      }
+
+      throw new Error(`${_mtype_v(input)} has no length.`)
     },
     'not': input => {
       return !isTrue(input)
@@ -349,16 +364,16 @@
   }
 
   const iterate = (value, optional) => {
-    if (isObject(value)) {
-      value = Object.values(value)
+    if (Array.isArray(value)) {
+      return toStream(value)
     }
-    else if (!Array.isArray(value)) {
-      return optional
-        ? undefined
-        : throw new Error(`Cannot iterate over ${_mtype_v(value)}.`)
+    if (isObject(value)) {
+      return toStream(Object.values(value))
     }
 
-    return toStream(value)
+    return optional
+      ? undefined
+      : throw new Error(`Cannot iterate over ${_mtype_v(value)}.`)
   }
 
   const map = (stream, fn) => {

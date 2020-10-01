@@ -41,7 +41,7 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * join (incomplete)
 * keys (incomplete)
 * keys_unsorted (incomplete)
-* length (incomplete)
+* length
 * map
 * map_values (incomplete)
 * not
