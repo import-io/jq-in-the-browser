@@ -639,6 +639,28 @@
       ]
     ],
     [
+      "not",
+      [
+        ".[] | not",
+        ".[] | not | not",
+        ".[] | select(not)"
+      ],
+      [
+        [null, false, true, 0, -0, 1, -1, 25],
+        ["", "null", "false", "true", "0", "1", "foo"],
+        [[], [false], [0], [""], [{}]],
+        [
+          {},
+          { "a": false },
+          { "a": 0 },
+          { "a": "" },
+          { "a": [] },
+          { "a": {} },
+          { "false": false }
+        ]
+      ]
+    ],
+    [
       "select",
       [
         "select(.)",

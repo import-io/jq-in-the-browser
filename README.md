@@ -24,11 +24,12 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * Optional iterator: `.[]?`
 * Comma: `,`
 * Pipe: `|`
-* Parenthesis: `(. + 2) * 5`
+* Parentheses: `(. + 2) * 5`
 * Array construction: `[1, 2, 3]`
 * Object construction: `{"a": 42, "b": 17}` (shortcut syntax not supported: `{a, b}` instead of `{a: .a, b: .b}`)
 * Arithmetics: `+`, `-`, `*`, `/`, `%`
 * Comparisons: `==`, `!=`, `<`, `<=`, `>`, `>=`
+* Boolean operators: `and`, `or` (and `not` as a function)
 * Literals: `false`, `true`, `null`, `empty`
 
 ## Supported functions
@@ -43,6 +44,7 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * length (incomplete)
 * map
 * map_values (incomplete)
+* not
 * reverse (incomplete)
 * select
 * sort
@@ -59,9 +61,7 @@ in that they change casing for all Unicode letters, not only for ASCII letters (
 ## Operator precedence
 
 It is not documented in the [offical manual](https://stedolan.github.io/jq/manual/) but can be found here:
-http://rosettacode.org/wiki/Operator_precedence#jq.
-
-Note that it's broken in current implementation. For example `1 + 1 | 2` returns 3 while it must return 2.
+https://github.com/stedolan/jq/blob/master/src/parser.y#L98.
 
 <hr>
 

@@ -50,6 +50,9 @@
     'false': input => {
       return false
     },
+    'not': input => {
+      return !isTrue(input)
+    },
     'null': input => {
       return null
     },
