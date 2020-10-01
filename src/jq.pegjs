@@ -809,7 +809,10 @@ object_prop
       }
 
       return product(value(input), keys, (value, key) => {
-        // TODO: check key validity (strings only)
+        if (!isString(key)) {
+          throw new Error(`Cannot use ${_mtype_v(key)} as object key.`)
+        }
+
         return { [key]: value }
       })
     }
