@@ -519,12 +519,12 @@ expr
   }
 
 expr_simple // for object construction
-  = left: and rest: (_ "|" _ and)* {
+  = left: or rest: (_ "|" _ or)* {
     return parsePipe(left, rest)
   }
 
 stream
-  = left: and rest: (_ "," _ and)* {
+  = left: or rest: (_ "," _ or)* {
     if (!rest.length) {
       return left
     }
@@ -533,6 +533,32 @@ stream
     const all = [left, ...rest]
     return input => concat(all.map(expr => expr(input)))
   }
+
+or
+  = left: and rest: (_ or_op _ and)* {
+    if (!rest.length) {
+      return left
+    }
+
+    rest = rest.map(([,,, expr]) => expr)
+
+    const prep = (input, expr) =>
+      map(expr(input), isTrue)
+
+    const stop = left =>
+      !includes(left, false)
+
+    const reducer = input => (left, next) => {
+      next = prep(input, next)
+      return map(left, left => left || next)
+    }
+
+    return input => reduce(
+      prep(input, left), rest, stop, reducer(input))
+  }
+
+or_op
+  = "or" (!name_char / ws_char)
 
 and
   = left: comparison rest: (_ and_op _ comparison)* {

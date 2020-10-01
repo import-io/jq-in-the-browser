@@ -133,6 +133,8 @@ describe('Error messages', () => {
     ['. | 1foo', 'Expected [.0-9] or a space but "f" found.'],
     ['. | 1 and234', 'Expected a space but "2" found.'],
     ['. | 1 andfoo', 'Expected a space but "f" found.'],
+    ['. | 1 or234', 'Expected a space but "2" found.'],
+    ['. | 1 orfoo', 'Expected a space but "f" found.'],
     ['. | foo', 'function foo/0 is not defined.'],
     ['. | bar', 'function bar/0 is not defined.'],
     ['. | bar(4)', 'function bar/1 is not defined.'],
