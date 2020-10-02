@@ -30,6 +30,7 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * Arithmetics: `+`, `-`, `*`, `/`, `%`
 * Comparisons: `==`, `!=`, `<`, `<=`, `>`, `>=`
 * Boolean operators: `and`, `or` (and `not` as a function)
+* Alternative operator: `//`
 * Literals: `false`, `true`, `null`, `empty`
 
 ## Supported functions

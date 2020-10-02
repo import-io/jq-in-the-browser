@@ -142,7 +142,7 @@
     // arrays
 
     if (Array.isArray(a)) {
-      for (let i = 0; i < a.length && i < b.length; ++i) {
+      for (let i = 0, n = Math.min(a.length, b.length); i < n; ++i) {
         const result = compare(a[i], b[i])
         if (result) {
           return result
@@ -165,7 +165,7 @@
     a.sort(keyComparer)
     b.sort(keyComparer)
 
-    for (let i = 0; i < a.length && i < b.length; ++i) {
+    for (let i = 0, n = Math.min(a.length, b.length); i < n; ++i) {
       const [ka, va] = a[i]
       const [kb, vb] = b[i]
 
@@ -194,7 +194,7 @@
         return false
       }
 
-      for (let i = 0; i < a.length; ++i) {
+      for (let i = 0, n = a.length; i < n; ++i) {
         if (!compareForEquality(a[i], b[i])) {
           return false
         }
@@ -220,7 +220,7 @@
     a.sort(keyComparer)
     b.sort(keyComparer)
 
-    for (let i = 0; i < a.length; ++i) {
+    for (let i = 0, n = a.length; i < n; ++i) {
       const [ka, va] = a[i]
       const [kb, vb] = b[i]
 
@@ -283,7 +283,7 @@
   }
 
   const convert = (array, fn) => {
-    for (let i = 0; i < array.length; ++i) {
+    for (let i = 0, n = array.length; i < n; ++i) {
       array[i] = fn(array[i])
     }
   }
@@ -413,15 +413,12 @@
   }
 
   const reduce = (left, rest, stop, fn) => {
-    if (!rest.length || stop(left)) {
-      return left
-    }
-
-    for (const next of rest) {
-      left = fn(left, next)
+    for (let i = 0, n = rest.length; i < n; ++i) {
       if (stop(left)) {
         break
       }
+
+      left = fn(left, rest[i])
     }
 
     return left
@@ -442,7 +439,7 @@
     const keys = new Array(value.length)
     let someKeysAreStreams = false
 
-    for (let i = 0; i < value.length; ++i) {
+    for (let i = 0, n = value.length; i < n; ++i) {
       const key = fn(value[i])
       indexes[i] = i
       keys[i] = key
@@ -537,12 +534,12 @@ expr
   }
 
 expr_simple // for object construction
-  = left: or rest: (_ "|" _ or)* {
+  = left: alternative rest: (_ "|" _ alternative)* {
     return parsePipe(left, rest)
   }
 
 stream
-  = left: or rest: (_ "," _ or)* {
+  = left: alternative rest: (_ "," _ alternative)* {
     if (!rest.length) {
       return left
     }
@@ -550,6 +547,37 @@ stream
     rest = rest.map(([,,, expr]) => expr)
     const all = [left, ...rest]
     return input => concat(all.map(expr => expr(input)))
+  }
+
+alternative
+  = left: or rest: (_ "//" _ or)* {
+    if (!rest.length) {
+      return left
+    }
+
+    rest = rest.map(([,,, expr]) => expr)
+    const last = rest[rest.length - 1]
+    --rest.length
+
+    const prep = (input, expr) =>
+      map(expr(input), value => isTrue(value) ? value : undefined)
+
+    const stop = left =>
+      !isEmpty(left)
+
+    const reducer = input => (left, next) =>
+      prep(input, next)
+
+    return input => {
+      const result = reduce(
+        prep(input, left), rest, stop, reducer(input))
+
+      if (!isEmpty(result)) {
+        return result
+      }
+
+      return last(input)
+    }
   }
 
 or

@@ -234,6 +234,39 @@
       ]
     ],
     [
+      "Alternative",
+      [
+        ".[] // \"None\"",
+        ".[], true // \"None\"",
+        ".[] or false // \"None\"",
+        ".[] and true // \"None\"",
+        "(.[] | select(. == 25)) // \"None\"",
+        "(.[] | select(. <= 25)) // \"None\"",
+        "(.[] | select(. == -1)) // \"None\"",
+        "(.[] | select(. == -1)) // (.[] | select(. == 25))",
+        "(.[] | select(. == -1)) // (.[] | select(. <= 25))",
+        "(.[] | select(. == -1)) // (.[] | select(. == -2))",
+        "(.[] | select(. == -1)) // (.[] | select(. == 25)) // \"None\"",
+        "(.[] | select(. == -1)) // (.[] | select(. <= 25)) // \"None\"",
+        "(.[] | select(. == -1)) // (.[] | select(. == -2)) // \"None\"",
+        ".[] | . // \"Bad\"",
+        ".[] | select(. == 25) // \"Bad\"",
+        ".[] | select(. <= 25) // \"Bad\"",
+        ".[] | select(. == -1) // \"Bad\"",
+        ".[] | select(. == -1) // select(. == 25)",
+        ".[] | select(. == -1) // select(. <= 25)",
+        ".[] | select(. == -1) // select(. == -2)",
+        ".[] | select(. == -1) // select(. == 25) // \"Bad\"",
+        ".[] | select(. == -1) // select(. <= 25) // \"Bad\"",
+        ".[] | select(. == -1) // select(. == -2) // \"Bad\""
+      ],
+      [[
+        true, null, false, 0, 25, "", "foo",
+        [], ["foo"],
+        {}, { "foo": "bar" }
+      ]]
+    ],
+    [
       "Logical Or",
       [
         ".[0] or .[0]",
