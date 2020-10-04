@@ -511,8 +511,8 @@
   }
 }
 
-output
-  = _ expr: expr _ {
+Output
+  = _ expr: Expr _ {
     return input => {
       if (input === undefined) {
         return []
@@ -523,23 +523,23 @@ output
   }
 
 _
-  = $ws_char*
+  = $SpaceChar*
 
-ws_char 'a space'
+SpaceChar 'a space'
   = [ \n\t]
 
-expr
-  = left: stream rest: (_ "|" _ stream)* {
+Expr
+  = left: Stream rest: (_ "|" _ Stream)* {
     return parsePipe(left, rest)
   }
 
-expr_simple // for object construction
-  = left: alternative rest: (_ "|" _ alternative)* {
+ExprSimple // for object construction
+  = left: Alternative rest: (_ "|" _ Alternative)* {
     return parsePipe(left, rest)
   }
 
-stream
-  = left: alternative rest: (_ "," _ alternative)* {
+Stream
+  = left: Alternative rest: (_ "," _ Alternative)* {
     if (!rest.length) {
       return left
     }
@@ -549,8 +549,8 @@ stream
     return input => concat(all.map(expr => expr(input)))
   }
 
-alternative
-  = left: or rest: (_ "//" _ or)* {
+Alternative
+  = left: Or rest: (_ "//" _ Or)* {
     if (!rest.length) {
       return left
     }
@@ -580,8 +580,8 @@ alternative
     }
   }
 
-or
-  = left: and rest: (_ or_op _ and)* {
+Or
+  = left: And rest: (_ OrOp _ And)* {
     if (!rest.length) {
       return left
     }
@@ -603,11 +603,11 @@ or
       prep(input, left), rest, stop, reducer(input))
   }
 
-or_op
-  = "or" (!name_char / ws_char)
+OrOp
+  = "or" (!NameChar / SpaceChar)
 
-and
-  = left: comparison rest: (_ and_op _ comparison)* {
+And
+  = left: Comparison rest: (_ AndOp _ Comparison)* {
     if (!rest.length) {
       return left
     }
@@ -629,11 +629,11 @@ and
       prep(input, left), rest, stop, reducer(input))
   }
 
-and_op
-  = "and" (!name_char / ws_char)
+AndOp
+  = "and" (!NameChar / SpaceChar)
 
-comparison
-  = left: addsub right: (_ compare_op _ addsub)? {
+Comparison
+  = left: AddSub right: (_ CompareOp _ AddSub)? {
     if (!right) {
       return left
     }
@@ -649,7 +649,7 @@ comparison
     }
   }
 
-compare_op
+CompareOp
   = "==" {
     return compareForEquality
   }
@@ -669,8 +669,8 @@ compare_op
     return (a, b) => compare(a, b) > 0
   }
 
-addsub
-  = left: muldiv rest: (_ addsub_op _ muldiv)* {
+AddSub
+  = left: MulDiv rest: (_ AddSubOp _ MulDiv)* {
     if (!rest.length) {
       return left
     }
@@ -684,7 +684,7 @@ addsub
       left(input), rest, isEmpty, reducer(input))
   }
 
-addsub_op
+AddSubOp
   = "+" {
     return (a, b) => {
       if (a === null) {
@@ -710,8 +710,8 @@ addsub_op
     }
   }
 
-muldiv
-  = left: negation rest: (_ muldiv_op _ negation)* {
+MulDiv
+  = left: Negation rest: (_ MulDivOp _ Negation)* {
     if (!rest.length) {
       return left
     }
@@ -725,7 +725,7 @@ muldiv
       left(input), rest, isEmpty, reducer(input))
   }
 
-muldiv_op
+MulDivOp
   = "*" {
     return (a, b) => {
       if (isNumber(a) && isNumber(b)) {
@@ -754,8 +754,8 @@ muldiv_op
     }
   }
 
-negation
-  = minuses: ("-" _)* expr: parens {
+Negation
+  = minuses: ("-" _)* expr: Parens {
     const count = minuses.length
     if (!count) {
       return expr
@@ -773,12 +773,12 @@ negation
     })
   }
 
-parens // TODO: "({}).name" shouldn't fail
-  = "(" _ expr: expr _ ")" { return expr }
-  / filter
+Parens // TODO: "({}).name" shouldn't fail
+  = "(" _ expr: Expr _ ")" { return expr }
+  / Filter
 
-filter
-  = left: head_filter rest: (_ transform)* {
+Filter
+  = left: FilterHead rest: (_ Transform)* {
     if (!rest.length) {
       return left
     }
@@ -787,34 +787,34 @@ filter
     return input => reduce(left(input), rest, isEmpty, map)
   }
 
-head_filter
-  = literal
-  / dot_name
-  / identity
-  / array_construction
-  / object_construction
-  / function1
-  / function0
+FilterHead
+  = Literal
+  / DotName
+  / Dot
+  / ArrayConstruction
+  / ObjectConstruction
+  / Function1
+  / Function0
 
-function1
-  = name: name _ "(" _ arg: expr _ ")" {return get_function_1(name)(arg)}
+Function1
+  = name: Name _ "(" _ arg: Expr _ ")" {return get_function_1(name)(arg)}
 
-function0
-  = name: name {return get_function_0(name)}
+Function0
+  = name: Name {return get_function_0(name)}
 
-array_construction
+ArrayConstruction
   = "[" _ "]" {
     return input => []
   }
-  / "[" _ items: expr _ "]" {
+  / "[" _ items: Expr _ "]" {
     return input => toArray(items(input))
   }
 
-object_construction
+ObjectConstruction
   = "{" _ "}" {
     return input => ({})
   }
-  / "{" _ left: object_prop rest: (_ "," _ object_prop)* (_ ",")? _ "}" {
+  / "{" _ left: ObjectProp rest: (_ "," _ ObjectProp)* (_ ",")? _ "}" {
     if (!rest.length) {
       return left
     }
@@ -828,8 +828,8 @@ object_construction
       left(input), rest, isEmpty, reducer(input))
   }
 
-object_prop
-  = key: object_key _ ":" _ value: expr_simple {
+ObjectProp
+  = key: ObjectKey _ ":" _ value: ExprSimple {
     return input => {
       const keys = key(input)
       if (isEmpty(keys)) {
@@ -846,22 +846,22 @@ object_prop
     }
   }
 
-object_key
-  = name: (name / string) {
+ObjectKey
+  = name: (Name / String) {
     return input => name
   }
-  / parens
+  / Parens
 
-transform
-  = bracket_transforms
-  / dot_name
+Transform
+  = BracketTransform
+  / DotName
 
-bracket_transforms
+BracketTransform
   = "[" _ "]" optional: (_ "?")? {
     optional = optional !== null
     return input => iterate(input, optional)
   }
-  / "[" _ index_expr: (numeric_index / string) _ "]" optional: (_ "?")? {
+  / "[" _ index_expr: (NumericIndex / String) _ "]" optional: (_ "?")? {
     optional = optional !== null
     return input => {
       let index = index_expr // TODO: expression indices
@@ -886,7 +886,7 @@ bracket_transforms
       return input[index]
     }
   }
-  / "[" _ start: numeric_index? _ ":" _ end: numeric_index? _ "]" optional: (_ "?")? & {
+  / "[" _ start: NumericIndex? _ ":" _ end: NumericIndex? _ "]" optional: (_ "?")? & {
     return start || end // for JQ compliance
   } {
     optional = optional !== null
@@ -911,38 +911,38 @@ bracket_transforms
     }
   }
 
-numeric_index // TODO: remove when we support expression indices
-  = "-" _ number: number { return -number }
-  / number
+NumericIndex // TODO: remove when we support expression indices
+  = "-" _ number: Number { return -number }
+  / Number
 
-identity
+Dot
   = "." {
     return identity
   }
 
-dot_name
-  = "." name: name optional: (_ "?")? {
+DotName
+  = "." name: Name optional: (_ "?")? {
     optional = optional !== null
     return input => dotName(input, name, optional)
   }
 
-literal
-  = value: (string / number) {
+Literal
+  = value: (String / Number) {
     return input => value
   }
 
-string
+String
   = '"' core: $[^"]* '"' { return core }
   / "'" core: $[^']* "'" { return core }
 
-name
-  = $([a-zA-Z_$] name_char*)
+Name
+  = $([a-zA-Z_$] NameChar*)
 
-name_char
+NameChar
   = [0-9a-zA-Z_$]
 
-number
-  = [.]*[0-9][.0-9]* (!name_char / ws_char) {
+Number
+  = [.]*[0-9][.0-9]* (!NameChar / SpaceChar) {
     const chars = text()
     const value = +chars
 
