@@ -755,27 +755,24 @@ MulDivOp
   }
 
 Negation
-  = minuses: ("-" _)* expr: Parens {
-    const count = minuses.length
+  = minuses: ("-" _)* right: Filter {
+    let count = minuses.length
     if (!count) {
-      return expr
+      return right
     }
 
-    return input => map(expr(input), value => {
+    count %= 2
+    return input => map(right(input), value => {
       if (!isNumber(value)) {
         throw new Error(`${_mtype_v(value)} cannot be negated.`)
       }
-      if (!(count % 2)) {
+      if (!count) {
         return value
       }
 
       return -value
     })
   }
-
-Parens // TODO: "({}).name" shouldn't fail
-  = "(" _ expr: Expr _ ")" { return expr }
-  / Filter
 
 Filter
   = left: FilterHead rest: (_ Transform)* {
@@ -788,13 +785,17 @@ Filter
   }
 
 FilterHead
-  = Literal
-  / DotName
-  / Dot
+  = Parens
   / ArrayConstruction
   / ObjectConstruction
+  / Literal
+  / DotName
+  / Dot
   / Function1
   / Function0
+
+Parens
+  = "(" _ expr: Expr _ ")" { return expr }
 
 Function1
   = name: Name _ "(" _ arg: Expr _ ")" {return get_function_1(name)(arg)}
