@@ -1,17 +1,6 @@
 {
-  const get_function_0 = name => {
-    const f = function0_map[name]
-    if (f === undefined) throw new Error(`function ${name}/0 is not defined.`)
-    return f
-  }
-
-  const get_function_1 = name => {
-    const f = function1_map[name]
-    if (f === undefined) throw new Error(`function ${name}/1 is not defined.`)
-    return f
-  }
-
-  const function0_map = {
+  const Functions0 = {
+    // Bad
     "keys": input => Object.keys(input).sort(),
     "keys_unsorted": input => Object.keys(input),
     "to_entries": input => Object.entries(input).map(([key, value]) => ({ key, value })),
@@ -20,6 +9,8 @@
     "reverse": input => ([].concat(input).reverse()),
     "tonumber": input => input * 1,
     "tostring": input => ((typeof input === "object") ? JSON.stringify(input) : String(input)),
+
+    // Good
     'ascii_downcase': input => {
       // as 'explode | map(if 65 <= . and . <= 90 then . + 32 else . end) | implode'
       if (!isString(input)) {
@@ -86,18 +77,21 @@
     },
   }
 
-  const function1_map = {
+  const Functions1 = {
+    // Bad
     "map_values": arg => input => {
       const pairs = Object.keys(input).map(key => ({[key]: arg(input[key])}))
       return Object.assign({}, ...pairs)
     },
     "with_entries": arg => input => {
-      const from_entries = function0_map["from_entries"]
-      const to_entries = function0_map["to_entries"]
+      const from_entries = Functions0["from_entries"]
+      const to_entries = Functions0["to_entries"]
       const mapped = to_entries(input).map(arg)
       return from_entries(mapped)
     },
     "join": arg => input => input.join(arg(input)),
+
+    // Good
     'map': arg => input => {
       // as '[.[] | arg]'
       return toArray(map(iterate(input), arg))
@@ -820,10 +814,26 @@ Parens
   = "(" _ expr: Expr _ ")" { return expr }
 
 Function1
-  = name: FunctionName _ "(" _ arg: Expr _ ")" {return get_function_1(name)(arg)}
+  = name: FunctionName _ "(" _ arg: Expr _ ")" {
+    if (Functions1.hasOwnProperty(name)) {
+      return Functions1[name](arg)
+    }
+
+    error(Functions0.hasOwnProperty(name)
+      ? `Function "${name}" accepts no parameters.`
+      : `Function "${name}" is not defined.`)
+  }
 
 Function0
-  = name: FunctionName {return get_function_0(name)}
+  = name: FunctionName {
+    if (Functions0.hasOwnProperty(name)) {
+      return Functions0[name]
+    }
+
+    error(Functions1.hasOwnProperty(name)
+      ? `Function "${name}" requires a parameter.`
+      : `Function "${name}" is not defined.`)
+  }
 
 FunctionName 'function name'
   = name: Name & {

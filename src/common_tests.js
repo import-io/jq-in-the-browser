@@ -76,6 +76,79 @@ describe('Extension functions', () => {
   })
 })
 
+describe('Compile-time errors', () => {
+  const tests = [
+    ['..1', 'Invalid numeric literal "..1".'],
+    ['1..', 'Invalid numeric literal "1..".'],
+    ['1..2', 'Invalid numeric literal "1..2".'],
+    ['1.2.3', 'Invalid numeric literal "1.2.3".'],
+    ['1foo', 'Invalid numeric literal "1foo".'],
+    ['0x1', 'Invalid numeric literal "0x1".'],
+    ['0b1', 'Invalid numeric literal "0b1".'],
+    ['0o1', 'Invalid numeric literal "0o1".'],
+
+    ['foo', 'Function "foo" is not defined.'],
+    ['bar(4)', 'Function "bar" is not defined.'],
+    ['select', 'Function "select" requires a parameter.'],
+    ['empty(4)', 'Function "empty" accepts no parameters.'],
+
+    ['and', /^Expected .+, function name,.+ but "a" found\.$/],
+    ['elif', /^Expected .+, function name,.+ but "e" found\.$/],
+    ['else', /^Expected .+, function name,.+ but "e" found\.$/],
+    ['end', /^Expected .+, function name,.+ but "e" found\.$/],
+    ['if', /^Expected .+ but end of input found\.$/],
+    ['or', /^Expected .+, function name,.+ but "o" found\.$/],
+    ['then', /^Expected .+, function name,.+ but "t" found\.$/],
+
+    ['1and 234', 'Invalid numeric literal "1and".'],
+    ['1 and234', 'Expected space but "2" found.'],
+    ['1 andfoo', 'Expected space but "f" found.'],
+    ['1 and', /^Expected ((?!a-z).)+ but end of input found\.$/],
+    ['1or 234', 'Invalid numeric literal "1or".'],
+    ['1 or234', 'Expected space but "2" found.'],
+    ['1 orfoo', 'Expected space but "f" found.'],
+    ['1 or', /^Expected ((?!a-z).)+ but end of input found\.$/],
+
+    ['if 1', /^Expected .*"then".* but end of input found\.$/],
+    ['if 1 then', /^Expected .+ but end of input found\.$/],
+    ['if 1 then 2', /^Expected .*"elif", "else".* but end of input found\.$/],
+    ['if 1 then 2 else', /^Expected .+ but end of input found\.$/],
+    ['if 1 then 2 else 3', /^Expected .*"end".* but end of input found\.$/],
+    ['if 1 then 2 elif', /^Expected .+ but end of input found\.$/],
+    ['if 1 then 2 elif 3', /^Expected .*"then".* but end of input found\.$/],
+
+    ['if1 then 2 else 3 end', 'Function "if1" is not defined.'],
+    ['iffoo then 2 else 3 end', 'Function "iffoo" is not defined.'],
+    ['if 1 then2 else 3 end', 'Expected space but "2" found.'],
+    ['if 1 thenfoo else 3 end', 'Expected space but "f" found.'],
+    ['if 1 then 2 else3 end', 'Expected space but "3" found.'],
+    ['if 1 then 2 elsefoo end', 'Expected space but "f" found.'],
+    ['if 1 then 2 else 3 end4', 'Expected space but "4" found.'],
+    ['if 1 then 2 else 3 endfoo', 'Expected space but "f" found.'],
+    ['if 1 then 2 elif3 then 4 else 5 end', 'Expected space but "3" found.'],
+    ['if 1 then 2 eliffoo then 4 else 5 end', 'Expected space but "f" found.'],
+  ]
+
+  tests.forEach(([query, error]) =>
+    it(`Error '${error}' for '${query}'`, () => {
+      assert.throws(() => jq(query), { name: 'SyntaxError', message: error })
+    })
+  )
+})
+
+describe('Run-time errors', () => {
+  const tests = [
+    ['downcase', 'downcase input must be a string.'],
+    ['upcase', 'upcase input must be a string.'],
+  ]
+
+  tests.forEach(([query, error]) =>
+    it(`Error '${error}' for '${query}'`, () => {
+      assert.throws(() => jq(query)(null), { message: error })
+    })
+  )
+})
+
 describe('Other tests', () => {
   it('handle example code correctly', () => {
     const query = '{"names": .[] | .name}'
@@ -121,66 +194,4 @@ describe('Other tests', () => {
 
     assert.deepStrictEqual(jq(query)(input), output)
   })
-})
-
-
-describe('Error messages', () => {
-  const tests = [
-    ['. | ..1', 'Invalid numeric literal "..1".'],
-    ['. | 1..', 'Invalid numeric literal "1..".'],
-    ['. | 1..2', 'Invalid numeric literal "1..2".'],
-    ['. | 1.2.3', 'Invalid numeric literal "1.2.3".'],
-    ['. | 1foo', 'Invalid numeric literal "1foo".'],
-    ['. | 0x1', 'Invalid numeric literal "0x1".'],
-    ['. | 0b1', 'Invalid numeric literal "0b1".'],
-    ['. | 0o1', 'Invalid numeric literal "0o1".'],
-
-    ['. | foo', 'function foo/0 is not defined.'],
-    ['. | bar', 'function bar/0 is not defined.'],
-    ['. | bar(4)', 'function bar/1 is not defined.'],
-    ['. | downcase', 'downcase input must be a string.'],
-    ['. | upcase', 'upcase input must be a string.'],
-
-    ['. | and', /^Expected .+, function name,.+ but "a" found\.$/],
-    ['. | elif', /^Expected .+, function name,.+ but "e" found\.$/],
-    ['. | else', /^Expected .+, function name,.+ but "e" found\.$/],
-    ['. | end', /^Expected .+, function name,.+ but "e" found\.$/],
-    ['. | if', /^Expected .+ but end of input found\.$/],
-    ['. | or', /^Expected .+, function name,.+ but "o" found\.$/],
-    ['. | then', /^Expected .+, function name,.+ but "t" found\.$/],
-
-    ['. | 1and 234', 'Invalid numeric literal "1and".'],
-    ['. | 1 and234', 'Expected space but "2" found.'],
-    ['. | 1 andfoo', 'Expected space but "f" found.'],
-    ['. | 1 and', /^Expected ((?!a-z).)+ but end of input found\.$/],
-    ['. | 1or 234', 'Invalid numeric literal "1or".'],
-    ['. | 1 or234', 'Expected space but "2" found.'],
-    ['. | 1 orfoo', 'Expected space but "f" found.'],
-    ['. | 1 or', /^Expected ((?!a-z).)+ but end of input found\.$/],
-
-    ['. | if 1', /^Expected .*"then".* but end of input found\.$/],
-    ['. | if 1 then', /^Expected .+ but end of input found\.$/],
-    ['. | if 1 then 2', /^Expected .*"elif", "else".* but end of input found\.$/],
-    ['. | if 1 then 2 else', /^Expected .+ but end of input found\.$/],
-    ['. | if 1 then 2 else 3', /^Expected .*"end".* but end of input found\.$/],
-    ['. | if 1 then 2 elif', /^Expected .+ but end of input found\.$/],
-    ['. | if 1 then 2 elif 3', /^Expected .*"then".* but end of input found\.$/],
-
-    ['. | if1 then 2 else 3 end', 'function if1/0 is not defined.'],
-    ['. | iffoo then 2 else 3 end', 'function iffoo/0 is not defined.'],
-    ['. | if 1 then2 else 3 end', 'Expected space but "2" found.'],
-    ['. | if 1 thenfoo else 3 end', 'Expected space but "f" found.'],
-    ['. | if 1 then 2 else3 end', 'Expected space but "3" found.'],
-    ['. | if 1 then 2 elsefoo end', 'Expected space but "f" found.'],
-    ['. | if 1 then 2 else 3 end4', 'Expected space but "4" found.'],
-    ['. | if 1 then 2 else 3 endfoo', 'Expected space but "f" found.'],
-    ['. | if 1 then 2 elif3 then 4 else 5 end', 'Expected space but "3" found.'],
-    ['. | if 1 then 2 eliffoo then 4 else 5 end', 'Expected space but "f" found.'],
-  ]
-
-  tests.forEach(([query, error]) =>
-    it(`Error '${error}' for '${query}'`, () => {
-      assert.throws(() => jq(query)(null), { message: error })
-    })
-  )
 })
