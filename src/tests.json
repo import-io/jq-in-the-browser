@@ -57,6 +57,9 @@
       [
         ".foo",
         ".bar",
+        ".and",
+        ".or",
+        ".if",
         ".bar.x",
         ".foo[1]",
         ".baz",
@@ -442,6 +445,47 @@
       ]
     ],
     [
+      "If",
+      [
+        "if .t then .a else .b end",
+        "if .f then .a else .b end",
+        "if .t then .a elif .t then .a * 2 else .b end",
+        "if .f then .a elif .t then .a * 2 else .b end",
+        "if .t then .a elif .f then .a * 2 else .b end",
+        "if .f then .a elif .f then .a * 2 else .b end",
+        "if .t then if .t then .a * 2 else .b * 2 end else .b end",
+        "if .f then if .t then .a * 2 else .b * 2 end else .b end",
+        "if .t then if .f then .a * 2 else .b * 2 end else .b end",
+        "if .f then if .f then .a * 2 else .b * 2 end else .b end",
+        "if .t then .a else if .t then .a * 2 else .b * 2 end end",
+        "if .f then .a else if .t then .a * 2 else .b * 2 end end",
+        "if .t then .a else if .f then .a * 2 else .b * 2 end end",
+        "if .f then .a else if .f then .a * 2 else .b * 2 end end",
+        "if .a < .b or .t then .f | not else .b end",
+        "if .a < .b or .f then .a else .t | not end",
+        "if if .a < .b then .t else .f end then .a else .b end",
+        "if if .a < .b then .f else .t end then .a else .b end",
+        " -if .t then .a else .b end",
+        " -if .f then .a else .b end",
+        "if .t then -if .t then .a * 2 else .b * 2 end else .b end",
+        "if .f then .a else -if .t then .a * 2 else .b * 2 end end",
+        "if .t then .a, .a + 1 else .b, .b + 1 end",
+        "if .f then .a, .a + 1 else .b, .b + 1 end",
+        "if .t, .t then .a, .a + 1 else .b, .b + 1 end",
+        "if .f, .t then .a, .a + 1 else .b, .b + 1 end",
+        "if .t, .f then .a, .a + 1 else .b, .b + 1 end",
+        "if .f, .f then .a, .a + 1 else .b, .b + 1 end",
+        "if .t, .t then .a elif .t, .f then .a * 2 else .b end",
+        "if .f, .t then .a elif .f, .t then .a * 2 else .b end",
+        "if .t, .f then .a elif .t, .f then .a * 2 else .b end",
+        "if .f, .f then .a elif .f, .t then .a * 2 else .b end"
+      ],
+      [
+        { "f": false, "t": true, "a": 10, "b": -10 },
+        { "f": null, "t": 0, "a": 10, "b": -10 }
+      ]
+    ],
+    [
       "Array Construction",
       [
         "[]",
@@ -481,6 +525,9 @@
         "{ foo: \"bar\"}",
         "{foo : \"bar\"}",
         "{foo: \"bar\", foo: \"baz\"}",
+        "{and: \"bar\"}",
+        "{or: \"bar\"}",
+        "{if: \"bar\"}",
         "{(.a): true}",
         "{({\"a\": \"b\"} | .a): true}",
         "{\"a\": 4, \"b\": 3, \"c\": -1, \"d\": \"f\"}"

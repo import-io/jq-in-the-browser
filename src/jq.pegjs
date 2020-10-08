@@ -111,6 +111,16 @@
     },
   }
 
+  const Keywords = [
+    'and',
+    'elif',
+    'else',
+    'end',
+    'if',
+    'or',
+    'then',
+  ]
+
   class Stream {
     constructor(items) {
       this.items = items
@@ -477,12 +487,17 @@
     return new Stream(array)
   }
 
+  const parseIf = (cond, left, right) => {
+    return input => map(cond(input), cond =>
+      isTrue(cond) ? left(input) : right(input))
+  }
+
   const parsePipe = (left, rest) => {
     if (!rest.length) {
       return left
     }
 
-    rest = rest.map(([,,, expr]) => expr)
+    rest = rest.map(rest => rest[3])
     return input => reduce(left(input), rest, isEmpty, map)
   }
 
@@ -525,7 +540,7 @@ Output
 _
   = $SpaceChar*
 
-SpaceChar 'a space'
+SpaceChar 'space'
   = [ \n\t]
 
 Expr
@@ -544,7 +559,7 @@ Stream
       return left
     }
 
-    rest = rest.map(([,,, expr]) => expr)
+    rest = rest.map(rest => rest[3])
     const all = [left, ...rest]
     return input => concat(all.map(expr => expr(input)))
   }
@@ -555,7 +570,7 @@ Alternative
       return left
     }
 
-    rest = rest.map(([,,, expr]) => expr)
+    rest = rest.map(rest => rest[3])
     const last = rest[rest.length - 1]
     --rest.length
 
@@ -581,12 +596,12 @@ Alternative
   }
 
 Or
-  = left: And rest: (_ OrOp _ And)* {
+  = left: And rest: (_ "or" B$ _ And)* {
     if (!rest.length) {
       return left
     }
 
-    rest = rest.map(([,,, expr]) => expr)
+    rest = rest.map(rest => rest[4])
 
     const prep = (input, expr) =>
       map(expr(input), isTrue)
@@ -603,16 +618,13 @@ Or
       prep(input, left), rest, stop, reducer(input))
   }
 
-OrOp
-  = "or" (!NameChar / SpaceChar)
-
 And
-  = left: Comparison rest: (_ AndOp _ Comparison)* {
+  = left: Comparison rest: (_ "and" B$ _ Comparison)* {
     if (!rest.length) {
       return left
     }
 
-    rest = rest.map(([,,, expr]) => expr)
+    rest = rest.map(rest => rest[4])
 
     const prep = (input, expr) =>
       map(expr(input), isTrue)
@@ -628,9 +640,6 @@ And
     return input => reduce(
       prep(input, left), rest, stop, reducer(input))
   }
-
-AndOp
-  = "and" (!NameChar / SpaceChar)
 
 Comparison
   = left: AddSub right: (_ CompareOp _ AddSub)? {
@@ -755,23 +764,36 @@ MulDivOp
   }
 
 Negation
-  = minuses: ("-" _)* right: Filter {
+  = minuses: ("-" _)* right: (If / Filter) {
     let count = minuses.length
     if (!count) {
       return right
     }
 
     count %= 2
-    return input => map(right(input), value => {
-      if (!isNumber(value)) {
-        throw new Error(`${_mtype_v(value)} cannot be negated.`)
+    return input => map(right(input), right => {
+      if (!isNumber(right)) {
+        throw new Error(`${_mtype_v(right)} cannot be negated.`)
       }
       if (!count) {
-        return value
+        return right
       }
 
-      return -value
+      return -right
     })
+  }
+
+If
+  = "if" B$ _ cond: Expr _ "then" B$ _ left: Expr _ right: Else {
+    return parseIf(cond, left, right)
+  }
+
+Else
+  = "else" B$ _ expr: Expr _ "end" B$ {
+    return expr
+  }
+  / "elif" B$ _ cond: Expr _ "then" B$ _ left: Expr _ right: Else {
+    return parseIf(cond, left, right)
   }
 
 Filter
@@ -798,10 +820,17 @@ Parens
   = "(" _ expr: Expr _ ")" { return expr }
 
 Function1
-  = name: Name _ "(" _ arg: Expr _ ")" {return get_function_1(name)(arg)}
+  = name: FunctionName _ "(" _ arg: Expr _ ")" {return get_function_1(name)(arg)}
 
 Function0
-  = name: Name {return get_function_0(name)}
+  = name: FunctionName {return get_function_0(name)}
+
+FunctionName 'function name'
+  = name: Name & {
+    return !Keywords.includes(name)
+  } {
+    return name
+  }
 
 ArrayConstruction
   = "[" _ "]" {
@@ -820,7 +849,7 @@ ObjectConstruction
       return left
     }
 
-    rest = rest.map(([,,, expr]) => expr)
+    rest = rest.map(rest => rest[3])
 
     const reducer = input => (left, next) =>
       product(next(input), left, (next, left) => ({ ...left, ...next }))
@@ -932,7 +961,7 @@ Literal
     return input => value
   }
 
-String
+String 'string'
   = '"' core: $[^"]* '"' { return core }
   / "'" core: $[^']* "'" { return core }
 
@@ -942,13 +971,16 @@ Name
 NameChar
   = [0-9a-zA-Z_$]
 
-Number
-  = [.]*[0-9][.0-9]* (!NameChar / SpaceChar) {
-    const chars = text()
-    const value = +chars
+B$ // name boundary
+  = !NameChar / SpaceChar
 
-    if (Number.isNaN(value)) {
-      error(`Invalid numeric literal '${chars}'.`)
+Number 'number'
+  = [.]*[0-9][.0-9]* tail: NameChar* {
+    const chars = text()
+
+    let value
+    if (tail.length || Number.isNaN(value = +chars)) {
+      error(`Invalid numeric literal "${chars}".`)
     }
 
     return value
