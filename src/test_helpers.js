@@ -33,21 +33,20 @@ const substMessage = (query, input) => {
 }
 
 const test_with_jq_web = ([feature, queries, inputs]) => {
-  describe(feature, () =>
+  describe(feature, () => {
+    const isErrorTest = feature.endsWith(' - errors')
     queries.forEach((query) =>
       describe(`Query: ${query}`, () =>
         inputs.forEach((input) =>
           it(`Input: ${JSON.stringify(input)}`, () => {
-            if (query.startsWith('# ')) {
-              const realQuery = query.slice(2)
-
+            if (isErrorTest) {
               let message
-              assert.throws(() => jq_web_fixed(input, realQuery), e => { message = e.message; return true })
+              assert.throws(() => jq_web_fixed(input, query), e => { message = e.message; return true })
               message = message.trimRight()
               message = message.replace(/^jq: error \(at <stdin>:0\): /, '')
               message += '.'
 
-              const compiledQuery = jq(realQuery)
+              const compiledQuery = jq(query)
               assert.throws(() => substMessage(compiledQuery, input), { message })
             }
             else {
@@ -59,7 +58,7 @@ const test_with_jq_web = ([feature, queries, inputs]) => {
         )
       )
     )
-  )
+  })
 }
 
 export { test_with_jq_web }
