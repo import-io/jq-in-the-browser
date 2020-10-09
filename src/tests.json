@@ -693,14 +693,6 @@
         1
       ]
     ],
-    ["to_entries", [
-      ". | to_entries"
-    ], [
-        {"id": 0, "name": "Mary", "age": 22},
-        {"id": 1, "name": "Rupert", "age": 29},
-        {"id": 2, "name": "Jane", "age": 11},
-        {"id": 3, "name": "John", "age": 42}
-    ]],
     ["from_entries", [
       ". | from_entries"
     ], [
@@ -742,10 +734,11 @@
       [1, null]
     ],
     [
-      "keys, keys_unsorted",
+      "keys, keys_unsorted, to_entries",
       [
         "keys",
-        "keys_unsorted"
+        "keys_unsorted",
+        "to_entries"
       ],
       [
         {},
@@ -757,10 +750,11 @@
       ]
     ],
     [
-      "keys, keys_unsorted - errors",
+      "keys, keys_unsorted, to_entries - errors",
       [
         "keys",
-        "keys_unsorted"
+        "keys_unsorted",
+        "to_entries"
       ],
       [
         null, false, 3, "foo"

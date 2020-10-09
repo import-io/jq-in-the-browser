@@ -1,7 +1,6 @@
 {
   const Functions0 = {
     // Bad
-    "to_entries": input => Object.entries(input).map(([key, value]) => ({ key, value })),
     "from_entries": input => input.reduce(
       (result, element) => Object.assign({}, result, {[element.key]: element.value}), {}),
     "reverse": input => ([].concat(input).reverse()),
@@ -79,6 +78,19 @@
     },
     'sort': input => {
       return sortBy(input, identity)
+    },
+    'to_entries': input => {
+      // as '[keys_unsorted[] as $k | {key: $k, value: .[$k]}]'
+      if (Array.isArray(input)) {
+        return input.map((value, index) => ({ key: index, value }))
+      }
+      if (!isObject(input)) {
+        throw new Error(`${_mtype_v(input)} has no keys.`)
+      }
+
+      const entries = Object.entries(input)
+      convert(entries, ([key, value]) => ({ key, value }))
+      return entries
     },
     'true': input => {
       return true
