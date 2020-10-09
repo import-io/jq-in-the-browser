@@ -693,42 +693,6 @@
         1
       ]
     ],
-    [
-      "keys",
-      [
-        "keys"
-      ],
-      [
-        {},
-        {
-          "a": 3
-        },
-        {
-          "b": {
-            "a": 3
-          },
-          "a": null
-        }
-      ]
-    ],
-    [
-      "keys_unsorted",
-      [
-        "keys_unsorted"
-      ],
-      [
-        {},
-        {
-          "a": 3
-        },
-        {
-          "b": {
-            "a": 3
-          },
-          "a": null
-        }
-      ]
-    ],
     ["to_entries", [
       ". | to_entries"
     ], [
@@ -776,6 +740,31 @@
         "ascii_upcase"
       ],
       [1, null]
+    ],
+    [
+      "keys, keys_unsorted",
+      [
+        "keys",
+        "keys_unsorted"
+      ],
+      [
+        {},
+        { "b": null },
+        { "b": null, "a": 3 },
+        [],
+        [null],
+        [null, 3]
+      ]
+    ],
+    [
+      "keys, keys_unsorted - errors",
+      [
+        "keys",
+        "keys_unsorted"
+      ],
+      [
+        null, false, 3, "foo"
+      ]
     ],
     [
       "length",
