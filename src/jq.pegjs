@@ -1,8 +1,6 @@
 {
   const Functions0 = {
     // Bad
-    "from_entries": input => input.reduce(
-      (result, element) => Object.assign({}, result, {[element.key]: element.value}), {}),
     "reverse": input => ([].concat(input).reverse()),
     "tonumber": input => input * 1,
     "tostring": input => ((typeof input === "object") ? JSON.stringify(input) : String(input)),
@@ -36,6 +34,26 @@
     },
     'false': input => {
       return false
+    },
+    'from_entries': input => {
+      // as 'map({(.key // .Key // .name // .Name): (if has("value") then .value else .Value end)}) | add | . //= {}'
+      const stream = iterate(input)
+      const result = {}
+
+      forEach(stream, entry => {
+        const key = checkKey(
+          ifTrue(dotName(entry, 'key')) ??
+          ifTrue(dotName(entry, 'Key')) ??
+          ifTrue(dotName(entry, 'name')) ??
+          dotName(entry, 'Name'))
+
+        result[key] =
+          has(entry, 'value') ? entry.value :
+          has(entry, 'Value') ? entry.Value :
+          null
+      })
+
+      return result
     },
     'keys': input => {
       if (Array.isArray(input)) {
@@ -146,6 +164,14 @@
     constructor(items) {
       this.items = items
     }
+  }
+
+  const checkKey = (key) => {
+    if (!isString(key)) {
+      throw new Error(`Cannot use ${_mtype_v(key)} as object key.`)
+    }
+
+    return key
   }
 
   const compare = (a, b) => {
@@ -329,11 +355,30 @@
         : throw new Error(`Cannot index ${_mtype(value)} with string "${name}".`)
     }
 
-    return value.hasOwnProperty(name) ? value[name] : null
+    return has(value, name) ? value[name] : null
+  }
+
+  const forEach = (stream, fn) => {
+    if (stream === undefined) {
+      return undefined
+    }
+    if (!isStream(stream)) {
+      return fn(stream)
+    }
+
+    stream.items.forEach(fn)
+  }
+
+  const has = (value, key) => {
+    return Object.prototype.hasOwnProperty.call(value, key)
   }
 
   const identity = (value) => {
     return value
+  }
+
+  const ifTrue = (value) => {
+    return isTrue(value) ? value : undefined
   }
 
   const includes = (stream, value) => {
@@ -596,7 +641,7 @@ Alternative
     --rest.length
 
     const prep = (input, expr) =>
-      map(expr(input), value => isTrue(value) ? value : undefined)
+      map(expr(input), ifTrue)
 
     const stop = left =>
       !isEmpty(left)
@@ -842,22 +887,22 @@ Parens
 
 Function1
   = name: FunctionName _ "(" _ arg: Expr _ ")" {
-    if (Functions1.hasOwnProperty(name)) {
+    if (has(Functions1, name)) {
       return Functions1[name](arg)
     }
 
-    error(Functions0.hasOwnProperty(name)
+    error(has(Functions0, name)
       ? `Function "${name}" accepts no parameters.`
       : `Function "${name}" is not defined.`)
   }
 
 Function0
   = name: FunctionName {
-    if (Functions0.hasOwnProperty(name)) {
+    if (has(Functions0, name)) {
       return Functions0[name]
     }
 
-    error(Functions1.hasOwnProperty(name)
+    error(has(Functions1, name)
       ? `Function "${name}" requires a parameter.`
       : `Function "${name}" is not defined.`)
   }
@@ -903,13 +948,8 @@ ObjectProp
         return undefined
       }
 
-      return product(value(input), keys, (value, key) => {
-        if (!isString(key)) {
-          throw new Error(`Cannot use ${_mtype_v(key)} as object key.`)
-        }
-
-        return { [key]: value }
-      })
+      return product(value(input), keys, (value, key) =>
+        ({ [checkKey(key)]: value }))
     }
   }
 

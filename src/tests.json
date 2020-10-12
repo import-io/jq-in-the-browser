@@ -69,6 +69,7 @@
       [
         ".foo",
         ".bar",
+        ".hasOwnProperty",
         ".and",
         ".or",
         ".if",
@@ -86,7 +87,8 @@
           "foo": [3, 1],
           "bar": { "x": 3, "y": 0.5 },
           "2bar": 1,
-          "a b": "a b"
+          "a b": "a b",
+          "hasOwnProperty": "foo"
         }
       ]
     ],
@@ -101,7 +103,8 @@
           "foo": [3, 1],
           "bar": { "x": 3, "y": 0.5 },
           "2bar": 1,
-          "a b": "a b"
+          "a b": "a b",
+          "hasOwnProperty": "foo"
         }
       ]
     ],
@@ -113,6 +116,7 @@
         ".[\"foo\"]",
         ".[\"foo \"]",
         ".[\" foo\"]",
+        ".[\"hasOwnProperty\"]",
         ".[\"bar\"].x",
         ".bar[ \"y\"]",
         ".[\"2bar\"]",
@@ -129,7 +133,8 @@
           "foo": [3, 1],
           "bar": { "x": 3, "y": 0.5 },
           "2bar": 1,
-          "a b": "a b"
+          "a b": "a b",
+          "hasOwnProperty": "foo"
         }
       ]
     ],
@@ -144,7 +149,8 @@
           "foo": [3, 1],
           "bar": { "x": 3, "y": 0.5 },
           "2bar": 1,
-          "a b": "a b"
+          "a b": "a b",
+          "hasOwnProperty": "foo"
         }
       ]
     ],
@@ -693,12 +699,6 @@
         1
       ]
     ],
-    ["from_entries", [
-      ". | from_entries"
-    ], [
-      [{"key": "baz", "value": false}],
-      [{"key": "baz", "value": false}, {"key": "foo", "value": "bar"}]
-    ]],
     ["reverse", [". | reverse"], [
       [1, 2, 3, 4],
       [3, 1, 2],
@@ -732,6 +732,58 @@
         "ascii_upcase"
       ],
       [1, null]
+    ],
+    [
+      "from_entries",
+      [
+        "from_entries"
+      ],
+      [
+        [],
+        [{ "key": "", "value": 1 }],
+        [{ "key": "a", "value": 1 }],
+        [{ "key": "a", "value": 1 }, { "key": "b", "value": 2 }],
+        [{ "key": "a", "value": 1 }, { "key": "b", "value": null }],
+        [{ "key": "a", "value": 1 }, { "key": "b", "value": 2 }, { "key": "a", "value": 3 }],
+        [{ "key": "a", "value": 1, "hasOwnProperty": "foo" }],
+        [{ "Key": "a", "value": 1 }],
+        [{ "name": "a", "value": 1 }],
+        [{ "Name": "a", "value": 1 }],
+        [{ "key": null, "Key": "a", "value": 1 }],
+        [{ "key": false, "Key": "a", "value": 1 }],
+        [{ "key": false, "Key": "a", "name": "b", "value": 1 }],
+        [{ "key": false, "Key": "a", "Name": "b", "value": 1 }],
+        [{ "key": false, "name": "a", "Name": "b", "value": 1 }],
+        [{ "Key": null, "name": "a", "value": 1 }],
+        [{ "Key": false, "name": "a", "value": 1 }],
+        [{ "name": null, "Name": "a", "value": 1 }],
+        [{ "name": false, "Name": "a", "value": 1 }],
+        [{ "key": "a" }],
+        [{ "key": "a", "Value": 2 }],
+        [{ "key": "a", "Value": 2, "value": 1 }],
+        {},
+        { "x": { "key": "a", "value": 1 } },
+        { "x": { "key": "a", "value": 1 }, "y": { "key": "b", "value": 2 }, "z": { "key": "a", "value": 3 } }
+      ]
+    ],
+    [
+      "from_entries - errors",
+      [
+        "from_entries"
+      ],
+      [
+        null, false, 3, "key",
+        [null], [false], [3], ["key"],
+        [{ "value": 1 }],
+        [{ "key": 1, "value": 1 }],
+        [{ "key": null, "value": 1 }],
+        [{ "key": false, "value": 1 }],
+        [{ "Key": false, "value": 1 }],
+        [{ "name": false, "value": 1 }],
+        [{ "Name": false, "value": 1 }],
+        { "x": { "value": 1 } },
+        { "x": { "key": 1, "value": 1 } }
+      ]
     ],
     [
       "keys, keys_unsorted, to_entries",

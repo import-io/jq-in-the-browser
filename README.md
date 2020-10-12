@@ -39,7 +39,7 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * ascii_downcase
 * ascii_upcase
 * downcase (non-standard extension, see below)
-* from_entries (incomplete)
+* from_entries
 * join (incomplete)
 * keys
 * keys_unsorted
