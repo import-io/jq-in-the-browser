@@ -47,7 +47,7 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * map
 * map_values (incomplete)
 * not
-* reverse (incomplete)
+* reverse
 * select
 * sort
 * sort_by

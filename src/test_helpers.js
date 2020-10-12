@@ -27,7 +27,10 @@ const substMessage = (query, input) => {
     return query(input)
   }
   catch (e) {
-    e.message = e.message.replace(/\bascii_(downcase|upcase)\b/, 'explode')
+    e.message = e.message
+      .replace(/\bascii_(downcase|upcase)\b/, 'explode')
+      .replace(/^(\w+) .+ cannot be reversed\b.*/, 'Cannot index $1 with number.')
+
     throw e
   }
 }

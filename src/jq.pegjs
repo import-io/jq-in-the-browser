@@ -1,7 +1,6 @@
 {
   const Functions0 = {
     // Bad
-    "reverse": input => ([].concat(input).reverse()),
     "tonumber": input => input * 1,
     "tostring": input => ((typeof input === "object") ? JSON.stringify(input) : String(input)),
 
@@ -56,7 +55,7 @@
       return result
     },
     'keys': input => {
-      if (Array.isArray(input)) {
+      if (isArray(input)) {
         return input.map((value, index) => index)
       }
       if (!isObject(input)) {
@@ -76,7 +75,7 @@
       if (input === null) {
         return 0
       }
-      if (Array.isArray(input) || isString(input)) {
+      if (isArray(input) || isString(input)) {
         return input.length
       }
       if (isObject(input)) {
@@ -94,12 +93,23 @@
     'null': input => {
       return null
     },
+    'reverse': input => {
+      // as '[.[length - 1 - range(0;length)]]'
+      if (!Functions0.length(input)) {
+        return [] // for JQ compliance
+      }
+      if (!isArray(input)) {
+        throw new Error(`${_mtype_v(input)} cannot be reversed, as it is not an array.`)
+      }
+
+      return [...input].reverse()
+    },
     'sort': input => {
       return sortBy(input, identity)
     },
     'to_entries': input => {
       // as '[keys_unsorted[] as $k | {key: $k, value: .[$k]}]'
-      if (Array.isArray(input)) {
+      if (isArray(input)) {
         return input.map((value, index) => ({ key: index, value }))
       }
       if (!isObject(input)) {
@@ -185,7 +195,7 @@
         || (++i, value === true)
         || (++i, isNumber(value))
         || (++i, isString(value))
-        || (++i, Array.isArray(value))
+        || (++i, isArray(value))
         || (++i)
 
       return i
@@ -198,7 +208,7 @@
 
     // arrays
 
-    if (Array.isArray(a)) {
+    if (isArray(a)) {
       for (let i = 0, n = Math.min(a.length, b.length); i < n; ++i) {
         const result = compare(a[i], b[i])
         if (result) {
@@ -246,8 +256,8 @@
 
     // arrays
 
-    if (Array.isArray(a)) {
-      if (!Array.isArray(b) || a.length !== b.length) {
+    if (isArray(a)) {
+      if (!isArray(b) || a.length !== b.length) {
         return false
       }
 
@@ -392,6 +402,10 @@
     return stream.items.includes(value)
   }
 
+  const isArray = (value) => {
+    return Array.isArray(value)
+  }
+
   const isEmpty = (stream) => {
     if (stream === undefined) {
       return true
@@ -440,7 +454,7 @@
   }
 
   const iterate = (value, optional) => {
-    if (Array.isArray(value)) {
+    if (isArray(value)) {
       return toStream(value)
     }
     if (isObject(value)) {
@@ -501,7 +515,7 @@
   }
 
   const sortBy = (value, fn) => {
-    if (!Array.isArray(value)) {
+    if (!isArray(value)) {
       throw new Error(`${_mtype_v(value)} cannot be sorted, as it is not an array.`)
     }
     if (value.length <= 1) {
@@ -975,7 +989,7 @@ BracketTransform
       if (isString(index)) {
         return dotName(input, index, optional)
       }
-      if (input !== null && !Array.isArray(input) || !isNumber(index)) {
+      if (input !== null && !isArray(input) || !isNumber(index)) {
         return optional
           ? undefined
           : throw new Error(`Cannot index ${_mtype(input)} with ${_mtype(index)}.`)
@@ -1001,7 +1015,7 @@ BracketTransform
       if (input === null) {
         return null
       }
-      if (!Array.isArray(input) && !isString(input)) {
+      if (!isArray(input) && !isString(input)) {
         return optional
           ? undefined
           : throw new Error(`Cannot index ${_mtype(input)} with object.`)
