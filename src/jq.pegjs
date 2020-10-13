@@ -966,6 +966,9 @@ ObjectProp
         ({ [checkKey(key)]: value }))
     }
   }
+  / key: (Name / String) {
+    return input => ({ [key]: dotName(input, key) })
+  }
 
 ObjectKey
   = name: (Name / String) {
