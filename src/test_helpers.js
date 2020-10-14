@@ -30,6 +30,7 @@ const substMessage = (query, input) => {
     e.message = e.message
       .replace(/\bascii_(downcase|upcase)\b/, 'explode')
       .replace(/^(\w+) .+ cannot be reversed\b.*/, 'Cannot index $1 with number.')
+      .replace(/^Cannot index array with object\.$/, 'Start and end indices of an array slice must be numbers.')
 
     throw e
   }

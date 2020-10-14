@@ -699,7 +699,7 @@ Or
   }
 
 And
-  = left: Comparison rest: (_ "and" B$ _ Comparison)* {
+  = left: Compare rest: (_ "and" B$ _ Compare)* {
     if (!rest.length) {
       return left
     }
@@ -721,20 +721,20 @@ And
       prep(input, left), rest, stop, reducer(input))
   }
 
-Comparison
+Compare
   = left: AddSub right: (_ CompareOp _ AddSub)? {
     if (!right) {
       return left
     }
 
-    const [, op,, next] = right
+    const [, op,, tail] = right
     return input => {
-      const first = left(input)
-      if (isEmpty(first)) {
+      const head = left(input)
+      if (isEmpty(head)) {
         return undefined
       }
 
-      return product(first, next(input), op)
+      return product(head, tail(input), op)
     }
   }
 
@@ -883,7 +883,15 @@ Filter
     }
 
     rest = rest.map(([, expr]) => expr)
-    return input => reduce(left(input), rest, isEmpty, map)
+
+    const reducer = input => (left, next) => {
+      return has(next, 'arg')
+        ? product(left, next.arg(input), next)
+        : map(left, next)
+    }
+
+    return input => reduce(
+      left(input), rest, isEmpty, reducer(input))
   }
 
 FilterHead
@@ -947,8 +955,8 @@ ObjectConstruction
 
     rest = rest.map(rest => rest[3])
 
-    const reducer = input => (left, next) =>
-      product(next(input), left, (next, left) => ({ ...left, ...next }))
+    const reducer = input => (left, next) => product(next(input), left,
+      (next, left) => ({ ...left, ...next }))
 
     return input => reduce(
       left(input), rest, isEmpty, reducer(input))
@@ -957,13 +965,13 @@ ObjectConstruction
 ObjectProp
   = key: ObjectKey _ ":" _ value: ExprSimple {
     return input => {
-      const keys = key(input)
-      if (isEmpty(keys)) {
+      const head = key(input)
+      if (isEmpty(head)) {
         return undefined
       }
 
-      return product(value(input), keys, (value, key) =>
-        ({ [checkKey(key)]: value }))
+      return product(value(input), head,
+        (value, key) => ({ [checkKey(key)]: value }))
     }
   }
   / key: (Name / String) {
@@ -981,14 +989,11 @@ Transform
   / DotName
 
 BracketTransform
-  = "[" _ "]" optional: (_ "?")? {
-    optional = optional !== null
+  = "[" _ "]" optional: Opt {
     return input => iterate(input, optional)
   }
-  / "[" _ index_expr: (NumericIndex / String) _ "]" optional: (_ "?")? {
-    optional = optional !== null
-    return input => {
-      let index = index_expr // TODO: expression indices
+  / "[" _ index: Expr _ "]" optional: Opt {
+    const transform = (input, index) => {
       if (isString(index)) {
         return dotName(input, index, optional)
       }
@@ -1009,12 +1014,17 @@ BracketTransform
 
       return input[index]
     }
+
+    transform.arg = index
+    return transform
   }
-  / "[" _ start: NumericIndex? _ ":" _ end: NumericIndex? _ "]" optional: (_ "?")? & {
+  / "[" _ start: Expr? _ ":" _ end: Expr? _ "]" optional: Opt & {
     return start || end // for JQ compliance
   } {
-    optional = optional !== null
-    return input => {
+    start ||= Functions0.null
+    end ||= Functions0.null
+
+    const transform = (input, [start, end]) => {
       if (input === null) {
         return null
       }
@@ -1029,15 +1039,28 @@ BracketTransform
           : throw new Error(`Start and end indices of an ${_mtype(input)} slice must be numbers.`)
       }
 
-      const startIndex = start ? Math.floor(start) : 0 // TODO: expression indices
-      const endIndex = end ? Math.ceil(end) : undefined // TODO: expression indices
-      return input.slice(startIndex, endIndex)
-    }
-  }
+      start = start !== null
+        ? Math.floor(start)
+        : 0
+      end = end !== null
+        ? Math.ceil(end)
+        : undefined
 
-NumericIndex // TODO: remove when we support expression indices
-  = "-" _ number: Number { return -number }
-  / Number
+      return input.slice(start, end)
+    }
+
+    transform.arg = input => {
+      const head = start(input)
+      if (isEmpty(head)) {
+        return undefined
+      }
+
+      return product(end(input), head,
+        (end, start) => [start, end])
+    }
+
+    return transform
+  }
 
 Dot
   = "." {
@@ -1045,9 +1068,13 @@ Dot
   }
 
 DotName
-  = "." name: Name optional: (_ "?")? {
-    optional = optional !== null
+  = "." name: Name optional: Opt {
     return input => dotName(input, name, optional)
+  }
+
+Opt
+  = tag: (_ "?")? {
+    return !!tag
   }
 
 Literal

@@ -27,10 +27,6 @@
         ".[1][1].x",
         ".[1][1].x[0]",
         ".[1][1].y[0]",
-        ".[1][1][0]?",
-        ".[1][1][0]?[0]",
-        ".[1][1][0]? [0]",
-        ".[1][1].x[0][0] ?",
         ".[4]",
         ".[12]",
         ".[200]",
@@ -40,7 +36,9 @@
         ".[4.1]",
         ".[-5.1]",
         ".[.1]",
-        ".[-.1]"
+        ".[-.1]",
+        ".[.[6] - .[5]]",
+        ".[1][.[6] - .[5]]"
       ],
       [
         [
@@ -51,17 +49,52 @@
       ]
     ],
     [
-      "Array Index - errors",
+      "Array Index - streams",
       [
-        ".[1][1][0]",
-        ".[1][1].x[0][0]"
+        ".[1, 0]",
+        ".[][2, 1, 0]"
+      ],
+      [[
+        [1, 2, 3],
+        [10, 20, 30]
+      ]]
+    ],
+    [
+      "Array Index on non-array - errors",
+      [
+        ".[0]"
       ],
       [
-        [
-          0,
-          [1, { "x": ["y"] }],
-          2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
-        ]
+        false, 3, "foo", { "bar": 1 }
+      ]
+    ],
+    [
+      "Array Index on non-array - optional",
+      [
+        ".[0]?",
+        ".[0] ?"
+      ],
+      [
+        false, 3, "foo", { "bar": 1 }
+      ]
+    ],
+    [
+      "Array Index with non-numeric index - errors",
+      [
+        "[0][.]"
+      ],
+      [
+        null, false, "foo", { "bar": 1 }
+      ]
+    ],
+    [
+      "Array Index with non-numeric index - optional",
+      [
+        "[0][.]?",
+        "[0][.] ?"
+      ],
+      [
+        null, false, "foo", { "bar": 1 }
       ]
     ],
     [
@@ -74,18 +107,15 @@
         ".or",
         ".if",
         ".bar.x",
+        ".bar.foo",
         ".foo[1]",
         ".baz",
-        ".baz.x",
-        ".foo.x?",
-        ".foo.x?.y",
-        ".foo.x? .y",
-        ".bar.y.x ?"
+        ".baz.x"
       ],
       [
         {
           "foo": [3, 1],
-          "bar": { "x": 3, "y": 0.5 },
+          "bar": { "x": 3, "foo": 0.5 },
           "2bar": 1,
           "a b": "a b",
           "hasOwnProperty": "foo"
@@ -93,19 +123,22 @@
       ]
     ],
     [
-      "Object Identifier-Index - errors",
+      "Object Identifier-Index on non-object - errors",
       [
-        ".foo.x",
-        ".bar.y.x"
+        ".foo"
       ],
       [
-        {
-          "foo": [3, 1],
-          "bar": { "x": 3, "y": 0.5 },
-          "2bar": 1,
-          "a b": "a b",
-          "hasOwnProperty": "foo"
-        }
+        false, 3, "foo", [1, 2]
+      ]
+    ],
+    [
+      "Object Identifier-Index on non-object - optional",
+      [
+        ".foo?",
+        ".foo ?"
+      ],
+      [
+        false, 3, "foo", [1, 2]
       ]
     ],
     [
@@ -118,20 +151,18 @@
         ".[\" foo\"]",
         ".[\"hasOwnProperty\"]",
         ".[\"bar\"].x",
-        ".bar[ \"y\"]",
+        ".bar[ \"foo\"]",
         ".[\"2bar\"]",
         ".[\"a b\" ]",
         ".[\"baz\"]",
         ".[\"baz\"][\"x\"]",
-        ".foo[\"x\"]?",
-        ".foo[\"x\"]?[\"y\"]",
-        ".foo[\"x\"]? [\"y\"]",
-        ".bar.y[\"x\"] ?"
+        ".[.hasOwnProperty]",
+        ".bar[.hasOwnProperty]"
       ],
       [
         {
           "foo": [3, 1],
-          "bar": { "x": 3, "y": 0.5 },
+          "bar": { "x": 3, "foo": 0.5 },
           "2bar": 1,
           "a b": "a b",
           "hasOwnProperty": "foo"
@@ -139,19 +170,103 @@
       ]
     ],
     [
-      "Generic Object Index - errors",
+      "Generic Object Index - streams",
       [
-        ".foo[\"x\"]",
-        ".bar.y[\"x\"]"
+        ".[\"bar\", \"foo\"]",
+        ".[][\"baz\", \"bar\", \"foo\"]"
+      ],
+      [{
+        "foo": { "foo": 1, "bar": 2, "baz": 3 },
+        "bar": { "foo": 10, "bar": 20, "baz": 30 }
+      }]
+    ],
+    [
+      "Generic Object Index on non-object - errors",
+      [
+        ".[\"foo\"]"
       ],
       [
-        {
-          "foo": [3, 1],
-          "bar": { "x": 3, "y": 0.5 },
-          "2bar": 1,
-          "a b": "a b",
-          "hasOwnProperty": "foo"
-        }
+        false, 3, "foo", [1, 2]
+      ]
+    ],
+    [
+      "Generic Object Index on non-object - optional",
+      [
+        ".[\"foo\"]?",
+        ".[\"foo\"] ?"
+      ],
+      [
+        false, 3, "foo", [1, 2]
+      ]
+    ],
+    [
+      "Generic Object Index with non-string index - errors",
+      [
+        "{\"foo\": \"bar\"}[.]"
+      ],
+      [
+        null, false, 3, [1, 2], { "bar": 1 }
+      ]
+    ],
+    [
+      "Generic Object Index with non-string index - optional",
+      [
+        "{\"foo\": \"bar\"}[.]?",
+        "{\"foo\": \"bar\"}[.] ?"
+      ],
+      [
+        null, false, 3, [1, 2], { "bar": 1 }
+      ]
+    ],
+    [
+      "Array/String slice",
+      [
+        ".[0:0]", ".[0:1]", ".[1:0]", ".[2:4]", ".[4:2]", ".[3:100]",
+        ".[-4:-2]", ".[-1:-3]", ".[-50:-3]", ".[-4:-100]",
+        ".[:3]", ".[1:]", ".[-1:]", ".[:-3]", ".[-14:]", ".[:100]",
+        ".[:2.1]", ".[:2.5]", ".[:2.8]", ".[:3.5]",
+        ".[2.1:]", ".[2.5:]", ".[2.8:]", ".[3.5:]",
+        ".[:-2.1]", ".[:-2.5]", ".[:-2.8]", ".[:-3.5]",
+        ".[-2.1:]", ".[-2.5:]", ".[-2.8:]", ".[-3.5:]",
+        "[.][100][:3]",
+        ".[[.][100]:3]",
+        ".[1:[.][100]]",
+        ".[[.][100]:[.][100]]",
+        "{a: 2, b: 4, x: .} | .x[.a:.b]"
+      ],
+      [
+        [0, 3, "foo", -2, false, [true]],
+        "Hello World!"
+      ]
+    ],
+    [
+      "Array/String slice - streams",
+      [
+        ".[0, 1: 2, 3]",
+        ".[][0, 1: 2, 3]"
+      ],
+      [
+        [[1, 2, 3], [10, 20, 30], [100, 200, 300]],
+        ["123", "abc", "ABC"]
+      ]
+    ],
+    [
+      "Array/String slice on non-array/string - errors",
+      [
+        ".[:1]"
+      ],
+      [
+        0, 3, false, true, {}, { "a": 1 }
+      ]
+    ],
+    [
+      "Array/String slice on non-array/string - optional",
+      [
+        ".[:1]?",
+        ".[:1] ?"
+      ],
+      [
+        0, 3, false, true, {}, { "a": 1 }
       ]
     ],
     [
@@ -1075,36 +1190,6 @@
           {"id": 2, "name": "Jane", "age": 11},
           {"id": 3, "name": "John", "age": 42}
         ]
-    ]],
-    [
-      "Array/String slice",
-      [
-        ".[2:4]", ".[0:1]", ".[4:2]", ".[3:100]",
-        ".[-4:-2]", ".[-1:-3]", ".[-50:-3]", ".[-4:-100]",
-        ".[:3]", ".[1:]", ".[-1:]", ".[:-3]", ".[-14:]", ".[:100]",
-        ".[:2.1]", ".[:2.5]", ".[:2.8]", ".[:3.5]",
-        ".[2.1:]", ".[2.5:]", ".[2.8:]", ".[3.5:]",
-        ".[:-2.1]", ".[:-2.5]", ".[:-2.8]", ".[:-3.5]",
-        ".[-2.1:]", ".[-2.5:]", ".[-2.8:]", ".[-3.5:]",
-        "[.][100][:1]",
-        ".[4]?[:1]?",
-        ".[4]?[:1]?[:1]",
-        ".[4]?[:1]? [:1]",
-        ".[4]?[:1] ?[:1]"
-      ],
-      [
-        [0, 3, "foo", -2, false, [true]],
-        "Hello World!"
-      ]
-    ],
-    [
-      "Array/String slice - errors",
-      [
-        ".[:1]"
-      ],
-      [
-        0, 3, false, true, {}, { "a": 1 }
-      ]
-    ]
+    ]]
   ]
 }
