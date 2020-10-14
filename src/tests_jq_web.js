@@ -1,6 +1,7 @@
 import assert from 'assert'
 import jq_web from 'jq-web'
 import jq from './index.js'
+import tests from './tests.json'
 
 // A fixed version of jq_web.json, which resolves the following issues:
 //
@@ -65,4 +66,4 @@ const test_with_jq_web = ([feature, queries, inputs]) => {
   })
 }
 
-export { test_with_jq_web }
+tests.forEach(test_with_jq_web)

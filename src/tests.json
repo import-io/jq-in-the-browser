@@ -1,1195 +1,1191 @@
-{
-  "tests_node_jq": [
+[
+  [
+    "Identity",
     [
-      "Identity",
-      [
-        ".",
-        " .  "
-      ],
-      [
-        [
-          4
-        ],
-        {
-          "foo": "bar"
-        }
-      ]
+      ".",
+      " .  "
     ],
     [
-      "Array Index",
       [
-        ".[0]",
-        ".[-0]",
-        ".[1 ]",
-        ".[-1]",
-        ".[ - 1 ]",
-        ".[ 1][0]",
-        ".[1][1].x",
-        ".[1][1].x[0]",
-        ".[1][1].y[0]",
-        ".[4]",
-        ".[12]",
-        ".[200]",
-        ".[-5]",
-        ".[-10]",
-        ".[-200]",
-        ".[4.1]",
-        ".[-5.1]",
-        ".[.1]",
-        ".[-.1]",
-        ".[.[6] - .[5]]",
-        ".[1][.[6] - .[5]]"
+        4
       ],
-      [
-        [
-          0,
-          [1, { "x": ["y"] }],
-          2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
-        ]
-      ]
+      {
+        "foo": "bar"
+      }
+    ]
+  ],
+  [
+    "Array Index",
+    [
+      ".[0]",
+      ".[-0]",
+      ".[1 ]",
+      ".[-1]",
+      ".[ - 1 ]",
+      ".[ 1][0]",
+      ".[1][1].x",
+      ".[1][1].x[0]",
+      ".[1][1].y[0]",
+      ".[4]",
+      ".[12]",
+      ".[200]",
+      ".[-5]",
+      ".[-10]",
+      ".[-200]",
+      ".[4.1]",
+      ".[-5.1]",
+      ".[.1]",
+      ".[-.1]",
+      ".[.[6] - .[5]]",
+      ".[1][.[6] - .[5]]"
     ],
     [
-      "Array Index - streams",
       [
-        ".[1, 0]",
-        ".[][2, 1, 0]"
-      ],
-      [[
-        [1, 2, 3],
-        [10, 20, 30]
-      ]]
-    ],
-    [
-      "Array Index on non-array - errors",
-      [
-        ".[0]"
-      ],
-      [
-        false, 3, "foo", { "bar": 1 }
-      ]
-    ],
-    [
-      "Array Index on non-array - optional",
-      [
-        ".[0]?",
-        ".[0] ?"
-      ],
-      [
-        false, 3, "foo", { "bar": 1 }
-      ]
-    ],
-    [
-      "Array Index with non-numeric index - errors",
-      [
-        "[0][.]"
-      ],
-      [
-        null, false, "foo", { "bar": 1 }
-      ]
-    ],
-    [
-      "Array Index with non-numeric index - optional",
-      [
-        "[0][.]?",
-        "[0][.] ?"
-      ],
-      [
-        null, false, "foo", { "bar": 1 }
-      ]
-    ],
-    [
-      "Object Identifier-Index",
-      [
-        ".foo",
-        ".bar",
-        ".hasOwnProperty",
-        ".and",
-        ".or",
-        ".if",
-        ".bar.x",
-        ".bar.foo",
-        ".foo[1]",
-        ".baz",
-        ".baz.x"
-      ],
-      [
-        {
-          "foo": [3, 1],
-          "bar": { "x": 3, "foo": 0.5 },
-          "2bar": 1,
-          "a b": "a b",
-          "hasOwnProperty": "foo"
-        }
-      ]
-    ],
-    [
-      "Object Identifier-Index on non-object - errors",
-      [
-        ".foo"
-      ],
-      [
-        false, 3, "foo", [1, 2]
-      ]
-    ],
-    [
-      "Object Identifier-Index on non-object - optional",
-      [
-        ".foo?",
-        ".foo ?"
-      ],
-      [
-        false, 3, "foo", [1, 2]
-      ]
-    ],
-    [
-      "Generic Object Index",
-      [
-        ".[\"\"]",
-        ".[\" \"]",
-        ".[\"foo\"]",
-        ".[\"foo \"]",
-        ".[\" foo\"]",
-        ".[\"hasOwnProperty\"]",
-        ".[\"bar\"].x",
-        ".bar[ \"foo\"]",
-        ".[\"2bar\"]",
-        ".[\"a b\" ]",
-        ".[\"baz\"]",
-        ".[\"baz\"][\"x\"]",
-        ".[.hasOwnProperty]",
-        ".bar[.hasOwnProperty]"
-      ],
-      [
-        {
-          "foo": [3, 1],
-          "bar": { "x": 3, "foo": 0.5 },
-          "2bar": 1,
-          "a b": "a b",
-          "hasOwnProperty": "foo"
-        }
-      ]
-    ],
-    [
-      "Generic Object Index - streams",
-      [
-        ".[\"bar\", \"foo\"]",
-        ".[][\"baz\", \"bar\", \"foo\"]"
-      ],
-      [{
-        "foo": { "foo": 1, "bar": 2, "baz": 3 },
-        "bar": { "foo": 10, "bar": 20, "baz": 30 }
-      }]
-    ],
-    [
-      "Generic Object Index on non-object - errors",
-      [
-        ".[\"foo\"]"
-      ],
-      [
-        false, 3, "foo", [1, 2]
-      ]
-    ],
-    [
-      "Generic Object Index on non-object - optional",
-      [
-        ".[\"foo\"]?",
-        ".[\"foo\"] ?"
-      ],
-      [
-        false, 3, "foo", [1, 2]
-      ]
-    ],
-    [
-      "Generic Object Index with non-string index - errors",
-      [
-        "{\"foo\": \"bar\"}[.]"
-      ],
-      [
-        null, false, 3, [1, 2], { "bar": 1 }
-      ]
-    ],
-    [
-      "Generic Object Index with non-string index - optional",
-      [
-        "{\"foo\": \"bar\"}[.]?",
-        "{\"foo\": \"bar\"}[.] ?"
-      ],
-      [
-        null, false, 3, [1, 2], { "bar": 1 }
-      ]
-    ],
-    [
-      "Array/String slice",
-      [
-        ".[0:0]", ".[0:1]", ".[1:0]", ".[2:4]", ".[4:2]", ".[3:100]",
-        ".[-4:-2]", ".[-1:-3]", ".[-50:-3]", ".[-4:-100]",
-        ".[:3]", ".[1:]", ".[-1:]", ".[:-3]", ".[-14:]", ".[:100]",
-        ".[:2.1]", ".[:2.5]", ".[:2.8]", ".[:3.5]",
-        ".[2.1:]", ".[2.5:]", ".[2.8:]", ".[3.5:]",
-        ".[:-2.1]", ".[:-2.5]", ".[:-2.8]", ".[:-3.5]",
-        ".[-2.1:]", ".[-2.5:]", ".[-2.8:]", ".[-3.5:]",
-        "[.][100][:3]",
-        ".[[.][100]:3]",
-        ".[1:[.][100]]",
-        ".[[.][100]:[.][100]]",
-        "{a: 2, b: 4, x: .} | .x[.a:.b]"
-      ],
-      [
-        [0, 3, "foo", -2, false, [true]],
-        "Hello World!"
-      ]
-    ],
-    [
-      "Array/String slice - streams",
-      [
-        ".[0, 1: 2, 3]",
-        ".[][0, 1: 2, 3]"
-      ],
-      [
-        [[1, 2, 3], [10, 20, 30], [100, 200, 300]],
-        ["123", "abc", "ABC"]
-      ]
-    ],
-    [
-      "Array/String slice on non-array/string - errors",
-      [
-        ".[:1]"
-      ],
-      [
-        0, 3, false, true, {}, { "a": 1 }
-      ]
-    ],
-    [
-      "Array/String slice on non-array/string - optional",
-      [
-        ".[:1]?",
-        ".[:1] ?"
-      ],
-      [
-        0, 3, false, true, {}, { "a": 1 }
-      ]
-    ],
-    [
-      "Pipe",
-      [
-        ".a | .b",
-        ".a|.b",
-        "1 + .a.b[1] | 2"
-      ],
-      [
-        {
-          "a": {
-            "b": [4, 10]
-          }
-        },
-        {
-          "a": {
-            "b": ["oo", 7]
-          }
-        }
-      ]
-    ],
-    [
-      "Stream",
-      [
-        "[.a], .b",
-        "[.a], .b | .[1]",
-        "[.a], .b | .[-1]",
-        ".a, .b[1]",
-        "-.a, .b[1] + 2 * .a",
-        "-.a, 2 * .a, .b[1] | .",
-        "-.a, 2 * .a, .b[1] | ., .",
-        "-.a, 2 * .a, .b[1] | []",
-        "-.a, 2 * .a, .b[1] | [][]",
-        "-.a, .b[] | 10 + .",
-        ".b[], -.a | . + 10",
-        ".b[], .b[] | . + .",
-        ".b[], -.a, .b[] | . * 10",
-        "-.a, .b[], -.a | 10 * .",
-        "-(.a, .b[])",
-        "-(.a, .b[]) + .a",
-        "[.b[]]",
-        "[(.b[])]",
-        "[.a, .b[]]",
-        "[(.a, .b[])]",
-        "[.b | .[1], .[-1] | . + 10]",
-        "[(.b | .[1], .[-1] | . + 10)]",
-        ".a - -(.a, .b[])",
-        "(.a, 10) + .b[]",
-        "(.a, 10) - .b[:2][] - (4, 5)",
-        "-(.a, .b[]) * .a",
-        ".a / -(.a, .b[])",
-        "(.a, 10) * .b[]",
-        "(.a, 10) / .b[:2][] / (4, 5)",
-        "(.a, -.a, 3) == .b[]",
-        "(.a, -.a, 3) != .b[]",
-        "(.a, -.a, 3) < .b[]",
-        "(.a, -.a, 3) <= .b[]",
-        "(.a, -.a, 3) > .b[]",
-        "(.a, -.a, 3) >= .b[]",
-        "{foo: .b}",
-        "{foo: .b[]}",
-        "{foo: [][]}",
-        "{foo: (.a, .b[0])}",
-        "{foo: (.a, .b)}",
-        "{foo: (.a, .b[])}",
-        "{foo: (.a, [][], .b[])}",
-        "{(\"foo\", \"bar\"): .b[]}",
-        "{(\"foo\", \"bar\", \"foo\"): .b[:2][]}",
-        "{(\"foo\", \"bar\", \"baz\"): .b[:2][]}",
-        "{(\"a\", \"b\"): .b[:2][], (\"c\", \"d\"): .b[2:][]}",
-        "{(\"a\", \"b\"): .b[:2][], (\"c\", \"d\"): .b[2:][], (\"e\", \"f\"): -.b[:2][]}",
-        ".a and .b[]",
-        "(.a, true) and .b[0]",
-        "(.a, false) and .b[0]",
-        "(false, false) and .b[0]",
-        "[][] and .b[0]",
-        ".a and .b[] != 2",
-        "(.a, true) and .b[] != 2",
-        "(.a, false) and .b[] != 2",
-        "(false, false) and .b[] != 2",
-        "[][] and .b[] != 2",
-        ".a and [][]",
-        "(.a, true) and [][]",
-        "(.a, false) and [][]",
-        "(false, false) and [][]",
-        "[][] and [][]",
-        "(.a, true) and .b[] != 2 and .b[] != 5",
-        ".a or .b[]",
-        "(.a, true) or .b[0]",
-        "(.a, false) or .b[0]",
-        "(false, false) or .b[0]",
-        "[][] or .b[0]",
-        ".a or .b[] != 2",
-        "(.a, true) or .b[] != 2",
-        "(.a, false) or .b[] != 2",
-        "(false, false) or .b[] != 2",
-        "[][] or .b[] != 2",
-        ".a or [][]",
-        "(.a, true) or [][]",
-        "(.a, false) or [][]",
-        "(false, false) or [][]",
-        "[][] or [][]",
-        "(.a == 0, false) or .b[] == 2 or .b[] != 5"
-      ],
-      [
-        { "a": -1, "b": [1, 2, 4, 5] }
-      ]
-    ],
-    [
-      "Parentheses",
-      [
-        "( .a)",
-        "((.a))",
-        "(.).a",
-        "(.b)[]",
-        "(.b)[0]",
-        "(.b)[0:2]",
-        "(.).a",
-        "(-1 )",
-        "(-5.5)",
-        "(.4)",
-        "(. | .)"
-      ],
-      [
-        { "a": -1, "b": [1, 2, 4, 5] }
-      ]
-    ],
-    [
-      "Alternative",
-      [
-        ".[] // \"None\"",
-        ".[], true // \"None\"",
-        ".[] or false // \"None\"",
-        ".[] and true // \"None\"",
-        "(.[] | select(. == 25)) // \"None\"",
-        "(.[] | select(. <= 25)) // \"None\"",
-        "(.[] | select(. == -1)) // \"None\"",
-        "(.[] | select(. == -1)) // (.[] | select(. == 25))",
-        "(.[] | select(. == -1)) // (.[] | select(. <= 25))",
-        "(.[] | select(. == -1)) // (.[] | select(. == -2))",
-        "(.[] | select(. == -1)) // (.[] | select(. == 25)) // \"None\"",
-        "(.[] | select(. == -1)) // (.[] | select(. <= 25)) // \"None\"",
-        "(.[] | select(. == -1)) // (.[] | select(. == -2)) // \"None\"",
-        ".[] | . // \"Bad\"",
-        ".[] | select(. == 25) // \"Bad\"",
-        ".[] | select(. <= 25) // \"Bad\"",
-        ".[] | select(. == -1) // \"Bad\"",
-        ".[] | select(. == -1) // select(. == 25)",
-        ".[] | select(. == -1) // select(. <= 25)",
-        ".[] | select(. == -1) // select(. == -2)",
-        ".[] | select(. == -1) // select(. == 25) // \"Bad\"",
-        ".[] | select(. == -1) // select(. <= 25) // \"Bad\"",
-        ".[] | select(. == -1) // select(. == -2) // \"Bad\""
-      ],
-      [[
-        true, null, false, 0, 25, "", "foo",
-        [], ["foo"],
-        {}, { "foo": "bar" }
-      ]]
-    ],
-    [
-      "Logical Or",
-      [
-        ".[0] or .[0]",
-        ".[0] or .[1]",
-        ".[1] or .[0]",
-        ".[1] or .[1]",
-        ".[1] or .[1] or .[0]",
-        ".[] or .[]",
-        "1, .[0] or .[1], 1",
-        ".[1] or .[0] == 1",
-        "1 == .[0] or .[1]",
-        ".[0] != .[0] or .[1] != .[1]",
-        ".[0] or .[0] and .[1] or .[1]"
-      ],
-      [[false, true, null, 0, 1]]
-    ],
-    [
-      "Logical And",
-      [
-        ".[0] and .[0]",
-        ".[0] and .[1]",
-        ".[1] and .[0]",
-        ".[1] and .[1]",
-        ".[1] and .[1] and .[0]",
-        ".[] and .[]",
-        "1, .[1] and .[0], 1",
-        ".[0] and .[1] != 1",
-        "1 != .[1] and .[0]",
-        ".[0] == .[0] and .[1] == .[1]",
-        ".[0] and .[1] or .[1] and .[1]"
-      ],
-      [[false, true, null, 0, 1]]
-    ],
-    [
-      "Comparison",
-      [
-        "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a == .b), a: .a | tostring, b: .b | tostring}",
-        "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a != .b), a: .a | tostring, b: .b | tostring}",
-        "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a <  .b), a: .a | tostring, b: .b | tostring}",
-        "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a <= .b), a: .a | tostring, b: .b | tostring}",
-        "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a >  .b), a: .a | tostring, b: .b | tostring}",
-        "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a >= .b), a: .a | tostring, b: .b | tostring}"
-      ],
-      [{
-        "a": [
-          null, false, true,
-          0, -0, 5, 30,
-          "null", "false", "true", "12",
-          "foo", "bar", "foobar", "Foo",
-          [], [1, "foo"], [1, "bar", "foo"], ["bar", 1, "foo"],
-          {}, { "foo": 1 }, { "foo": 1, "bar": 2 },
-          { "foo": [true, "bar"], "baz": 3 }
-        ],
-        "b": [
-          null, false, true,
-          0, -0, 5, 30,
-          "null", "false", "true", "12",
-          "foo", "bar", "foobar", "Foo",
-          [], [1, "foo"], [1, "bar", "foo"], ["bar", 1, "foo"],
-          {}, { "foo": 1 }, { "foo": 1, "bar": 2 },
-          { "foo": [true, "bar"], "baz": 3 }
-        ]
-      }]
-    ],
-    [
-      "Addition (numbers)",
-      [
-        "1 + 1",
-        ".a + [.b][0]",
-        ".b + .a",
-        "-3 + 4.1 + .a",
-        "3 + (-3)",
-        ".a + .x",
-        ".x + .b",
-        ".x + .y",
-        ". + .x",
-        ".x + [.b]"
-      ],
-      [
-        { "a": 3, "b": 0 },
-        { "a": -3, "b": 1.1 }
-      ]
-    ],
-    [
-      "Addition (numbers) - errors",
-      [
-        ".a + [.b]",
-        ". + .b",
-        ". + [.b]"
-      ],
-      [
-        { "a": 3, "b": 0 }
-      ]
-    ],
-    [
-      "Subtraction (numbers)",
-      [
-        ".a - .b",
-        ".b - .a",
-        "4- 3",
-        "-3    -(4)",
-        "14-.a -11"
-      ],
-      [
-        { "a": 3, "b": 0 },
-        { "a": -3, "b": 1.1 }
-      ]
-    ],
-    [
-      "Subtraction (numbers) - errors",
-      [
-        ".a - .x",
-        ".x - .b",
-        ".x - .y",
-        ". - .x",
-        ".x - [.b]",
-        ".a - [.b]",
-        ". - .b",
-        ". - [.b]"
-      ],
-      [
-        { "a": 3, "b": 0 }
-      ]
-    ],
-    [
-      "Multiplication (numbers)",
-      [
-        "1 * 1",
-        ".a * [.b][0]",
-        ".b * .a",
-        "3 * 4.1 * .a",
-        "3 * (-.3)"
-      ],
-      [
-        { "a": 3, "b": 0 },
-        { "a": -3, "b": 1.1 }
-      ]
-    ],
-    [
-      "Multiplication (numbers) - errors",
-      [
-        ".a * .x",
-        ".x * .b",
-        ".x * .y",
-        ". * .x",
-        ".x * [.b]",
-        ".a * [.b]",
-        ". * .b",
-        ". * [.b]"
-      ],
-      [
-        { "a": 3, "b": 0 }
-      ]
-    ],
-    [
-      "Modulo (numbers)",
-      [
-        "1 % 1",
-        ".a % [.b][0]",
-        ".b % .a",
-        "3 % 4 % .a"
-      ],
-      [
-        { "a": 3, "b": 1 },
-        { "a": -3, "b": 1 }
-      ]
-    ],
-    [
-      "Modulo (numbers) - errors",
-      [
-        ".a % .x",
-        ".x % .b",
-        ".x % .y",
-        ". % .x",
-        ".x % [.b]",
-        ".a % [.b]",
-        ". % .b",
-        ". % [.b]"
-      ],
-      [
-        { "a": 3, "b": 1 }
-      ]
-    ],
-    [
-      "Division (numbers)",
-      [
-        ".a / .b",
-        ".b / .a",
-        "4/ 3",
-        "-3/(4)",
-        "-1.1 + (3 * (((.4 - .b) / .a) + .b))",
-        ".a / 15 / .b"
-      ],
-      [
-        { "a": 3, "b": -1.1 },
-        { "a": -3, "b": 1.1 }
-      ]
-    ],
-    [
-      "Division (numbers) - errors",
-      [
-        ".a / .x",
-        ".x / .b",
-        ".x / .y",
-        ". / .x",
-        ".x / [.b]",
-        ".a / [.b]",
-        ". / .b",
-        ". / [.b]"
-      ],
-      [
-        { "a": 3, "b": -1.1 }
-      ]
-    ],
-    [
-      "If",
-      [
-        "if .t then .a else .b end",
-        "if .f then .a else .b end",
-        "if .t then .a elif .t then .a * 2 else .b end",
-        "if .f then .a elif .t then .a * 2 else .b end",
-        "if .t then .a elif .f then .a * 2 else .b end",
-        "if .f then .a elif .f then .a * 2 else .b end",
-        "if .t then if .t then .a * 2 else .b * 2 end else .b end",
-        "if .f then if .t then .a * 2 else .b * 2 end else .b end",
-        "if .t then if .f then .a * 2 else .b * 2 end else .b end",
-        "if .f then if .f then .a * 2 else .b * 2 end else .b end",
-        "if .t then .a else if .t then .a * 2 else .b * 2 end end",
-        "if .f then .a else if .t then .a * 2 else .b * 2 end end",
-        "if .t then .a else if .f then .a * 2 else .b * 2 end end",
-        "if .f then .a else if .f then .a * 2 else .b * 2 end end",
-        "if .a < .b or .t then .f | not else .b end",
-        "if .a < .b or .f then .a else .t | not end",
-        "if if .a < .b then .t else .f end then .a else .b end",
-        "if if .a < .b then .f else .t end then .a else .b end",
-        " -if .t then .a else .b end",
-        " -if .f then .a else .b end",
-        "if .t then -if .t then .a * 2 else .b * 2 end else .b end",
-        "if .f then .a else -if .t then .a * 2 else .b * 2 end end",
-        "if .t then .a, .a + 1 else .b, .b + 1 end",
-        "if .f then .a, .a + 1 else .b, .b + 1 end",
-        "if .t, .t then .a, .a + 1 else .b, .b + 1 end",
-        "if .f, .t then .a, .a + 1 else .b, .b + 1 end",
-        "if .t, .f then .a, .a + 1 else .b, .b + 1 end",
-        "if .f, .f then .a, .a + 1 else .b, .b + 1 end",
-        "if .t, .t then .a elif .t, .f then .a * 2 else .b end",
-        "if .f, .t then .a elif .f, .t then .a * 2 else .b end",
-        "if .t, .f then .a elif .t, .f then .a * 2 else .b end",
-        "if .f, .f then .a elif .f, .t then .a * 2 else .b end"
-      ],
-      [
-        { "f": false, "t": true, "a": 10, "b": -10 },
-        { "f": null, "t": 0, "a": 10, "b": -10 }
-      ]
-    ],
-    [
-      "Array Construction",
-      [
-        "[]",
-        "[ ]",
-        "[4]",
-        "[ -6, [0]]",
-        "[7 | 4]",
-        "[.]",
-        "[. | [6]]",
-        "[5, 6 ] | ."
-      ],
-      [
-        [
-          1
-        ],
-        {
-          "a": "a"
-        }
-      ]
-    ],
-    [
-      "Object Construction",
-      [
-        "{}",
-        "{  }",
-        "{\"\": 6}",
-        "{\" \": 6}",
-        "{\"foo\": 6}",
-        "{ \"foo\": 6 }",
-        "{\"foo\" : 6 }",
-        "{\"foo\": 6,}",
-        "{\"foo\": 6 ,}",
-        "{\"foo\": 6, \"bar\": [5, 3]}",
-        "{\"foo\": 6, \"bar\": [5, 3], }",
-        "{\"x\": 3} | {\"y\": .x}",
-        "{foo: \"bar\"}",
-        "{ foo: \"bar\"}",
-        "{foo : \"bar\"}",
-        "{foo: \"bar\", foo: \"baz\"}",
-        "{and: \"bar\"}",
-        "{or: \"bar\"}",
-        "{if: \"bar\"}",
-        "{(.a): true}",
-        "{({\"a\": \"b\"} | .a): true}",
-        "{\"a\": 4, \"b\": 3, \"c\": -1, \"d\": \"f\"}",
-        "{a}",
-        "{a, b}",
-        "{a: 6, b}",
-        "{a, b: 6}",
-        "{a, b: 6, c}",
-        "{a: 6, b, c: 3}",
-        "{\"a\"}",
-        "{\"a\", b}",
-        "{a, \"b\"}",
-        "{a: 6, \"b\"}",
-        "{\"a\", \"b\"}"
-      ],
-      [
-        { "a": "b", "b": 3 }
-      ]
-    ],
-    [
-      "Object Construction - errors",
-      [
-        "{(.): 6}"
-      ],
-      [
-        null, false, true, 0, 1, -1, 25,
-        [], ["foo"],
-        {}, { "foo": "bar" }
-      ]
-    ],
-    [
-      "Integer literal",
-      [
-        "3",
-        "  6",
-        "-4",
-        "0",
-        "- 7",
-        "011",
-        "091"
-      ],
-      [
-        1
-      ]
-    ],
-    [
-      "Float literal",
-      [
-        ".3",
-        "3.",
-        "6.0",
-        "-4.001",
-        "3.14",
-        "0.1"
-      ],
-      [
-        1
-      ]
-    ],
-    [
-      "Boolean literal, null, empty",
-      [
-        "true",
-        "false",
-        "null",
-        "empty",
-        "empty[]",
-        "[empty]",
-        "[empty][]"
-      ],
-      [
-        1
-      ]
-    ],
-    [
-      "Boolean literal, null, empty - errors",
-      [
-        ".true",
-        ".false",
-        ".null",
-        ".empty"
-      ],
-      [
-        1
-      ]
-    ],
-    [
-      "Double quote String literal",
-      [
-        "\"true\"",
-        "\"false\"",
-        "\"foo\"",
-        "[\"ba'r\"]"
-      ],
-      [
-        1
-      ]
-    ],
-    ["map_values", ["map_values(.+1 )", ". | map_values( {foo: .})"], [
-      {"a": 4, "b": 2},
-      {"a": 4, "b": -1, "c": 0}
-    ]],
-    ["with_entries", [
-      "with_entries({key: .key, value: (2 * .value)})",
-      "with_entries({key: \"a\", value: (2 * .value)})"
-    ], [
-      {"foo": 2, "bar": -1},
-      {"a": 2, "_": -1, "??": 0}
-    ]],
-    ["tonumber", ["tonumber"], [1, -1, "1", "-1", "1.23", "-.1"]],
-    ["tostring", ["tostring"], [1, -1, "1", "-1", "1.23", "-.1", [1], {"a": 2}]],
-    [
-      "ascii_downcase, ascii_upcase",
-      [
-        ".greeting | ascii_downcase",
-        ".greeting | ascii_upcase"
-      ],
-      [{ "greeting": "Hello, МИР! © 2020\nПривет, WORLD!" }]
-    ],
-    [
-      "ascii_downcase, ascii_upcase - errors",
-      [
-        "ascii_downcase",
-        "ascii_upcase"
-      ],
-      [1, null]
-    ],
-    [
-      "from_entries",
-      [
-        "from_entries"
-      ],
-      [
-        [],
-        [{ "key": "", "value": 1 }],
-        [{ "key": "a", "value": 1 }],
-        [{ "key": "a", "value": 1 }, { "key": "b", "value": 2 }],
-        [{ "key": "a", "value": 1 }, { "key": "b", "value": null }],
-        [{ "key": "a", "value": 1 }, { "key": "b", "value": 2 }, { "key": "a", "value": 3 }],
-        [{ "key": "a", "value": 1, "hasOwnProperty": "foo" }],
-        [{ "Key": "a", "value": 1 }],
-        [{ "name": "a", "value": 1 }],
-        [{ "Name": "a", "value": 1 }],
-        [{ "key": null, "Key": "a", "value": 1 }],
-        [{ "key": false, "Key": "a", "value": 1 }],
-        [{ "key": false, "Key": "a", "name": "b", "value": 1 }],
-        [{ "key": false, "Key": "a", "Name": "b", "value": 1 }],
-        [{ "key": false, "name": "a", "Name": "b", "value": 1 }],
-        [{ "Key": null, "name": "a", "value": 1 }],
-        [{ "Key": false, "name": "a", "value": 1 }],
-        [{ "name": null, "Name": "a", "value": 1 }],
-        [{ "name": false, "Name": "a", "value": 1 }],
-        [{ "key": "a" }],
-        [{ "key": "a", "Value": 2 }],
-        [{ "key": "a", "Value": 2, "value": 1 }],
-        {},
-        { "x": { "key": "a", "value": 1 } },
-        { "x": { "key": "a", "value": 1 }, "y": { "key": "b", "value": 2 }, "z": { "key": "a", "value": 3 } }
-      ]
-    ],
-    [
-      "from_entries - errors",
-      [
-        "from_entries"
-      ],
-      [
-        null, false, 3, "key",
-        [null], [false], [3], ["key"],
-        [{ "value": 1 }],
-        [{ "key": 1, "value": 1 }],
-        [{ "key": null, "value": 1 }],
-        [{ "key": false, "value": 1 }],
-        [{ "Key": false, "value": 1 }],
-        [{ "name": false, "value": 1 }],
-        [{ "Name": false, "value": 1 }],
-        { "x": { "value": 1 } },
-        { "x": { "key": 1, "value": 1 } }
-      ]
-    ],
-    [
-      "keys, keys_unsorted, to_entries",
-      [
-        "keys",
-        "keys_unsorted",
-        "to_entries"
-      ],
-      [
-        {},
-        { "b": null },
-        { "b": null, "a": 3 },
-        [],
-        [null],
-        [null, 3]
-      ]
-    ],
-    [
-      "keys, keys_unsorted, to_entries - errors",
-      [
-        "keys",
-        "keys_unsorted",
-        "to_entries"
-      ],
-      [
-        null, false, 3, "foo"
-      ]
-    ],
-    [
-      "length",
-      [
-        "length"
-      ],
-      [
-        null, 0, -0, 1, -1, 25, -25, "", "foo",
-        [], [0], [1, 2],
-        {}, { "a": 0 }, { "a": 0, "b": 1 }, { "length": 25 }
-      ]
-    ],
-    [
-      "length - errors",
-      [
-        "length"
-      ],
-      [
-        false, true
-      ]
-    ],
-    [
-      "map",
-      [
-        "map(.)",
-        "map(. + 10)",
-        "map(., . + 10)",
-        "map(empty)",
-        "map(.) | map(.)"
-      ],
-      [
-        [1, 2, 3, 0],
-        { "a": 1, "b": 2, "c": 3, "d": 0 }
-      ]
-    ],
-    [
-      "map - errors",
-      [
-        "map(.)"
-      ],
-      [
-        null, true, 1, "foo"
-      ]
-    ],
-    [
-      "not",
-      [
-        ".[] | not",
-        ".[] | not | not",
-        ".[] | select(not)"
-      ],
-      [
-        [null, false, true, 0, -0, 1, -1, 25],
-        ["", "null", "false", "true", "0", "1", "foo"],
-        [[], [false], [0], [""], [{}]],
-        [
-          {},
-          { "a": false },
-          { "a": 0 },
-          { "a": "" },
-          { "a": [] },
-          { "a": {} },
-          { "false": false }
-        ]
-      ]
-    ],
-    [
-      "reverse",
-      [
-        "reverse"
-      ],
-      [
-        [],
-        [1, 2, 3, 4],
-        [3, 1, 2],
-        [3, "foo", null, { "a": 1 }, false, ["bar", -3.14]],
-        [[3, 1, 2]],
-        null,
         0,
-        -0,
-        "",
-        {}
-      ]
-    ],
-    [
-      "reverse - errors",
-      [
-        "reverse"
-      ],
-      [
-        false, 3, -3, 0.1, -0.1, "foo", { "a": 1 }
-      ]
-    ],
-    [
-      "select",
-      [
-        "select(.)",
-        "select(. > 2)",
-        ".[] | select(.)",
-        ".[] | select(. > 2)",
-        ".[] | select(. < 2)",
-        ".[] | select(. < 0)",
-        ".[] | select(. < 2, . > 2)",
-        ".[] | select(. < 2, . > 0)",
-        ".[] | select(. == false)",
-        ".[] | select(. == true)",
-        ".[] | select([.][])"
-      ],
-      [[1, 2, 3, 0, false, "false", null, "null", "", [], {}]]
-    ],
-    [
-      "sort",
-      [
-        "sort",
-        "[.[] | [5, .], .] | sort",
-        "[.[] | [5, .], {\"b\": ., \"a\": [5, .]}, .] | sort"
-      ],
-      [[10, 5, {}, null, [], "false", [5, 10]]]
-    ],
-    [
-      "sort - errors",
-      [
-        "sort"
-      ],
-      [10, {}, null, "false"]
-    ],
-    [
-      "sort_by",
-      [
-        "sort_by(.)",
-        "sort_by(-.)",
-        "sort_by(. % 3)",
-        "sort_by(empty)",
-        "sort_by({\"z\": 1}, .)",
-        "sort_by({\"z\": 1}, select(. != 2))",
-        "sort_by({\"z\": 1}, select(. != 2), {\"z\": 1})",
-        "sort_by(select(. < 5), select(. < 10))"
-      ],
-      [[10, 5, 1, 2]]
-    ],
-    ["join", ["join(\", \")", "join(\"\")", "join(.[0])"], [["a","b,c,d","e"], ["foo"], [], ["foo", "bar"]]],
-    [
-      "Additive inverse",
-      [
-        "-(1 + 3)",
-        "-(-1)",
-        ".a | -(.b)",
-        "[--1]",
-        "(--.a.b)",
-        "(- -.a.b)",
-        "(-- .a.b)"
-      ],
-      [
-        { "a": { "b": 3 } },
-        { "a": { "b": -3.1 } }
-      ]
-    ],
-    [
-      "Additive inverse - errors",
-      [
-        "-.a",
-        "-.x",
-        "(--.a)",
-        "(--.x)"
-      ],
-      [
-        { "a": { "b": 3 } }
+        [1, { "x": ["y"] }],
+        2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
       ]
     ]
   ],
-  "tests_jq_web": [
+  [
+    "Array Index - streams",
     [
-      "Array Construction",
-      [
-        "[]",
-        "[4]"
-      ],
-      [
-        [
-          1
-        ],
-        {
-          "a": "a"
-        }
-      ]
+      ".[1, 0]",
+      ".[][2, 1, 0]"
     ],
-    [
-      "Array/Object Value Iterator",
-      [
-        ".[]"
-      ],
-      [
-        [1, -1],
-        ["foo"],
-        { "foo": 1, "bar": -5.3 },
-        { "foo": [] }
-      ]
-    ],
-    [
-      "Array/Object Value Iterator 2",
-      [
-        ".[ ]",
-        ".[\"foo\"][]",
-        ".foo[]"
-      ],
-      [
-        { "foo": [3, 3] }
-      ]
-    ],
-    [
-      "Array/Object Value Iterator 3",
-      [
-        ".[]?",
-        ".[]?[]",
-        ".[]? []",
-        ".[] ?[]"
-      ],
-      [
-        3
-      ]
-    ],
-    [
-      "Array/Object Value Iterator - errors",
-      [
-        ".[]"
-      ],
-      [
-        3, "bar", null
-      ]
-    ],
-    [
-      "Pipe",
-      [
-        ".[] | .",
-        ".[] | .name",
-        ".[] | 1 + .age | 2"
-      ],
-      [
-         [
-          {"name": "Mary", "age": 22},
-          {"name": "Rupert", "age": 29},
-          {"name": "Jane", "age": 11},
-          {"name": "John", "age": 42}
-        ]
-      ]
-    ],
-    ["Stream as object value", [
-        "{names: .[] | .name}", "{\"names\": .[] | .name, \"ages\": .[] | .age}",
-        "{\"names\": .[] | .name, \"x\": 3}",
-        "{\"names\": 5.4, \"x\": .[] | .age}",
-        "{names: 5.4, ages: .[] | .age, ages2: .[] | .id}"
-    ], [
-        [
-          {"id": 0, "name": "Mary", "age": 22},
-          {"id": 1, "name": "Rupert", "age": 29},
-          {"id": 2, "name": "Jane", "age": 11},
-          {"id": 3, "name": "John", "age": 42}
-        ]
+    [[
+      [1, 2, 3],
+      [10, 20, 30]
     ]]
-  ]
-}
+  ],
+  [
+    "Array Index on non-array - errors",
+    [
+      ".[0]"
+    ],
+    [
+      false, 3, "foo", { "bar": 1 }
+    ]
+  ],
+  [
+    "Array Index on non-array - optional",
+    [
+      ".[0]?",
+      ".[0] ?"
+    ],
+    [
+      false, 3, "foo", { "bar": 1 }
+    ]
+  ],
+  [
+    "Array Index with non-numeric index - errors",
+    [
+      "[0][.]"
+    ],
+    [
+      null, false, "foo", { "bar": 1 }
+    ]
+  ],
+  [
+    "Array Index with non-numeric index - optional",
+    [
+      "[0][.]?",
+      "[0][.] ?"
+    ],
+    [
+      null, false, "foo", { "bar": 1 }
+    ]
+  ],
+  [
+    "Object Identifier-Index",
+    [
+      ".foo",
+      ".bar",
+      ".hasOwnProperty",
+      ".and",
+      ".or",
+      ".if",
+      ".bar.x",
+      ".bar.foo",
+      ".foo[1]",
+      ".baz",
+      ".baz.x"
+    ],
+    [
+      {
+        "foo": [3, 1],
+        "bar": { "x": 3, "foo": 0.5 },
+        "2bar": 1,
+        "a b": "a b",
+        "hasOwnProperty": "foo"
+      }
+    ]
+  ],
+  [
+    "Object Identifier-Index on non-object - errors",
+    [
+      ".foo"
+    ],
+    [
+      false, 3, "foo", [1, 2]
+    ]
+  ],
+  [
+    "Object Identifier-Index on non-object - optional",
+    [
+      ".foo?",
+      ".foo ?"
+    ],
+    [
+      false, 3, "foo", [1, 2]
+    ]
+  ],
+  [
+    "Generic Object Index",
+    [
+      ".[\"\"]",
+      ".[\" \"]",
+      ".[\"foo\"]",
+      ".[\"foo \"]",
+      ".[\" foo\"]",
+      ".[\"hasOwnProperty\"]",
+      ".[\"bar\"].x",
+      ".bar[ \"foo\"]",
+      ".[\"2bar\"]",
+      ".[\"a b\" ]",
+      ".[\"baz\"]",
+      ".[\"baz\"][\"x\"]",
+      ".[.hasOwnProperty]",
+      ".bar[.hasOwnProperty]"
+    ],
+    [
+      {
+        "foo": [3, 1],
+        "bar": { "x": 3, "foo": 0.5 },
+        "2bar": 1,
+        "a b": "a b",
+        "hasOwnProperty": "foo"
+      }
+    ]
+  ],
+  [
+    "Generic Object Index - streams",
+    [
+      ".[\"bar\", \"foo\"]",
+      ".[][\"baz\", \"bar\", \"foo\"]"
+    ],
+    [{
+      "foo": { "foo": 1, "bar": 2, "baz": 3 },
+      "bar": { "foo": 10, "bar": 20, "baz": 30 }
+    }]
+  ],
+  [
+    "Generic Object Index on non-object - errors",
+    [
+      ".[\"foo\"]"
+    ],
+    [
+      false, 3, "foo", [1, 2]
+    ]
+  ],
+  [
+    "Generic Object Index on non-object - optional",
+    [
+      ".[\"foo\"]?",
+      ".[\"foo\"] ?"
+    ],
+    [
+      false, 3, "foo", [1, 2]
+    ]
+  ],
+  [
+    "Generic Object Index with non-string index - errors",
+    [
+      "{\"foo\": \"bar\"}[.]"
+    ],
+    [
+      null, false, 3, [1, 2], { "bar": 1 }
+    ]
+  ],
+  [
+    "Generic Object Index with non-string index - optional",
+    [
+      "{\"foo\": \"bar\"}[.]?",
+      "{\"foo\": \"bar\"}[.] ?"
+    ],
+    [
+      null, false, 3, [1, 2], { "bar": 1 }
+    ]
+  ],
+  [
+    "Array/String slice",
+    [
+      ".[0:0]", ".[0:1]", ".[1:0]", ".[2:4]", ".[4:2]", ".[3:100]",
+      ".[-4:-2]", ".[-1:-3]", ".[-50:-3]", ".[-4:-100]",
+      ".[:3]", ".[1:]", ".[-1:]", ".[:-3]", ".[-14:]", ".[:100]",
+      ".[:2.1]", ".[:2.5]", ".[:2.8]", ".[:3.5]",
+      ".[2.1:]", ".[2.5:]", ".[2.8:]", ".[3.5:]",
+      ".[:-2.1]", ".[:-2.5]", ".[:-2.8]", ".[:-3.5]",
+      ".[-2.1:]", ".[-2.5:]", ".[-2.8:]", ".[-3.5:]",
+      "[.][100][:3]",
+      ".[[.][100]:3]",
+      ".[1:[.][100]]",
+      ".[[.][100]:[.][100]]",
+      "{a: 2, b: 4, x: .} | .x[.a:.b]"
+    ],
+    [
+      [0, 3, "foo", -2, false, [true]],
+      "Hello World!"
+    ]
+  ],
+  [
+    "Array/String slice - streams",
+    [
+      ".[0, 1: 2, 3]",
+      ".[][0, 1: 2, 3]"
+    ],
+    [
+      [[1, 2, 3], [10, 20, 30], [100, 200, 300]],
+      ["123", "abc", "ABC"]
+    ]
+  ],
+  [
+    "Array/String slice on non-array/string - errors",
+    [
+      ".[:1]"
+    ],
+    [
+      0, 3, false, true, {}, { "a": 1 }
+    ]
+  ],
+  [
+    "Array/String slice on non-array/string - optional",
+    [
+      ".[:1]?",
+      ".[:1] ?"
+    ],
+    [
+      0, 3, false, true, {}, { "a": 1 }
+    ]
+  ],
+  [
+    "Pipe",
+    [
+      ".a | .b",
+      ".a|.b",
+      "1 + .a.b[1] | 2"
+    ],
+    [
+      {
+        "a": {
+          "b": [4, 10]
+        }
+      },
+      {
+        "a": {
+          "b": ["oo", 7]
+        }
+      }
+    ]
+  ],
+  [
+    "Stream",
+    [
+      "[.a], .b",
+      "[.a], .b | .[1]",
+      "[.a], .b | .[-1]",
+      ".a, .b[1]",
+      "-.a, .b[1] + 2 * .a",
+      "-.a, 2 * .a, .b[1] | .",
+      "-.a, 2 * .a, .b[1] | ., .",
+      "-.a, 2 * .a, .b[1] | []",
+      "-.a, 2 * .a, .b[1] | [][]",
+      "-.a, .b[] | 10 + .",
+      ".b[], -.a | . + 10",
+      ".b[], .b[] | . + .",
+      ".b[], -.a, .b[] | . * 10",
+      "-.a, .b[], -.a | 10 * .",
+      "-(.a, .b[])",
+      "-(.a, .b[]) + .a",
+      "[.b[]]",
+      "[(.b[])]",
+      "[.a, .b[]]",
+      "[(.a, .b[])]",
+      "[.b | .[1], .[-1] | . + 10]",
+      "[(.b | .[1], .[-1] | . + 10)]",
+      ".a - -(.a, .b[])",
+      "(.a, 10) + .b[]",
+      "(.a, 10) - .b[:2][] - (4, 5)",
+      "-(.a, .b[]) * .a",
+      ".a / -(.a, .b[])",
+      "(.a, 10) * .b[]",
+      "(.a, 10) / .b[:2][] / (4, 5)",
+      "(.a, -.a, 3) == .b[]",
+      "(.a, -.a, 3) != .b[]",
+      "(.a, -.a, 3) < .b[]",
+      "(.a, -.a, 3) <= .b[]",
+      "(.a, -.a, 3) > .b[]",
+      "(.a, -.a, 3) >= .b[]",
+      "{foo: .b}",
+      "{foo: .b[]}",
+      "{foo: [][]}",
+      "{foo: (.a, .b[0])}",
+      "{foo: (.a, .b)}",
+      "{foo: (.a, .b[])}",
+      "{foo: (.a, [][], .b[])}",
+      "{(\"foo\", \"bar\"): .b[]}",
+      "{(\"foo\", \"bar\", \"foo\"): .b[:2][]}",
+      "{(\"foo\", \"bar\", \"baz\"): .b[:2][]}",
+      "{(\"a\", \"b\"): .b[:2][], (\"c\", \"d\"): .b[2:][]}",
+      "{(\"a\", \"b\"): .b[:2][], (\"c\", \"d\"): .b[2:][], (\"e\", \"f\"): -.b[:2][]}",
+      ".a and .b[]",
+      "(.a, true) and .b[0]",
+      "(.a, false) and .b[0]",
+      "(false, false) and .b[0]",
+      "[][] and .b[0]",
+      ".a and .b[] != 2",
+      "(.a, true) and .b[] != 2",
+      "(.a, false) and .b[] != 2",
+      "(false, false) and .b[] != 2",
+      "[][] and .b[] != 2",
+      ".a and [][]",
+      "(.a, true) and [][]",
+      "(.a, false) and [][]",
+      "(false, false) and [][]",
+      "[][] and [][]",
+      "(.a, true) and .b[] != 2 and .b[] != 5",
+      ".a or .b[]",
+      "(.a, true) or .b[0]",
+      "(.a, false) or .b[0]",
+      "(false, false) or .b[0]",
+      "[][] or .b[0]",
+      ".a or .b[] != 2",
+      "(.a, true) or .b[] != 2",
+      "(.a, false) or .b[] != 2",
+      "(false, false) or .b[] != 2",
+      "[][] or .b[] != 2",
+      ".a or [][]",
+      "(.a, true) or [][]",
+      "(.a, false) or [][]",
+      "(false, false) or [][]",
+      "[][] or [][]",
+      "(.a == 0, false) or .b[] == 2 or .b[] != 5"
+    ],
+    [
+      { "a": -1, "b": [1, 2, 4, 5] }
+    ]
+  ],
+  [
+    "Parentheses",
+    [
+      "( .a)",
+      "((.a))",
+      "(.).a",
+      "(.b)[]",
+      "(.b)[0]",
+      "(.b)[0:2]",
+      "(.).a",
+      "(-1 )",
+      "(-5.5)",
+      "(.4)",
+      "(. | .)"
+    ],
+    [
+      { "a": -1, "b": [1, 2, 4, 5] }
+    ]
+  ],
+  [
+    "Alternative",
+    [
+      ".[] // \"None\"",
+      ".[], true // \"None\"",
+      ".[] or false // \"None\"",
+      ".[] and true // \"None\"",
+      "(.[] | select(. == 25)) // \"None\"",
+      "(.[] | select(. <= 25)) // \"None\"",
+      "(.[] | select(. == -1)) // \"None\"",
+      "(.[] | select(. == -1)) // (.[] | select(. == 25))",
+      "(.[] | select(. == -1)) // (.[] | select(. <= 25))",
+      "(.[] | select(. == -1)) // (.[] | select(. == -2))",
+      "(.[] | select(. == -1)) // (.[] | select(. == 25)) // \"None\"",
+      "(.[] | select(. == -1)) // (.[] | select(. <= 25)) // \"None\"",
+      "(.[] | select(. == -1)) // (.[] | select(. == -2)) // \"None\"",
+      ".[] | . // \"Bad\"",
+      ".[] | select(. == 25) // \"Bad\"",
+      ".[] | select(. <= 25) // \"Bad\"",
+      ".[] | select(. == -1) // \"Bad\"",
+      ".[] | select(. == -1) // select(. == 25)",
+      ".[] | select(. == -1) // select(. <= 25)",
+      ".[] | select(. == -1) // select(. == -2)",
+      ".[] | select(. == -1) // select(. == 25) // \"Bad\"",
+      ".[] | select(. == -1) // select(. <= 25) // \"Bad\"",
+      ".[] | select(. == -1) // select(. == -2) // \"Bad\""
+    ],
+    [[
+      true, null, false, 0, 25, "", "foo",
+      [], ["foo"],
+      {}, { "foo": "bar" }
+    ]]
+  ],
+  [
+    "Logical Or",
+    [
+      ".[0] or .[0]",
+      ".[0] or .[1]",
+      ".[1] or .[0]",
+      ".[1] or .[1]",
+      ".[1] or .[1] or .[0]",
+      ".[] or .[]",
+      "1, .[0] or .[1], 1",
+      ".[1] or .[0] == 1",
+      "1 == .[0] or .[1]",
+      ".[0] != .[0] or .[1] != .[1]",
+      ".[0] or .[0] and .[1] or .[1]"
+    ],
+    [[false, true, null, 0, 1]]
+  ],
+  [
+    "Logical And",
+    [
+      ".[0] and .[0]",
+      ".[0] and .[1]",
+      ".[1] and .[0]",
+      ".[1] and .[1]",
+      ".[1] and .[1] and .[0]",
+      ".[] and .[]",
+      "1, .[1] and .[0], 1",
+      ".[0] and .[1] != 1",
+      "1 != .[1] and .[0]",
+      ".[0] == .[0] and .[1] == .[1]",
+      ".[0] and .[1] or .[1] and .[1]"
+    ],
+    [[false, true, null, 0, 1]]
+  ],
+  [
+    "Comparison",
+    [
+      "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a == .b), a: .a | tostring, b: .b | tostring}",
+      "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a != .b), a: .a | tostring, b: .b | tostring}",
+      "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a <  .b), a: .a | tostring, b: .b | tostring}",
+      "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a <= .b), a: .a | tostring, b: .b | tostring}",
+      "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a >  .b), a: .a | tostring, b: .b | tostring}",
+      "{a: (.a[], .a), b: (.b[], .b)} | {r: (.a >= .b), a: .a | tostring, b: .b | tostring}"
+    ],
+    [{
+      "a": [
+        null, false, true,
+        0, -0, 5, 30,
+        "null", "false", "true", "12",
+        "foo", "bar", "foobar", "Foo",
+        [], [1, "foo"], [1, "bar", "foo"], ["bar", 1, "foo"],
+        {}, { "foo": 1 }, { "foo": 1, "bar": 2 },
+        { "foo": [true, "bar"], "baz": 3 }
+      ],
+      "b": [
+        null, false, true,
+        0, -0, 5, 30,
+        "null", "false", "true", "12",
+        "foo", "bar", "foobar", "Foo",
+        [], [1, "foo"], [1, "bar", "foo"], ["bar", 1, "foo"],
+        {}, { "foo": 1 }, { "foo": 1, "bar": 2 },
+        { "foo": [true, "bar"], "baz": 3 }
+      ]
+    }]
+  ],
+  [
+    "Addition (numbers)",
+    [
+      "1 + 1",
+      ".a + [.b][0]",
+      ".b + .a",
+      "-3 + 4.1 + .a",
+      "3 + (-3)",
+      ".a + .x",
+      ".x + .b",
+      ".x + .y",
+      ". + .x",
+      ".x + [.b]"
+    ],
+    [
+      { "a": 3, "b": 0 },
+      { "a": -3, "b": 1.1 }
+    ]
+  ],
+  [
+    "Addition (numbers) - errors",
+    [
+      ".a + [.b]",
+      ". + .b",
+      ". + [.b]"
+    ],
+    [
+      { "a": 3, "b": 0 }
+    ]
+  ],
+  [
+    "Subtraction (numbers)",
+    [
+      ".a - .b",
+      ".b - .a",
+      "4- 3",
+      "-3    -(4)",
+      "14-.a -11"
+    ],
+    [
+      { "a": 3, "b": 0 },
+      { "a": -3, "b": 1.1 }
+    ]
+  ],
+  [
+    "Subtraction (numbers) - errors",
+    [
+      ".a - .x",
+      ".x - .b",
+      ".x - .y",
+      ". - .x",
+      ".x - [.b]",
+      ".a - [.b]",
+      ". - .b",
+      ". - [.b]"
+    ],
+    [
+      { "a": 3, "b": 0 }
+    ]
+  ],
+  [
+    "Multiplication (numbers)",
+    [
+      "1 * 1",
+      ".a * [.b][0]",
+      ".b * .a",
+      "3 * 4.1 * .a",
+      "3 * (-.3)"
+    ],
+    [
+      { "a": 3, "b": 0 },
+      { "a": -3, "b": 1.1 }
+    ]
+  ],
+  [
+    "Multiplication (numbers) - errors",
+    [
+      ".a * .x",
+      ".x * .b",
+      ".x * .y",
+      ". * .x",
+      ".x * [.b]",
+      ".a * [.b]",
+      ". * .b",
+      ". * [.b]"
+    ],
+    [
+      { "a": 3, "b": 0 }
+    ]
+  ],
+  [
+    "Modulo (numbers)",
+    [
+      "1 % 1",
+      ".a % [.b][0]",
+      ".b % .a",
+      "3 % 4 % .a"
+    ],
+    [
+      { "a": 3, "b": 1 },
+      { "a": -3, "b": 1 }
+    ]
+  ],
+  [
+    "Modulo (numbers) - errors",
+    [
+      ".a % .x",
+      ".x % .b",
+      ".x % .y",
+      ". % .x",
+      ".x % [.b]",
+      ".a % [.b]",
+      ". % .b",
+      ". % [.b]"
+    ],
+    [
+      { "a": 3, "b": 1 }
+    ]
+  ],
+  [
+    "Division (numbers)",
+    [
+      ".a / .b",
+      ".b / .a",
+      "4/ 3",
+      "-3/(4)",
+      "-1.1 + (3 * (((.4 - .b) / .a) + .b))",
+      ".a / 15 / .b"
+    ],
+    [
+      { "a": 3, "b": -1.1 },
+      { "a": -3, "b": 1.1 }
+    ]
+  ],
+  [
+    "Division (numbers) - errors",
+    [
+      ".a / .x",
+      ".x / .b",
+      ".x / .y",
+      ". / .x",
+      ".x / [.b]",
+      ".a / [.b]",
+      ". / .b",
+      ". / [.b]"
+    ],
+    [
+      { "a": 3, "b": -1.1 }
+    ]
+  ],
+  [
+    "If",
+    [
+      "if .t then .a else .b end",
+      "if .f then .a else .b end",
+      "if .t then .a elif .t then .a * 2 else .b end",
+      "if .f then .a elif .t then .a * 2 else .b end",
+      "if .t then .a elif .f then .a * 2 else .b end",
+      "if .f then .a elif .f then .a * 2 else .b end",
+      "if .t then if .t then .a * 2 else .b * 2 end else .b end",
+      "if .f then if .t then .a * 2 else .b * 2 end else .b end",
+      "if .t then if .f then .a * 2 else .b * 2 end else .b end",
+      "if .f then if .f then .a * 2 else .b * 2 end else .b end",
+      "if .t then .a else if .t then .a * 2 else .b * 2 end end",
+      "if .f then .a else if .t then .a * 2 else .b * 2 end end",
+      "if .t then .a else if .f then .a * 2 else .b * 2 end end",
+      "if .f then .a else if .f then .a * 2 else .b * 2 end end",
+      "if .a < .b or .t then .f | not else .b end",
+      "if .a < .b or .f then .a else .t | not end",
+      "if if .a < .b then .t else .f end then .a else .b end",
+      "if if .a < .b then .f else .t end then .a else .b end",
+      " -if .t then .a else .b end",
+      " -if .f then .a else .b end",
+      "if .t then -if .t then .a * 2 else .b * 2 end else .b end",
+      "if .f then .a else -if .t then .a * 2 else .b * 2 end end",
+      "if .t then .a, .a + 1 else .b, .b + 1 end",
+      "if .f then .a, .a + 1 else .b, .b + 1 end",
+      "if .t, .t then .a, .a + 1 else .b, .b + 1 end",
+      "if .f, .t then .a, .a + 1 else .b, .b + 1 end",
+      "if .t, .f then .a, .a + 1 else .b, .b + 1 end",
+      "if .f, .f then .a, .a + 1 else .b, .b + 1 end",
+      "if .t, .t then .a elif .t, .f then .a * 2 else .b end",
+      "if .f, .t then .a elif .f, .t then .a * 2 else .b end",
+      "if .t, .f then .a elif .t, .f then .a * 2 else .b end",
+      "if .f, .f then .a elif .f, .t then .a * 2 else .b end"
+    ],
+    [
+      { "f": false, "t": true, "a": 10, "b": -10 },
+      { "f": null, "t": 0, "a": 10, "b": -10 }
+    ]
+  ],
+  [
+    "Array Construction",
+    [
+      "[]",
+      "[ ]",
+      "[4]",
+      "[ -6, [0]]",
+      "[7 | 4]",
+      "[.]",
+      "[. | [6]]",
+      "[5, 6 ] | ."
+    ],
+    [
+      [
+        1
+      ],
+      {
+        "a": "a"
+      }
+    ]
+  ],
+  [
+    "Object Construction",
+    [
+      "{}",
+      "{  }",
+      "{\"\": 6}",
+      "{\" \": 6}",
+      "{\"foo\": 6}",
+      "{ \"foo\": 6 }",
+      "{\"foo\" : 6 }",
+      "{\"foo\": 6,}",
+      "{\"foo\": 6 ,}",
+      "{\"foo\": 6, \"bar\": [5, 3]}",
+      "{\"foo\": 6, \"bar\": [5, 3], }",
+      "{\"x\": 3} | {\"y\": .x}",
+      "{foo: \"bar\"}",
+      "{ foo: \"bar\"}",
+      "{foo : \"bar\"}",
+      "{foo: \"bar\", foo: \"baz\"}",
+      "{and: \"bar\"}",
+      "{or: \"bar\"}",
+      "{if: \"bar\"}",
+      "{(.a): true}",
+      "{({\"a\": \"b\"} | .a): true}",
+      "{\"a\": 4, \"b\": 3, \"c\": -1, \"d\": \"f\"}",
+      "{a}",
+      "{a, b}",
+      "{a: 6, b}",
+      "{a, b: 6}",
+      "{a, b: 6, c}",
+      "{a: 6, b, c: 3}",
+      "{\"a\"}",
+      "{\"a\", b}",
+      "{a, \"b\"}",
+      "{a: 6, \"b\"}",
+      "{\"a\", \"b\"}"
+    ],
+    [
+      { "a": "b", "b": 3 }
+    ]
+  ],
+  [
+    "Object Construction - errors",
+    [
+      "{(.): 6}"
+    ],
+    [
+      null, false, true, 0, 1, -1, 25,
+      [], ["foo"],
+      {}, { "foo": "bar" }
+    ]
+  ],
+  [
+    "Integer literal",
+    [
+      "3",
+      "  6",
+      "-4",
+      "0",
+      "- 7",
+      "011",
+      "091"
+    ],
+    [
+      1
+    ]
+  ],
+  [
+    "Float literal",
+    [
+      ".3",
+      "3.",
+      "6.0",
+      "-4.001",
+      "3.14",
+      "0.1"
+    ],
+    [
+      1
+    ]
+  ],
+  [
+    "Boolean literal, null, empty",
+    [
+      "true",
+      "false",
+      "null",
+      "empty",
+      "empty[]",
+      "[empty]",
+      "[empty][]"
+    ],
+    [
+      1
+    ]
+  ],
+  [
+    "Boolean literal, null, empty - errors",
+    [
+      ".true",
+      ".false",
+      ".null",
+      ".empty"
+    ],
+    [
+      1
+    ]
+  ],
+  [
+    "Double quote String literal",
+    [
+      "\"true\"",
+      "\"false\"",
+      "\"foo\"",
+      "[\"ba'r\"]"
+    ],
+    [
+      1
+    ]
+  ],
+  ["map_values", ["map_values(.+1 )", ". | map_values( {foo: .})"], [
+    {"a": 4, "b": 2},
+    {"a": 4, "b": -1, "c": 0}
+  ]],
+  ["with_entries", [
+    "with_entries({key: .key, value: (2 * .value)})",
+    "with_entries({key: \"a\", value: (2 * .value)})"
+  ], [
+    {"foo": 2, "bar": -1},
+    {"a": 2, "_": -1, "??": 0}
+  ]],
+  ["tonumber", ["tonumber"], [1, -1, "1", "-1", "1.23", "-.1"]],
+  ["tostring", ["tostring"], [1, -1, "1", "-1", "1.23", "-.1", [1], {"a": 2}]],
+  [
+    "ascii_downcase, ascii_upcase",
+    [
+      ".greeting | ascii_downcase",
+      ".greeting | ascii_upcase"
+    ],
+    [{ "greeting": "Hello, МИР! © 2020\nПривет, WORLD!" }]
+  ],
+  [
+    "ascii_downcase, ascii_upcase - errors",
+    [
+      "ascii_downcase",
+      "ascii_upcase"
+    ],
+    [1, null]
+  ],
+  [
+    "from_entries",
+    [
+      "from_entries"
+    ],
+    [
+      [],
+      [{ "key": "", "value": 1 }],
+      [{ "key": "a", "value": 1 }],
+      [{ "key": "a", "value": 1 }, { "key": "b", "value": 2 }],
+      [{ "key": "a", "value": 1 }, { "key": "b", "value": null }],
+      [{ "key": "a", "value": 1 }, { "key": "b", "value": 2 }, { "key": "a", "value": 3 }],
+      [{ "key": "a", "value": 1, "hasOwnProperty": "foo" }],
+      [{ "Key": "a", "value": 1 }],
+      [{ "name": "a", "value": 1 }],
+      [{ "Name": "a", "value": 1 }],
+      [{ "key": null, "Key": "a", "value": 1 }],
+      [{ "key": false, "Key": "a", "value": 1 }],
+      [{ "key": false, "Key": "a", "name": "b", "value": 1 }],
+      [{ "key": false, "Key": "a", "Name": "b", "value": 1 }],
+      [{ "key": false, "name": "a", "Name": "b", "value": 1 }],
+      [{ "Key": null, "name": "a", "value": 1 }],
+      [{ "Key": false, "name": "a", "value": 1 }],
+      [{ "name": null, "Name": "a", "value": 1 }],
+      [{ "name": false, "Name": "a", "value": 1 }],
+      [{ "key": "a" }],
+      [{ "key": "a", "Value": 2 }],
+      [{ "key": "a", "Value": 2, "value": 1 }],
+      {},
+      { "x": { "key": "a", "value": 1 } },
+      { "x": { "key": "a", "value": 1 }, "y": { "key": "b", "value": 2 }, "z": { "key": "a", "value": 3 } }
+    ]
+  ],
+  [
+    "from_entries - errors",
+    [
+      "from_entries"
+    ],
+    [
+      null, false, 3, "key",
+      [null], [false], [3], ["key"],
+      [{ "value": 1 }],
+      [{ "key": 1, "value": 1 }],
+      [{ "key": null, "value": 1 }],
+      [{ "key": false, "value": 1 }],
+      [{ "Key": false, "value": 1 }],
+      [{ "name": false, "value": 1 }],
+      [{ "Name": false, "value": 1 }],
+      { "x": { "value": 1 } },
+      { "x": { "key": 1, "value": 1 } }
+    ]
+  ],
+  [
+    "keys, keys_unsorted, to_entries",
+    [
+      "keys",
+      "keys_unsorted",
+      "to_entries"
+    ],
+    [
+      {},
+      { "b": null },
+      { "b": null, "a": 3 },
+      [],
+      [null],
+      [null, 3]
+    ]
+  ],
+  [
+    "keys, keys_unsorted, to_entries - errors",
+    [
+      "keys",
+      "keys_unsorted",
+      "to_entries"
+    ],
+    [
+      null, false, 3, "foo"
+    ]
+  ],
+  [
+    "length",
+    [
+      "length"
+    ],
+    [
+      null, 0, -0, 1, -1, 25, -25, "", "foo",
+      [], [0], [1, 2],
+      {}, { "a": 0 }, { "a": 0, "b": 1 }, { "length": 25 }
+    ]
+  ],
+  [
+    "length - errors",
+    [
+      "length"
+    ],
+    [
+      false, true
+    ]
+  ],
+  [
+    "map",
+    [
+      "map(.)",
+      "map(. + 10)",
+      "map(., . + 10)",
+      "map(empty)",
+      "map(.) | map(.)"
+    ],
+    [
+      [1, 2, 3, 0],
+      { "a": 1, "b": 2, "c": 3, "d": 0 }
+    ]
+  ],
+  [
+    "map - errors",
+    [
+      "map(.)"
+    ],
+    [
+      null, true, 1, "foo"
+    ]
+  ],
+  [
+    "not",
+    [
+      ".[] | not",
+      ".[] | not | not",
+      ".[] | select(not)"
+    ],
+    [
+      [null, false, true, 0, -0, 1, -1, 25],
+      ["", "null", "false", "true", "0", "1", "foo"],
+      [[], [false], [0], [""], [{}]],
+      [
+        {},
+        { "a": false },
+        { "a": 0 },
+        { "a": "" },
+        { "a": [] },
+        { "a": {} },
+        { "false": false }
+      ]
+    ]
+  ],
+  [
+    "reverse",
+    [
+      "reverse"
+    ],
+    [
+      [],
+      [1, 2, 3, 4],
+      [3, 1, 2],
+      [3, "foo", null, { "a": 1 }, false, ["bar", -3.14]],
+      [[3, 1, 2]],
+      null,
+      0,
+      -0,
+      "",
+      {}
+    ]
+  ],
+  [
+    "reverse - errors",
+    [
+      "reverse"
+    ],
+    [
+      false, 3, -3, 0.1, -0.1, "foo", { "a": 1 }
+    ]
+  ],
+  [
+    "select",
+    [
+      "select(.)",
+      "select(. > 2)",
+      ".[] | select(.)",
+      ".[] | select(. > 2)",
+      ".[] | select(. < 2)",
+      ".[] | select(. < 0)",
+      ".[] | select(. < 2, . > 2)",
+      ".[] | select(. < 2, . > 0)",
+      ".[] | select(. == false)",
+      ".[] | select(. == true)",
+      ".[] | select([.][])"
+    ],
+    [[1, 2, 3, 0, false, "false", null, "null", "", [], {}]]
+  ],
+  [
+    "sort",
+    [
+      "sort",
+      "[.[] | [5, .], .] | sort",
+      "[.[] | [5, .], {\"b\": ., \"a\": [5, .]}, .] | sort"
+    ],
+    [[10, 5, {}, null, [], "false", [5, 10]]]
+  ],
+  [
+    "sort - errors",
+    [
+      "sort"
+    ],
+    [10, {}, null, "false"]
+  ],
+  [
+    "sort_by",
+    [
+      "sort_by(.)",
+      "sort_by(-.)",
+      "sort_by(. % 3)",
+      "sort_by(empty)",
+      "sort_by({\"z\": 1}, .)",
+      "sort_by({\"z\": 1}, select(. != 2))",
+      "sort_by({\"z\": 1}, select(. != 2), {\"z\": 1})",
+      "sort_by(select(. < 5), select(. < 10))"
+    ],
+    [[10, 5, 1, 2]]
+  ],
+  ["join", ["join(\", \")", "join(\"\")", "join(.[0])"], [["a","b,c,d","e"], ["foo"], [], ["foo", "bar"]]],
+  [
+    "Additive inverse",
+    [
+      "-(1 + 3)",
+      "-(-1)",
+      ".a | -(.b)",
+      "[--1]",
+      "(--.a.b)",
+      "(- -.a.b)",
+      "(-- .a.b)"
+    ],
+    [
+      { "a": { "b": 3 } },
+      { "a": { "b": -3.1 } }
+    ]
+  ],
+  [
+    "Additive inverse - errors",
+    [
+      "-.a",
+      "-.x",
+      "(--.a)",
+      "(--.x)"
+    ],
+    [
+      { "a": { "b": 3 } }
+    ]
+  ],
+  [
+    "Array Construction",
+    [
+      "[]",
+      "[4]"
+    ],
+    [
+      [
+        1
+      ],
+      {
+        "a": "a"
+      }
+    ]
+  ],
+  [
+    "Array/Object Value Iterator",
+    [
+      ".[]"
+    ],
+    [
+      [1, -1],
+      ["foo"],
+      { "foo": 1, "bar": -5.3 },
+      { "foo": [] }
+    ]
+  ],
+  [
+    "Array/Object Value Iterator 2",
+    [
+      ".[ ]",
+      ".[\"foo\"][]",
+      ".foo[]"
+    ],
+    [
+      { "foo": [3, 3] }
+    ]
+  ],
+  [
+    "Array/Object Value Iterator 3",
+    [
+      ".[]?",
+      ".[]?[]",
+      ".[]? []",
+      ".[] ?[]"
+    ],
+    [
+      3
+    ]
+  ],
+  [
+    "Array/Object Value Iterator - errors",
+    [
+      ".[]"
+    ],
+    [
+      3, "bar", null
+    ]
+  ],
+  [
+    "Pipe",
+    [
+      ".[] | .",
+      ".[] | .name",
+      ".[] | 1 + .age | 2"
+    ],
+    [
+        [
+        {"name": "Mary", "age": 22},
+        {"name": "Rupert", "age": 29},
+        {"name": "Jane", "age": 11},
+        {"name": "John", "age": 42}
+      ]
+    ]
+  ],
+  ["Stream as object value", [
+      "{names: .[] | .name}", "{\"names\": .[] | .name, \"ages\": .[] | .age}",
+      "{\"names\": .[] | .name, \"x\": 3}",
+      "{\"names\": 5.4, \"x\": .[] | .age}",
+      "{names: 5.4, ages: .[] | .age, ages2: .[] | .id}"
+  ], [
+      [
+        {"id": 0, "name": "Mary", "age": 22},
+        {"id": 1, "name": "Rupert", "age": 29},
+        {"id": 2, "name": "Jane", "age": 11},
+        {"id": 3, "name": "John", "age": 42}
+      ]
+  ]]
+]
