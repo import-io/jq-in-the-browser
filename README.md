@@ -55,7 +55,7 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * sort_by
 * to_entries
 * tonumber (incomplete)
-* tostring (incomplete)
+* tostring
 * true
 * with_entries (incomplete)
 * upcase (non-standard extension, see below)

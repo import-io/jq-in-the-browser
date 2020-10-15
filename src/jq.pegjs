@@ -2,7 +2,6 @@
   const Functions0 = {
     // Bad
     "tonumber": input => input * 1,
-    "tostring": input => ((typeof input === "object") ? JSON.stringify(input) : String(input)),
 
     // Good
     'ascii_downcase': input => {
@@ -119,6 +118,13 @@
       const entries = Object.entries(input)
       convert(entries, ([key, value]) => ({ key, value }))
       return entries
+    },
+    'tostring': input => {
+      if (isString(input)) {
+        return input
+      }
+
+      return JSON.stringify(input)
     },
     'true': input => {
       return true

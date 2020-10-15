@@ -836,7 +836,6 @@
     {"a": 2, "_": -1, "??": 0}
   ]],
   ["tonumber", ["tonumber"], [1, -1, "1", "-1", "1.23", "-.1"]],
-  ["tostring", ["tostring"], [1, -1, "1", "-1", "1.23", "-.1", [1], {"a": 2}]],
   [
     "ascii_downcase, ascii_upcase",
     [
@@ -1070,6 +1069,19 @@
       "sort_by(select(. < 5), select(. < 10))"
     ],
     [[10, 5, 1, 2]]
+  ],
+  [
+    "tostring",
+    [
+      "tostring",
+      "[., {foo: .}, . | tostring] | tostring",
+      "{(. | tostring): [.]} | tostring"
+    ],
+    [
+      null, false, true, 0, -0, 123, -123, 1.23, -1.23, 0.123, -0.123,
+      "", " ", "foo", " bar", "bar ", " baz ",
+      [], {}
+    ]
   ],
   ["join", ["join(\", \")", "join(\"\")", "join(.[0])"], [["a","b,c,d","e"], ["foo"], [], ["foo", "bar"]]],
   [
