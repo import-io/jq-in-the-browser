@@ -37,13 +37,13 @@ const substMessage = (query, input) => {
   }
 }
 
-const test_with_jq_web = ([feature, queries, inputs]) => {
+tests.forEach(([feature, queries, inputs]) => {
   describe(feature, () => {
     const isErrorTest = feature.endsWith(' - errors')
     queries.forEach((query) =>
-      describe(`Query: ${query}`, () =>
+      describe('Query: ' + query, () =>
         inputs.forEach((input) =>
-          it(`Input: ${JSON.stringify(input)}`, () => {
+          it('Input: ' + JSON.stringify(input), () => {
             if (isErrorTest) {
               let message
               assert.throws(() => jq_web_fixed(input, query), e => { message = e.message; return true })
@@ -56,14 +56,57 @@ const test_with_jq_web = ([feature, queries, inputs]) => {
             }
             else {
               const ourOutput = jq(query)(input)
-              const refOutput = jq_web_fixed(input, query)
-              assert.deepStrictEqual(ourOutput, refOutput)
+              const jqwOutput = jq_web_fixed(input, query)
+              assert.deepStrictEqual(ourOutput, jqwOutput)
             }
           })
         )
       )
     )
   })
-}
+})
 
-tests.forEach(test_with_jq_web)
+describe('Non-conforming behaviors', () => {
+  const tests = [
+    // in non-equality comparisons, NaN should be considered equal to NaN
+    // to ensure proper work of the sorting algorithm
+    {
+      query: 'nan < nan',
+      ourOutput: [false],
+      jqwOutput: [true],
+    },
+    {
+      query: 'nan > nan',
+      ourOutput: [false],
+      jqwOutput: [false],
+    },
+    {
+      query: 'nan <= nan',
+      ourOutput: [true],
+      jqwOutput: [true],
+    },
+    {
+      query: 'nan >= nan',
+      ourOutput: [true],
+      jqwOutput: [false],
+    },
+
+    // round-trip conversion "nan | tostring | tonumber" should work
+    {
+      query: 'nan | tostring',
+      ourOutput: ['NaN'],
+      jqwOutput: ['null'], // "tonumber" would fail on null
+    },
+  ]
+
+  tests.forEach(({ query, ourOutput, jqwOutput }) =>
+    it('Query: ' + query, () => {
+      const actual = {
+        ourOutput: jq(query)(null),
+        jqwOutput: jq_web_fixed(null, query),
+      }
+
+      assert.deepStrictEqual(actual, { ourOutput, jqwOutput })
+    })
+  )
+})

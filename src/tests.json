@@ -905,6 +905,15 @@
     ]
   ],
   [
+    "isnan",
+    [
+      "isnan"
+    ],
+    [
+      null, false, 0, 3, "foo", [], {}
+    ]
+  ],
+  [
     "keys, keys_unsorted, to_entries",
     [
       "keys",
@@ -972,6 +981,29 @@
     ],
     [
       null, true, 1, "foo"
+    ]
+  ],
+  [
+    "nan",
+    [
+      "nan | isnan",
+      "nan == nan",
+      "nan != nan",
+      "nan < true",
+      "nan > true",
+      "nan < \"\"",
+      "nan > \"\"",
+      "nan < 0",
+      "nan > 0",
+      "0 < nan",
+      "0 > nan",
+      "nan + nan | isnan",
+      "nan + 1 | isnan",
+      "[nan] | tostring",
+      "{a: nan} | tostring"
+    ],
+    [
+      1
     ]
   ],
   [

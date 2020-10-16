@@ -53,6 +53,9 @@
 
       return result
     },
+    'isnan': input => {
+      return Number.isNaN(input)
+    },
     'keys': input => {
       if (isArray(input)) {
         return input.map((value, index) => index)
@@ -86,6 +89,9 @@
 
       throw new Error(`${_mtype_v(input)} has no length.`)
     },
+    'nan': input => {
+      return NaN
+    },
     'not': input => {
       return !isTrue(input)
     },
@@ -95,7 +101,7 @@
     'reverse': input => {
       // as '[.[length - 1 - range(0;length)]]'
       if (!Functions0.length(input)) {
-        return [] // for JQ compliance
+        return [] // for JQ conformance
       }
       if (!isArray(input)) {
         throw new Error(`${_mtype_v(input)} cannot be reversed, as it is not an array.`)
@@ -124,7 +130,7 @@
         return input
       }
 
-      return JSON.stringify(input)
+      return stringify(input)
     },
     'true': input => {
       return true
@@ -199,10 +205,12 @@
       let i = 0; value === null
         || (++i, value === false)
         || (++i, value === true)
+        || (++i, Number.isNaN(value))
         || (++i, isNumber(value))
         || (++i, isString(value))
         || (++i, isArray(value))
-        || (++i)
+        || (++i, isObject(value))
+        || (i = Infinity)
 
       return i
     }
@@ -210,6 +218,10 @@
     const result = typeOrder(a) - typeOrder(b)
     if (result) {
       return result
+    }
+    if (Number.isNaN(result) || Number.isNaN(a)) {
+      // both sides are either of unknown type (Infinity - Infinity -> NaN) or NaNs
+      return 0
     }
 
     // arrays
@@ -225,11 +237,13 @@
       return a.length - b.length
     }
 
-    // objects
+    // primitives
 
     if (!isObject(a)) {
       return a < b ? -1 : 1
     }
+
+    // objects
 
     a = Object.entries(a)
     b = Object.entries(b)
@@ -276,11 +290,13 @@
       return true
     }
 
-    // objects
+    // primitives
 
     if (!isObject(a) || !isObject(b)) {
       return false
     }
+
+    // objects
 
     a = Object.entries(a)
     b = Object.entries(b)
@@ -551,6 +567,15 @@
     return indexes
   }
 
+  const stringify = (value) => {
+    if (isNumber(value)) {
+      // for NaN
+      return value.toString()
+    }
+
+    return JSON.stringify(value)
+  }
+
   const toArray = (stream) => {
     if (stream === undefined) {
       return []
@@ -602,7 +627,7 @@
 
   const _mtype_v = (value) => {
     const type = _mtype(value)
-    value = JSON.stringify(value)
+    value = stringify(value)
 
     if (value.length > 14) {
       value = value.slice(0, 14 - 3) + '...'
@@ -1025,7 +1050,7 @@ BracketTransform
     return transform
   }
   / "[" _ start: Expr? _ ":" _ end: Expr? _ "]" optional: Opt & {
-    return start || end // for JQ compliance
+    return start || end // for JQ conformance
   } {
     start ||= Functions0.null
     end ||= Functions0.null
