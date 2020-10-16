@@ -95,7 +95,14 @@ describe('Non-conforming behaviors', () => {
     {
       query: 'nan | tostring',
       ourOutput: ['NaN'],
-      jqwOutput: ['null'], // "tonumber" would fail on null
+      jqwOutput: ['null'], // "tonumber" would fail on "null"
+    },
+
+    // round-trip conversion "infinite | tostring | tonumber" should work
+    {
+      query: 'infinite, -infinite | tostring',
+      ourOutput: ['Infinity', '-Infinity'],
+      jqwOutput: [Number.MAX_VALUE.toString(), (-Number.MAX_VALUE).toString()],
     },
   ]
 

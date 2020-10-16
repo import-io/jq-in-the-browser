@@ -905,9 +905,49 @@
     ]
   ],
   [
-    "isnan",
+    "infinite",
     [
-      "isnan"
+      ". * infinite | isnan",
+      ". * infinite | isfinite",
+      ". * infinite | isinfinite",
+      ". * infinite | isnormal",
+      ". * infinite == nan",
+      ". * infinite != nan",
+      ". * infinite == infinite",
+      ". * infinite != infinite",
+      ". * infinite < true",
+      ". * infinite > true",
+      ". * infinite < \"\"",
+      ". * infinite > \"\"",
+      ". * infinite < 0",
+      ". * infinite > 0",
+      ". * infinite < nan",
+      ". * infinite > nan",
+      ". * infinite < infinite",
+      ". * infinite > infinite",
+      ". * infinite + nan | isnan",
+      ". * infinite + 1 == . * infinite",
+      ". * infinite + . * infinite == . * infinite",
+      ". * infinite - . * infinite | isnan",
+      ". * infinite * infinite == . * infinite",
+      ". * infinite / infinite | isnan",
+      "0 * . * infinite | isnan",
+      "0 / . * infinite | 0",
+      "1 / . * infinite | 0",
+      "[. * infinite] | tostring",
+      "{a: (. * infinite)} | tostring"
+    ],
+    [
+      1, -1
+    ]
+  ],
+  [
+    "isfinite, isinfinite, isnan, isnormal",
+    [
+      "isfinite",
+      "isinfinite",
+      "isnan",
+      "isnormal"
     ],
     [
       null, false, 0, 3, "foo", [], {}
@@ -987,6 +1027,9 @@
     "nan",
     [
       "nan | isnan",
+      "nan | isfinite",
+      "nan | isinfinite",
+      "nan | isnormal",
       "nan == nan",
       "nan != nan",
       "nan < true",

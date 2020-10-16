@@ -41,7 +41,11 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * empty
 * false
 * from_entries
+* infinite
+* isfinite
+* isinfinite
 * isnan
+* isnormal
 * join (incomplete)
 * keys
 * keys_unsorted

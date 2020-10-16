@@ -5,7 +5,11 @@
 
     // Good
     'ascii_downcase': input => {
-      // as 'explode | map(if 65 <= . and . <= 90 then . + 32 else . end) | implode'
+      /*
+        https://github.com/stedolan/jq/blob/master/src/builtin.jq#L200
+        def ascii_downcase:
+          explode | map(if 65 <= . and . <= 90 then . + 32 else . end) | implode;
+      */
       if (!isString(input)) {
         throw new Error('ascii_downcase input must be a string.')
       }
@@ -13,7 +17,11 @@
       return input.replace(/[A-Z]/g, x => String.fromCharCode(x.charCodeAt(0) + 32))
     },
     'ascii_upcase': input => {
-      // as 'explode | map(if 97 <= . and . <= 122 then . - 32 else . end) | implode'
+      /*
+        https://github.com/stedolan/jq/blob/master/src/builtin.jq#L203
+        def ascii_upcase:
+          explode | map(if 97 <= . and . <= 122 then . - 32 else . end) | implode;
+      */
       if (!isString(input)) {
         throw new Error('ascii_upcase input must be a string.')
       }
@@ -34,7 +42,11 @@
       return false
     },
     'from_entries': input => {
-      // as 'map({(.key // .Key // .name // .Name): (if has("value") then .value else .Value end)}) | add | . //= {}'
+      /*
+        https://github.com/stedolan/jq/blob/master/src/builtin.jq#L24
+        def from_entries:
+          map({(.key // .Key // .name // .Name): (if has("value") then .value else .Value end)}) | add | . //= {};
+      */
       const stream = iterate(input)
       const result = {}
 
@@ -53,8 +65,24 @@
 
       return result
     },
+    'infinite': input => {
+      return Infinity
+    },
+    'isfinite': input => {
+      /*
+        https://github.com/stedolan/jq/blob/master/src/builtin.jq#L35
+        def isfinite: type == "number" and (isinfinite | not);
+      */
+      return Number.isFinite(input) || Number.isNaN(input)
+    },
+    'isinfinite': input => {
+      return input === Infinity || input === -Infinity
+    },
     'isnan': input => {
       return Number.isNaN(input)
+    },
+    'isnormal': input => {
+      return Number.isFinite(input) && input !== 0
     },
     'keys': input => {
       if (isArray(input)) {
@@ -99,7 +127,10 @@
       return null
     },
     'reverse': input => {
-      // as '[.[length - 1 - range(0;length)]]'
+      /*
+        https://github.com/stedolan/jq/blob/master/src/builtin.jq#L26
+        def reverse: [.[length - 1 - range(0;length)]];
+      */
       if (!Functions0.length(input)) {
         return [] // for JQ conformance
       }
@@ -113,7 +144,10 @@
       return sortBy(input, identity)
     },
     'to_entries': input => {
-      // as '[keys_unsorted[] as $k | {key: $k, value: .[$k]}]'
+      /*
+        https://github.com/stedolan/jq/blob/master/src/builtin.jq#L23
+        def to_entries: [keys_unsorted[] as $k | {key: $k, value: .[$k]}];
+      */
       if (isArray(input)) {
         return input.map((value, index) => ({ key: index, value }))
       }
@@ -160,11 +194,17 @@
 
     // Good
     'map': arg => input => {
-      // as '[.[] | arg]'
+      /*
+        https://github.com/stedolan/jq/blob/master/src/builtin.jq#L3
+        def map(f): [.[] | f];
+      */
       return toArray(map(iterate(input), arg))
     },
     'select': arg => input => {
-      // as 'if arg then . else empty end'
+      /*
+        https://github.com/stedolan/jq/blob/master/src/builtin.jq#L4
+        def select(f): if f then . else empty end;
+      */
       return map(arg(input), arg => isTrue(arg) ? input : undefined)
     },
     'sort_by': arg => input => {
@@ -569,11 +609,17 @@
 
   const stringify = (value) => {
     if (isNumber(value)) {
-      // for NaN
+      // for NaN and Infinity
       return value.toString()
     }
 
-    return JSON.stringify(value)
+    // for JQ conformance
+    const replacer = (key, value) =>
+      value ===  Infinity ?  Number.MAX_VALUE :
+      value === -Infinity ? -Number.MAX_VALUE :
+      value
+
+    return JSON.stringify(value, replacer)
   }
 
   const toArray = (stream) => {
