@@ -1,9 +1,5 @@
 {
   const Functions0 = {
-    // Bad
-    "tonumber": input => input * 1,
-
-    // Good
     'ascii_downcase': input => {
       /*
         https://github.com/stedolan/jq/blob/master/src/builtin.jq#L200
@@ -158,6 +154,34 @@
       const entries = Object.entries(input)
       convert(entries, ([key, value]) => ({ key, value }))
       return entries
+    },
+    'tonumber': input => {
+      if (isNumber(input)) {
+        return input
+      }
+
+      if (isString(input)) {
+        let string = input.trim()
+        if (string) {
+          const number = +string
+          if (!Number.isNaN(number)) {
+            return number
+          }
+
+          string = string.toLowerCase()
+          if (string === 'nan' || string === '+nan' || string === '-nan') {
+            return NaN
+          }
+          if (string === 'infinity' || string === '+infinity') {
+            return Infinity
+          }
+          if (string === '-infinity') {
+            return -Infinity
+          }
+        }
+      }
+
+      throw new Error(`${_mtype_v(input)} cannot be parsed as a number.`)
     },
     'tostring': input => {
       if (isString(input)) {
