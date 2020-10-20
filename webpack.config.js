@@ -15,13 +15,19 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.pegjs$/,
-        use: ['babel-loader', 'pegjs-loader'],
-      },
-      {
         test: /\.js$/,
         exclude: /node_modules/,
         use: 'babel-loader',
+      },
+      {
+        resource: __dirname + '/src/jq.pegjs',
+        use: [
+          'babel-loader',
+          {
+            loader: 'pegjs-loader',
+            options: 'dependencies={"jq":"./compiler.js"}',
+          },
+        ],
       },
     ]
   }
