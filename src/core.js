@@ -11,8 +11,16 @@ export const add = (a, b) => {
   if (b === null) {
     return a
   }
-  if (isNumber(a) && isNumber(b)) {
-    return a + b
+
+  if (isNumber(a)) {
+    if (isNumber(b)) {
+      return a + b
+    }
+  }
+  else if (isString(a)) {
+    if (isString(b)) {
+      return a + b
+    }
   }
 
   throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be added.`)
