@@ -22,6 +22,11 @@ export const add = (a, b) => {
       return a + b
     }
   }
+  else if (isArray(a)) {
+    if (isArray(b)) {
+      return [...a, ...b]
+    }
+  }
 
   throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be added.`)
 }
