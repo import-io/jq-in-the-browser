@@ -896,13 +896,6 @@
       1
     ]
   ],
-  ["with_entries", [
-    "with_entries({key: .key, value: (2 * .value)})",
-    "with_entries({key: \"a\", value: (2 * .value)})"
-  ], [
-    {"foo": 2, "bar": -1},
-    {"a": 2, "_": -1, "??": 0}
-  ]],
   [
     "ascii_downcase, ascii_upcase",
     [
@@ -1299,6 +1292,36 @@
       null, false, true, 0, -0, 123, -123, 1.23, -1.23, 0.123, -0.123,
       "", " ", "foo", " bar", "bar ", " baz ",
       [], {}
+    ]
+  ],
+  [
+    "with_entries",
+    [
+      "with_entries(.)",
+      "with_entries({key})",
+      "with_entries({key, value})",
+      "with_entries({key: .value | tostring, value: .key})",
+      "with_entries({key, value: .value | (. + 10)})",
+      "with_entries({key, value: .value | (. + 10, . + 20)})",
+      "with_entries({key, value: .value | empty})",
+      "with_entries({key, value: .value | select(. < 2)})",
+      "with_entries({key, value: .value | select(. < 2, . < 3)})",
+      "{} | with_entries(.)",
+      "[] | with_entries(.)",
+      "[1, 2, 3, 0] | with_entries({key: .key | tostring, value})"
+    ],
+    [
+      { "a": 1, "b": 2, "c": 3, "d": 0 }
+    ]
+  ],
+  [
+    "with_entries - errors",
+    [
+      "with_entries(.)"
+    ],
+    [
+      null, false, 3, "foo",
+      [1, 2, 3, 0]
     ]
   ],
   ["join", ["join(\", \")", "join(\"\")", "join(.[0])"], [["a","b,c,d","e"], ["foo"], [], ["foo", "bar"]]],

@@ -65,7 +65,7 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * tonumber
 * tostring
 * true
-* with_entries (incomplete)
+* with_entries
 * upcase (non-standard extension, see below)
 
 The extension functions "downcase" and "upcase" are not present in standard JQ. They differ from

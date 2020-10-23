@@ -139,7 +139,10 @@ fn0['length'] = (input) => {
   def map(f): [.[] | f];
 */
 fn1['map'] = (input, transform) => {
-  return jq.toArray(jq.map(jq.iterate(input), transform))
+  let temp = input
+  temp = jq.iterate(temp)
+  temp = jq.map(temp, transform)
+  return jq.toArray(temp)
 }
 
 /*
@@ -272,12 +275,15 @@ fn0['upcase'] = (input) => {
   return input.toUpperCase()
 }
 
-// TODO: complete
-fn1['with_entries'] = (input, arg) => {
-  const from_entries = fn0["from_entries"]
-  const to_entries = fn0["to_entries"]
-  const mapped = to_entries(input).map(arg)
-  return from_entries(mapped)
+/*
+  https://github.com/stedolan/jq/blob/master/src/builtin.jq#L25
+  def with_entries(f): to_entries | map(f) | from_entries;
+*/
+fn1['with_entries'] = (input, transform) => {
+  let temp = input
+  temp = fn0.to_entries(temp)
+  temp = fn1.map(temp, transform)
+  return fn0.from_entries(temp)
 }
 
 Object.freeze(fn0)
