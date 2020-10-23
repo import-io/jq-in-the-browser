@@ -245,6 +245,20 @@ export const dotName = (value, name, optional) => {
   return has(value, name) ? value[name] : null
 }
 
+export const first = (stream) => {
+  if (stream === undefined) {
+    return undefined
+  }
+  if (!isStream(stream)) {
+    return stream
+  }
+  if (!stream.items.length) {
+    return undefined
+  }
+
+  return stream.items[0]
+}
+
 export const forEach = (stream, fn) => {
   if (stream === undefined) {
     return undefined

@@ -53,7 +53,7 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * keys_unsorted
 * length
 * map
-* map_values (incomplete)
+* map_values
 * nan
 * not
 * null

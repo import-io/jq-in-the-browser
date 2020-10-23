@@ -91,7 +91,8 @@ export const compileFunctionCall0 = (errorFn, name) => {
 
 export const compileFunctionCall1 = (errorFn, name, arg) => {
   if (jq.has(fn1, name)) {
-    return fn1[name](arg)
+    const fn = fn1[name]
+    return input => fn(input, arg)
   }
 
   errorFn(jq.has(fn0, name)

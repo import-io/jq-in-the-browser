@@ -154,6 +154,24 @@ describe('Non-conforming behaviors', () => {
       ourOutput: [NaN],
       jqwOutput: new Error('Invalid literal at EOF at line 1, column 3 (while parsing \'nan\').'),
     },
+
+    // map_values() on an array should correctly handle mapping expressions that may produce
+    // an empty stream; it should behave similar to map(), but JQ is buggy here
+    {
+      query: '[1, 2, 3, 0] | map_values(empty)',
+      ourOutput: [[]],
+      jqwOutput: [[2, 0]],
+    },
+    {
+      query: '[1, 2, 3, 0] | map_values(select(. < 2))',
+      ourOutput: [[1, 0]],
+      jqwOutput: [[1, 3, 0, null]],
+    },
+    {
+      query: '[1, 2, 3, 0] | map_values(select(. < 2, . < 3))',
+      ourOutput: [[1, 2, 0]],
+      jqwOutput: [[1, 2, 0, null]],
+    },
   ]
 
   tests.forEach(({ query, ourOutput, jqwOutput }) =>

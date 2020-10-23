@@ -896,10 +896,6 @@
       1
     ]
   ],
-  ["map_values", ["map_values(.+1 )", ". | map_values( {foo: .})"], [
-    {"a": 4, "b": 2},
-    {"a": 4, "b": -1, "c": 0}
-  ]],
   ["with_entries", [
     "with_entries({key: .key, value: (2 * .value)})",
     "with_entries({key: \"a\", value: (2 * .value)})"
@@ -1072,13 +1068,19 @@
     ]
   ],
   [
-    "map",
+    "map, map_values",
     [
       "map(.)",
       "map(. + 10)",
-      "map(., . + 10)",
+      "map(. + 10, . + 20)",
+      "map(. + 10) | map(. + 100)",
       "map(empty)",
-      "map(.) | map(.)"
+      "map(select(. < 2))",
+      "map(select(. < 2, . < 3))",
+      "map_values(.)",
+      "map_values(. + 10)",
+      "map_values(. + 10, . + 20)",
+      "map_values(. + 10) | map_values(. + 100)"
     ],
     [
       [1, 2, 3, 0],
@@ -1086,9 +1088,10 @@
     ]
   ],
   [
-    "map - errors",
+    "map, map_values - errors",
     [
-      "map(.)"
+      "map(.)",
+      "map_values(.)"
     ],
     [
       null, true, 1, "foo"
