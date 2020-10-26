@@ -94,8 +94,41 @@ fn0['isnormal'] = (input) => {
   return Number.isFinite(input) && input !== 0
 }
 
-// TODO: complete
-fn1['join'] = (input, arg) => input.join(arg(input))
+/*
+  https://github.com/stedolan/jq/blob/master/src/builtin.jq#L48
+  def join($x): reduce .[] as $i (null;
+    (if . == null then "" else . + $x end) +
+    ($i | if type == "boolean" or type == "number" then tostring else . // "" end)
+  ) // "";
+*/
+fn1['join'] = (input, separator) => {
+  const isStringArray =
+    jq.isArray(input) && input.every(jq.isString)
+
+  return jq.map(separator(input), separator => {
+    // fast path
+    if (isStringArray && (separator === null || jq.isString(separator))) {
+      return input.join(separator ?? '')
+    }
+
+    // slow path (JQ algorithm)
+    const stream = jq.iterate(input)
+    let result = ''
+
+    jq.forEach(stream, (value, index) => {
+      if (index) {
+        result = jq.add(result, separator)
+      }
+      if (jq.isBoolean(value) || jq.isNumber(value)) {
+        value = fn0.tostring(value)
+      }
+
+      result = jq.add(result, value)
+    })
+
+    return result
+  })
+}
 
 fn0['keys'] = (input) => {
   if (jq.isArray(input)) {

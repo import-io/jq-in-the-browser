@@ -297,6 +297,10 @@ export const isArray = (value) => {
   return Array.isArray(value)
 }
 
+export const isBoolean = (value) => {
+  return value === false || value === true
+}
+
 export const isEmpty = (stream) => {
   if (stream === undefined) {
     return true
