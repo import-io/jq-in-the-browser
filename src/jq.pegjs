@@ -253,8 +253,33 @@ Literal
     return jq.compileLiteral(value)
   }
 
-String 'string'
-  = '"' core: $[^"]* '"' { return core }
+String
+  = StringStart chars: StringChar* "\"" {
+    return chars.join('')
+  }
+
+StringStart 'string'
+  = "\""
+
+StringChar
+  = char: . & {
+    return char !== '"' && char !== '\\'
+  } {
+    return char
+  }
+  / "\\" char: EscapeChar {
+    return char
+  }
+
+EscapeChar
+  = "\""
+  / "\\"
+  / "/"
+  / "b" { return '\b' }
+  / "f" { return '\f' }
+  / "n" { return '\n' }
+  / "r" { return '\r' }
+  / "t" { return '\t' }
 
 Name
   = $([a-zA-Z_$] NameChar*)

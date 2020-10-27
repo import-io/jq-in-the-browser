@@ -34,6 +34,7 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * Boolean operators: `and`, `or` (and `not` as a function)
 * Alternative operator: `//`
 * If-then-else expressions: `if A then B else C end`, `if A1 then B1 elif A2 then B2 else C end`
+* Escape sequences (`\"`, `\\`, `\/`, `\b`, `\f`, `\n`, `\r`, `\t`) in string literals: `"foo\"bar"`, `"foo\nbar"`
 
 ## Supported functions
 

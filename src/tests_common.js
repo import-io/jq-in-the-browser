@@ -68,6 +68,7 @@ describe('Extension functions', () => {
 
 describe('Compile-time errors', () => {
   const tests = [
+    ['!', /^Expected .+, number,.+ but "!" found\.$/],
     ['..1', 'Invalid numeric literal "..1".'],
     ['1..', 'Invalid numeric literal "1..".'],
     ['1..2', 'Invalid numeric literal "1..2".'],
@@ -76,6 +77,12 @@ describe('Compile-time errors', () => {
     ['0x1', 'Invalid numeric literal "0x1".'],
     ['0b1', 'Invalid numeric literal "0b1".'],
     ['0o1', 'Invalid numeric literal "0o1".'],
+
+    ['!', /^Expected .+, or string but "!" found\.$/],
+    ['"foo', 'Expected "\\"", "\\\\", or any character but end of input found.'],
+    ['"foo\\', 'Expected "/", "\\"", "\\\\", "b", "f", "n", "r", or "t" but end of input found.'],
+    ['"foo\\"', 'Expected "\\"", "\\\\", or any character but end of input found.'],
+    ['"foo\\a"', 'Expected "/", "\\"", "\\\\", "b", "f", "n", "r", or "t" but "a" found.'],
 
     ['foo', 'Function "foo" is not defined.'],
     ['bar(4)', 'Function "bar" is not defined.'],

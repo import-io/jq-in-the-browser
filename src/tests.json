@@ -915,12 +915,24 @@
     ]
   ],
   [
-    "Double quote String literal",
+    "String literal",
     [
-      "\"true\"",
-      "\"false\"",
-      "\"foo\"",
-      "[\"ba'r\"]"
+      "\"\"",
+      "\" \"",
+      "\"1\"",
+      "\"[]\"",
+      "\"{}\"",
+      "\"foo'bar\"",
+      "\"foo/bar\"",
+      "\"foo\\\"bar\"",
+      "\"foo\\\\bar\"",
+      "\"foo\\/bar\"",
+      "\"foo\\bbar\"",
+      "\"foo\\fbar\"",
+      "\"foo\\nbar\"",
+      "\"foo\\rbar\"",
+      "\"foo\\tbar\"",
+      "\"\\\"\\/\\b\\f\\n\\r\\t\\\\\""
     ],
     [
       1
