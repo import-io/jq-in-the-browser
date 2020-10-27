@@ -23,6 +23,7 @@
       ".[-1]",
       ".[ - 1 ]",
       ".[ 1][0]",
+      ".[1] [1]",
       ".[1][1].x",
       ".[1][1].x[0]",
       ".[1][1].y[0]",
@@ -106,10 +107,27 @@
       ".or",
       ".if",
       ".bar.x",
+      ".bar .x",
       ".bar.foo",
       ".foo[1]",
+      ".foo [1]",
       ".baz",
-      ".baz.x"
+      ".baz.x",
+      ".\"\"",
+      ".\" \"",
+      ".\"foo\"",
+      ".\"foo \"",
+      ".\" foo\"",
+      ".\"hasOwnProperty\"",
+      ".\"bar\".x",
+      ".\"bar\" .x",
+      ".bar.\"foo\"",
+      ".\"foo\"[1]",
+      ".\"foo\" [1]",
+      ".\"2bar\"",
+      ".\"a b\"",
+      ".\"baz\"",
+      ".\"baz\".\"x\""
     ],
     [
       {
@@ -124,7 +142,12 @@
   [
     "Object Identifier-Index on non-object - errors",
     [
-      ".foo"
+      ".foo",
+      ".longStringlongString123456789",
+      ".longStringlongString1234567890",
+      ".\"foo\"",
+      ".\"longStringlongString123456789\"",
+      ".\"longStringlongString1234567890\""
     ],
     [
       false, 3, "foo", [1, 2]
@@ -134,7 +157,9 @@
     "Object Identifier-Index on non-object - optional",
     [
       ".foo?",
-      ".foo ?"
+      ".foo ?",
+      ".\"foo\"?",
+      ".\"foo\" ?"
     ],
     [
       false, 3, "foo", [1, 2]
@@ -150,7 +175,10 @@
       ".[\" foo\"]",
       ".[\"hasOwnProperty\"]",
       ".[\"bar\"].x",
+      ".[\"bar\"] .x",
       ".bar[ \"foo\"]",
+      ".[\"foo\"][1]",
+      ".[\"foo\"] [1]",
       ".[\"2bar\"]",
       ".[\"a b\" ]",
       ".[\"baz\"]",
@@ -182,7 +210,9 @@
   [
     "Generic Object Index on non-object - errors",
     [
-      ".[\"foo\"]"
+      ".[\"foo\"]",
+      ".[\"longStringlongString123456789\"]",
+      ".[\"longStringlongString1234567890\"]"
     ],
     [
       false, 3, "foo", [1, 2]

@@ -100,6 +100,13 @@ tests.forEach(([feature, queries, inputs]) => {
 
 describe('Non-conforming behaviors', () => {
   const tests = [
+    // we don't want to allow a whitespace between "." and a string literal, like JQ does
+    {
+      query: '{foo: 1} | . "foo"',
+      ourOutput: /SyntaxError: Expected .+ but "\\"" found\./,
+      jqwOutput: [1],
+    },
+
     // in non-equality comparisons, NaN should be considered equal to NaN
     // to ensure proper work of the sorting algorithm
     {
@@ -132,7 +139,7 @@ describe('Non-conforming behaviors', () => {
     {
       query: 'nan | tostring | tonumber',
       ourOutput: [NaN],
-      jqwOutput: new Error('string ("null") cannot be parsed as a number.'),
+      jqwOutput: 'Error: string ("null") cannot be parsed as a number.',
     },
 
     // round-trip conversion "infinite | tostring | tonumber" should work
@@ -152,7 +159,7 @@ describe('Non-conforming behaviors', () => {
     {
       query: '"nan" | tonumber',
       ourOutput: [NaN],
-      jqwOutput: new Error('Invalid literal at EOF at line 1, column 3 (while parsing \'nan\').'),
+      jqwOutput: 'Error: Invalid literal at EOF at line 1, column 3 (while parsing \'nan\').',
     },
 
     // map_values() on an array should correctly handle mapping expressions that may produce
@@ -176,15 +183,23 @@ describe('Non-conforming behaviors', () => {
 
   tests.forEach(({ query, ourOutput, jqwOutput }) =>
     it('Query: ' + query, () => {
-      const actual = {
-        ourOutput: jq(query)(null),
+      const actual = {}
+
+      try {
+        actual.ourOutput = jq(query)(null)
+      }
+      catch (e) {
+        actual.ourOutput = e.toString()
+        if (ourOutput instanceof RegExp && ourOutput.test(actual.ourOutput)) {
+          ourOutput = actual.ourOutput
+        }
       }
 
       try {
         actual.jqwOutput = jqw(null, query)
       }
       catch (e) {
-        actual.jqwOutput = e
+        actual.jqwOutput = e.toString()
       }
 
       assert.deepStrictEqual(actual, { ourOutput, jqwOutput })

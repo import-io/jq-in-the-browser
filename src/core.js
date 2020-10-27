@@ -239,7 +239,8 @@ export const dotName = (value, name, optional) => {
   }
   if (!isObject(value)) {
     if (optional) return undefined
-    throw new Error(`Cannot index ${_mtype(value)} with string "${name}".`)
+    const safeName = name.length < 30 ? `string "${name}"` : 'string'
+    throw new Error(`Cannot index ${_mtype(value)} with ${safeName}.`)
   }
 
   return has(value, name) ? value[name] : null

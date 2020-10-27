@@ -239,7 +239,7 @@ Dot
   }
 
 DotName
-  = "." name: Name optional: Opt {
+  = "." name: (Name / String) optional: Opt {
     return jq.compileDotName(name, optional)
   }
 
