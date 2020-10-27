@@ -255,7 +255,6 @@ Literal
 
 String 'string'
   = '"' core: $[^"]* '"' { return core }
-  / "'" core: $[^']* "'" { return core }
 
 Name
   = $([a-zA-Z_$] NameChar*)

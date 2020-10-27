@@ -48,16 +48,6 @@ describe('Error location', () => {
   )
 })
 
-describe('Single quote String literal', () => {
-  it('per se', () => {
-    assert.deepStrictEqual(jq("'Hello \"World\"!'")(null), ['Hello "World"!'])
-  })
-
-  it('as key', () => {
-    assert.deepStrictEqual(jq("{'a': false}")(null), [{'a': false}])
-  })
-})
-
 describe('Extension functions', () => {
   it('downcase', () => {
     const query = '.greeting | downcase'
