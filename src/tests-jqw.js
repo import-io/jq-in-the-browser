@@ -1,7 +1,7 @@
 import assert from 'assert'
 import jq_web from 'jq-web'
 import jq from './index.js'
-import tests from './tests.json'
+import tests from './tests-jqw.json'
 
 // A fixed version of jq_web.json, which resolves the following issues:
 //
