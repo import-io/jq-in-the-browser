@@ -183,7 +183,7 @@ FunctionName 'function name'
 
 ArrayConstruction
   = "[" _ "]" {
-    return jq.compileLiteral([])
+    return () => []
   }
   / "[" _ items: Expr _ "]" {
     return jq.compileArrayConstruction(items)
@@ -191,7 +191,7 @@ ArrayConstruction
 
 ObjectConstruction
   = "{" _ "}" {
-    return jq.compileLiteral({})
+    return () => ({})
   }
   / "{" _ first: ObjectEntry rest: (_ "," _ ObjectEntry)* (_ ",")? _ "}" {
     if (!rest.length) {
@@ -212,7 +212,7 @@ ObjectEntry
 
 ObjectKey
   = name: (Name / String) {
-    return jq.compileLiteral(name)
+    return () => name
   }
   / Parens
 
@@ -250,7 +250,7 @@ Opt
 
 Literal
   = value: (String / Number) {
-    return jq.compileLiteral(value)
+    return () => value
   }
 
 String

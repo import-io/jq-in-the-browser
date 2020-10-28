@@ -135,10 +135,6 @@ export const compileIterator = (optional) => {
   return input => jq.iterate(input, optional)
 }
 
-export const compileLiteral = (value) => {
-  return input => value
-}
-
 export const compileLogicalAnd = (first, rest) => {
   const prep = (input, expr) =>
     jq.map(expr(input), jq.isTrue)

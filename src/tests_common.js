@@ -145,3 +145,26 @@ describe('Run-time errors', () => {
     })
   )
 })
+
+describe('Don\'t return cached instances of objects', () => {
+  const queries = [
+    'empty',
+    '[]',
+    '{}',
+  ]
+
+  const output = [3]
+
+  queries.forEach(query =>
+    it('Query: ' + query, () => {
+      const compiledQuery = jq(query)
+      const output1 = compiledQuery(null)
+      const output2 = compiledQuery(null)
+
+      assert.notStrictEqual(output2, output1)
+      if (output2.length) {
+        assert.notStrictEqual(output2[0], output1[0])
+      }
+    })
+  )
+})
