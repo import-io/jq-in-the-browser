@@ -51,16 +51,16 @@ describe('Error location', () => {
 describe('Extension functions', () => {
   it('downcase', () => {
     const query = '.greeting | downcase'
-    const input = { "greeting": "Hello, МИР! © 2020\nПривет, WORLD!" }
-    const output = ["hello, мир! © 2020\nпривет, world!"]
+    const input = { greeting: 'Hello, МИР! © 2020\nПривет, WORLD!' }
+    const output = ['hello, мир! © 2020\nпривет, world!']
 
     assert.deepStrictEqual(jq(query)(input), output)
   })
 
   it('upcase', () => {
     const query = '.greeting | upcase'
-    const input = { "greeting": "Hello, МИР! © 2020\nПривет, WORLD!" }
-    const output = ["HELLO, МИР! © 2020\nПРИВЕТ, WORLD!"]
+    const input = { greeting: 'Hello, МИР! © 2020\nПривет, WORLD!' }
+    const output = ['HELLO, МИР! © 2020\nПРИВЕТ, WORLD!']
 
     assert.deepStrictEqual(jq(query)(input), output)
   })
@@ -173,8 +173,6 @@ describe('Don\'t return cached instances of objects', () => {
     '[]',
     '{}',
   ]
-
-  const output = [3]
 
   queries.forEach(query =>
     it('Query: ' + query, () => {

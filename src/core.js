@@ -262,10 +262,11 @@ export const first = (stream) => {
 
 export const forEach = (stream, fn) => {
   if (stream === undefined) {
-    return undefined
+    return
   }
   if (!isStream(stream)) {
-    return fn(stream)
+    fn(stream)
+    return
   }
 
   stream.items.forEach(fn)
@@ -479,10 +480,10 @@ export const toArray = (stream) => {
 }
 
 const toStream = (array) => {
-  if (array.length == 0) {
+  if (array.length === 0) {
     return undefined
   }
-  if (array.length == 1) {
+  if (array.length === 1) {
     return array[0]
   }
 

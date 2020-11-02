@@ -46,22 +46,22 @@ const substMessage = (query, input) => {
     if (e.message === 'Cannot index array with object.') {
       e.message = 'Start and end indices of an array slice must be numbers.'
     }
-    else if (m = e.message.match(/^(\w+) .+ cannot be reversed\b/)) {
+    else if ((m = e.message.match(/^(\w+) .+ cannot be reversed\b/))) {
       e.message = `Cannot index ${m[1]} with number.`
     }
-    else if (m = e.message.match(/^string \("([+-]\s.*)"\) cannot be parsed as a number\.$/)) {
+    else if ((m = e.message.match(/^string \("([+-]\s.*)"\) cannot be parsed as a number\.$/))) {
       e.message = `Invalid numeric literal at line 1, column 2 (while parsing '${m[1]}').`
     }
-    else if (m = e.message.match(/^string \("([0-9.+-]+\s.*)"\) cannot be parsed as a number\.$/)) {
+    else if ((m = e.message.match(/^string \("([0-9.+-]+\s.*)"\) cannot be parsed as a number\.$/))) {
       e.message = `Unexpected extra JSON values (while parsing '${m[1]}').`
     }
-    else if (m = e.message.match(/^string \("([0-9.+-].*)"\) cannot be parsed as a number\.$/)) {
+    else if ((m = e.message.match(/^string \("([0-9.+-].*)"\) cannot be parsed as a number\.$/))) {
       e.message = `Invalid numeric literal at EOF at line 1, column ${m[1].length} (while parsing '${m[1]}').`
     }
-    else if (m = e.message.match(/^string \("(\s*)"\) cannot be parsed as a number\.$/)) {
+    else if ((m = e.message.match(/^string \("(\s*)"\) cannot be parsed as a number\.$/))) {
       e.message = `Expected JSON value (while parsing '${m[1]}').`
     }
-    else if (m = e.message.match(/^string \("(.*)"\) cannot be parsed as a number\.$/)) {
+    else if ((m = e.message.match(/^string \("(.*)"\) cannot be parsed as a number\.$/))) {
       e.message = `Invalid literal at EOF at line 1, column ${m[1].length} (while parsing '${m[1]}').`
     }
     else {

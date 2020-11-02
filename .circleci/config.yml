@@ -20,6 +20,7 @@ jobs:
       - run:
           name: test
           command: |
+            npm run lint
             npm test
             npm run build
       - run:

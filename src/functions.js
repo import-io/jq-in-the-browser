@@ -37,11 +37,11 @@ fn0['downcase'] = (input) => {
   return input.toLowerCase()
 }
 
-fn0['empty'] = (input) => {
+fn0['empty'] = () => {
   return undefined // an empty stream
 }
 
-fn0['false'] = (input) => {
+fn0['false'] = () => {
   return false
 }
 
@@ -70,7 +70,7 @@ fn0['from_entries'] = (input) => {
   return result
 }
 
-fn0['infinite'] = (input) => {
+fn0['infinite'] = () => {
   return Infinity
 }
 
@@ -199,7 +199,7 @@ fn1['map_values'] = (input, transform) => {
   return result
 }
 
-fn0['nan'] = (input) => {
+fn0['nan'] = () => {
   return NaN
 }
 
@@ -207,7 +207,7 @@ fn0['not'] = (input) => {
   return !jq.isTrue(input)
 }
 
-fn0['null'] = (input) => {
+fn0['null'] = () => {
   return null
 }
 
@@ -296,7 +296,7 @@ fn0['tostring'] = (input) => {
   return jq.stringify(input)
 }
 
-fn0['true'] = (input) => {
+fn0['true'] = () => {
   return true
 }
 

@@ -84,7 +84,7 @@ export const compileFunctionCall0 = (errorFn, name) => {
     return fn0[name]
   }
 
-  errorFn(jq.has(fn1, name)
+  return errorFn(jq.has(fn1, name)
     ? `Function "${name}" requires a parameter.`
     : `Function "${name}" is not defined.`)
 }
@@ -97,7 +97,7 @@ export const compileFunctionCall1 = (errorFn, name, arg) => {
       : (input) => fn(input, arg)
   }
 
-  errorFn(jq.has(fn0, name)
+  return errorFn(jq.has(fn0, name)
     ? `Function "${name}" accepts no parameters.`
     : `Function "${name}" is not defined.`)
 }
