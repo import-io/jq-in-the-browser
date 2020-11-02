@@ -78,11 +78,31 @@ describe('Compile-time errors', () => {
     ['0b1', 'Invalid numeric literal "0b1".'],
     ['0o1', 'Invalid numeric literal "0o1".'],
 
-    ['!', /^Expected .+, or string but "!" found\.$/],
+    ['!', /^Expected .+, string,.+ but "!" found\.$/],
     ['"foo', 'Expected "\\"", "\\\\", or any character but end of input found.'],
     ['"foo\\', 'Expected "/", "\\"", "\\\\", "b", "f", "n", "r", or "t" but end of input found.'],
     ['"foo\\"', 'Expected "\\"", "\\\\", or any character but end of input found.'],
     ['"foo\\a"', 'Expected "/", "\\"", "\\\\", "b", "f", "n", "r", or "t" but "a" found.'],
+
+    ['!', /^Expected .+, or variable name but "!" found\.$/],
+    ['$', 'Expected name but end of input found.'],
+    ['$$', 'Expected name but "$" found.'],
+    ['$1', 'Expected name but "1" found.'],
+    ['$foo', 'Variable "$foo" is not defined.'],
+    ['$as', 'Variable "$as" is not defined.'],
+    ['$if', 'Variable "$if" is not defined.'],
+
+    ['1 as', 'Expected space or variable name but end of input found.'],
+    ['1 as234', 'Expected space or variable name but "2" found.'],
+    ['1 asfoo', 'Expected space or variable name but "f" found.'],
+    ['1 as $foo', 'Expected "|" or space but end of input found.'],
+
+    ['(1 as $foo | 2) | $foo', 'Variable "$foo" is not defined.'],
+    ['(1 as $foo | 2) + $foo', 'Variable "$foo" is not defined.'],
+    ['if 1 as $foo | 2 then $foo else 3 end', 'Variable "$foo" is not defined.'],
+    ['if 1 as $foo | 2 then 3 else $foo end', 'Variable "$foo" is not defined.'],
+    ['if 1 as $foo | 2 then 3 else 4 end | $foo', 'Variable "$foo" is not defined.'],
+    ['if 1 as $foo | 2 then 3 else 4 end + $foo', 'Variable "$foo" is not defined.'],
 
     ['foo', 'Function "foo" is not defined.'],
     ['bar(4)', 'Function "bar" is not defined.'],
@@ -90,6 +110,7 @@ describe('Compile-time errors', () => {
     ['empty(4)', 'Function "empty" accepts no parameters.'],
 
     ['and', /^Expected .+, function name,.+ but "a" found\.$/],
+    ['as', /^Expected .+, function name,.+ but "a" found\.$/],
     ['elif', /^Expected .+, function name,.+ but "e" found\.$/],
     ['else', /^Expected .+, function name,.+ but "e" found\.$/],
     ['end', /^Expected .+, function name,.+ but "e" found\.$/],

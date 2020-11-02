@@ -1,6 +1,7 @@
 {
   const Keywords = [
     'and',
+    'as',
     'elif',
     'else',
     'end',
@@ -16,6 +17,32 @@
 
     rest = rest.map(rest => rest[3])
     return jq.compilePipe(first, rest)
+  }
+
+  const variables = []
+
+  const resolveVariable = (name) => {
+    const index = variables.indexOf(name)
+    if (index >= 0) {
+      return index
+    }
+
+    error(`Variable "$${name}" is not defined.`)
+  }
+
+  // Hook parsing of VariableExpr so that the variable defined by that expression
+  // is not visible outside of it.
+
+  {
+    const parse = peg$parseVariableExpr
+    peg$parseVariableExpr = () => {
+      const count = variables.length
+      const result = parse()
+
+      // discard the inner variable after the end of the expression
+      variables.length = count
+      return result
+    }
   }
 }
 
@@ -75,12 +102,12 @@ LogicalAnd
   }
 
 Compare
-  = left: AddSub right: (_ CompareOp _ AddSub)? {
-    if (!right) {
+  = left: AddSub tail: (_ CompareOp _ AddSub)? {
+    if (!tail) {
       return left
     }
 
-    const op = right[1]; right = right[3]
+    const [, op,, right] = tail
     return jq.compileCompare(left, right, op)
   }
 
@@ -122,7 +149,7 @@ MulDivOp
   / "%" { return jq.modulo }
 
 Negation
-  = minuses: ("-" _)* right: (IfThenElse / Filter) {
+  = minuses: ("-" _)* right: (IfThenElse / VariableExpr) {
     const count = minuses.length
     if (!count) {
       return right
@@ -144,6 +171,27 @@ Else
     return jq.compileIfThenElse(cond, left, right)
   }
 
+VariableExpr
+  = left: Filter tail: (_ "as" _ VariableDecl _ "|" _ Expr)? {
+    if (!tail) {
+      return left
+    }
+
+    const [,,, index,,,, right] = tail
+    return jq.compileVariableExpr(left, right, index)
+  }
+
+VariableDecl
+  = name: VariableName {
+    let index = variables.indexOf(name)
+    if (index < 0) {
+      index = variables.length
+      variables.push(name)
+    }
+
+    return index
+  }
+
 Filter
   = first: FilterHead rest: (_ Transform)* {
     if (!rest.length) {
@@ -161,25 +209,11 @@ FilterHead
   / Literal
   / DotName
   / Dot
+  / VariableRef
   / FunctionCall
 
 Parens
   = "(" _ expr: Expr _ ")" { return expr }
-
-FunctionCall
-  = name: FunctionName _ "(" _ arg: Expr _ ")" {
-    return jq.compileFunctionCall1(error, name, arg)
-  }
-  / name: FunctionName {
-    return jq.compileFunctionCall0(error, name)
-  }
-
-FunctionName 'function name'
-  = name: Name & {
-    return !Keywords.includes(name)
-  } {
-    return name
-  }
 
 ArrayConstruction
   = "[" _ "]" {
@@ -206,8 +240,12 @@ ObjectEntry
   = key: ObjectKey _ ":" _ value: ExprSimple {
     return jq.compileObjectEntry(key, value)
   }
-  / key: (Name / String) {
-    return jq.compileObjectEntryShort(key)
+  / name: VariableName {
+    const index = resolveVariable(name)
+    return jq.compileObjectEntryFromVariable(name, index)
+  }
+  / name: (Name / String) {
+    return jq.compileObjectEntryFromName(name)
   }
 
 ObjectKey
@@ -215,6 +253,50 @@ ObjectKey
     return () => name
   }
   / Parens
+
+Literal
+  = value: (String / Number) {
+    return () => value
+  }
+
+DotName
+  = "." name: (Name / String) optional: Opt {
+    return jq.compileDotName(name, optional)
+  }
+
+Dot
+  = "." {
+    return jq.compileDot()
+  }
+
+VariableRef
+  = name: VariableName {
+    const index = resolveVariable(name)
+    return jq.compileVariableRef(index)
+  }
+
+VariableName
+  = VariableStart name: Name {
+    return name
+  }
+
+VariableStart 'variable name'
+  = "$"
+
+FunctionCall
+  = name: FunctionName _ "(" _ arg: Expr _ ")" {
+    return jq.compileFunctionCall1(error, name, arg)
+  }
+  / name: FunctionName {
+    return jq.compileFunctionCall0(error, name)
+  }
+
+FunctionName 'function name'
+  = name: Name & {
+    return !Keywords.includes(name)
+  } {
+    return name
+  }
 
 Transform
   = BracketTransform
@@ -233,24 +315,9 @@ BracketTransform
     return jq.compileSlice(start, end, optional)
   }
 
-Dot
-  = "." {
-    return jq.compileDot()
-  }
-
-DotName
-  = "." name: (Name / String) optional: Opt {
-    return jq.compileDotName(name, optional)
-  }
-
 Opt
   = tag: (_ "?")? {
     return !!tag
-  }
-
-Literal
-  = value: (String / Number) {
-    return () => value
   }
 
 String
@@ -281,11 +348,11 @@ EscapeChar
   / "r" { return '\r' }
   / "t" { return '\t' }
 
-Name
-  = $([a-zA-Z_$] NameChar*)
+Name 'name'
+  = $([a-zA-Z_] NameChar*)
 
 NameChar
-  = [0-9a-zA-Z_$]
+  = [a-zA-Z_0-9]
 
 B$ // name boundary
   = !NameChar / SpaceChar

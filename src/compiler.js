@@ -13,50 +13,50 @@ export {
 } from './core.js'
 
 export const compileAddMul = (first, rest) => {
-  const reducer = input => (left, next) =>
-    jq.product(left, next.expr(input), next.op)
+  const reducer = (input, vars) => (left, next) =>
+    jq.product(left, next.expr(input, vars), next.op)
 
-  return input => reduce(
-    first(input), rest, jq.isEmpty, reducer(input))
+  return (input, vars) => reduce(
+    first(input, vars), rest, jq.isEmpty, reducer(input, vars))
 }
 
 export const compileAlternative = (first, rest) => {
   const last = rest[rest.length - 1]
   --rest.length
 
-  const prep = (input, expr) =>
-    jq.map(expr(input), jq.ifTrue)
+  const prep = (input, vars, expr) =>
+    jq.map(expr(input, vars), jq.ifTrue)
 
   const stop = left =>
     !jq.isEmpty(left)
 
-  const reducer = input => (left, next) =>
-    prep(input, next)
+  const reducer = (input, vars) => (left, next) =>
+    prep(input, vars, next)
 
-  return input => {
+  return (input, vars) => {
     const result = reduce(
-      prep(input, first), rest, stop, reducer(input))
+      prep(input, vars, first), rest, stop, reducer(input, vars))
 
     if (!jq.isEmpty(result)) {
       return result
     }
 
-    return last(input)
+    return last(input, vars)
   }
 }
 
 export const compileArrayConstruction = (items) => {
-  return input => jq.toArray(items(input))
+  return (input, vars) => jq.toArray(items(input, vars))
 }
 
 export const compileCompare = (left, right, op) => {
-  return input => {
-    const left_ = left(input)
+  return (input, vars) => {
+    const left_ = left(input, vars)
     if (jq.isEmpty(left_)) {
       return undefined
     }
 
-    return jq.product(left_, right(input), op)
+    return jq.product(left_, right(input, vars), op)
   }
 }
 
@@ -65,18 +65,18 @@ export const compileDot = () => {
 }
 
 export const compileDotName = (name, optional) => {
-  return input => jq.dotName(input, name, optional)
+  return (input) => jq.dotName(input, name, optional)
 }
 
 export const compileFilter = (first, rest) => {
-  const reducer = input => (left, next) => {
+  const reducer = (input, vars) => (left, next) => {
     return jq.has(next, 'arg')
-      ? jq.product(left, next.arg(input), next)
-      : jq.map(left, next)
+      ? jq.product(left, next.arg(input, vars), next)
+      : jq.map(left, next) // vars are not passed to transforms
   }
 
-  return input => reduce(
-    first(input), rest, jq.isEmpty, reducer(input))
+  return (input, vars) => reduce(
+    first(input, vars), rest, jq.isEmpty, reducer(input, vars))
 }
 
 export const compileFunctionCall0 = (errorFn, name) => {
@@ -92,7 +92,9 @@ export const compileFunctionCall0 = (errorFn, name) => {
 export const compileFunctionCall1 = (errorFn, name, arg) => {
   if (jq.has(fn1, name)) {
     const fn = fn1[name]
-    return input => fn(input, arg)
+    return arg.length === 2 // needs vars
+      ? (input, vars) => fn(input, input => arg(input, vars))
+      : (input) => fn(input, arg)
   }
 
   errorFn(jq.has(fn0, name)
@@ -101,8 +103,8 @@ export const compileFunctionCall1 = (errorFn, name, arg) => {
 }
 
 export const compileIfThenElse = (cond, left, right) => {
-  return input => jq.map(cond(input),
-    cond => jq.isTrue(cond) ? left(input) : right(input))
+  return (input, vars) => jq.map(cond(input, vars),
+    cond => jq.isTrue(cond) ? left(input, vars) : right(input, vars))
 }
 
 export const compileIndex = (index, optional) => {
@@ -136,41 +138,41 @@ export const compileIterator = (optional) => {
 }
 
 export const compileLogicalAnd = (first, rest) => {
-  const prep = (input, expr) =>
-    jq.map(expr(input), jq.isTrue)
+  const prep = (input, vars, expr) =>
+    jq.map(expr(input, vars), jq.isTrue)
 
   const stop = left =>
     !jq.includes(left, true)
 
-  const reducer = input => (left, next) => {
-    next = prep(input, next)
+  const reducer = (input, vars) => (left, next) => {
+    next = prep(input, vars, next)
     return jq.map(left, left => left && next)
   }
 
-  return input => reduce(
-    prep(input, first), rest, stop, reducer(input))
+  return (input, vars) => reduce(
+    prep(input, vars, first), rest, stop, reducer(input, vars))
 }
 
 export const compileLogicalOr = (first, rest) => {
-  const prep = (input, expr) =>
-    jq.map(expr(input), jq.isTrue)
+  const prep = (input, vars, expr) =>
+    jq.map(expr(input, vars), jq.isTrue)
 
   const stop = left =>
     !jq.includes(left, false)
 
-  const reducer = input => (left, next) => {
-    next = prep(input, next)
+  const reducer = (input, vars) => (left, next) => {
+    next = prep(input, vars, next)
     return jq.map(left, left => left || next)
   }
 
-  return input => reduce(
-    prep(input, first), rest, stop, reducer(input))
+  return (input, vars) => reduce(
+    prep(input, vars, first), rest, stop, reducer(input, vars))
 }
 
 export const compileNegation = (count, right) => {
   count %= 2
 
-  return input => jq.map(right(input), right => {
+  return (input, vars) => jq.map(right(input, vars), right => {
     if (!jq.isNumber(right)) {
       throw new Error(`${jq._mtype_v(right)} cannot be negated.`)
     }
@@ -183,27 +185,33 @@ export const compileNegation = (count, right) => {
 }
 
 export const compileObjectConstruction = (first, rest) => {
-  const reducer = input => (left, next) => jq.product(next(input), left,
-    (next, left) => ({ ...left, ...next }))
+  const reducer = (input, vars) => (left, next) => {
+    return jq.product(next(input, vars), left,
+      (next, left) => ({ ...left, ...next }))
+  }
 
-  return input => reduce(
-    first(input), rest, jq.isEmpty, reducer(input))
+  return (input, vars) => reduce(
+    first(input, vars), rest, jq.isEmpty, reducer(input, vars))
 }
 
 export const compileObjectEntry = (key, value) => {
-  return input => {
-    const key_ = key(input)
+  return (input, vars) => {
+    const key_ = key(input, vars)
     if (jq.isEmpty(key_)) {
       return undefined
     }
 
-    return jq.product(value(input), key_,
+    return jq.product(value(input, vars), key_,
       (value, key) => ({ [jq.checkKey(key)]: value }))
   }
 }
 
-export const compileObjectEntryShort = (key) => {
-  return input => ({ [key]: jq.dotName(input, key) })
+export const compileObjectEntryFromName = (name) => {
+  return (input) => ({ [name]: jq.dotName(input, name) })
+}
+
+export const compileObjectEntryFromVariable = (name, index) => {
+  return (input, vars) => ({ [name]: vars[index] })
 }
 
 export const compileOutput = (expr) => {
@@ -212,12 +220,17 @@ export const compileOutput = (expr) => {
       return []
     }
 
-    return jq.toArray(expr(input))
+    const vars = Object.freeze([])
+    return jq.toArray(expr(input, vars))
   }
 }
 
 export const compilePipe = (first, rest) => {
-  return input => reduce(first(input), rest, jq.isEmpty, jq.map)
+  const reducer = vars => (left, next) =>
+    jq.map(left, left => next(left, vars))
+
+  return (input, vars) => reduce(
+    first(input, vars), rest, jq.isEmpty, reducer(vars))
 }
 
 export const compileSlice = (start, end, optional) => {
@@ -247,13 +260,13 @@ export const compileSlice = (start, end, optional) => {
     return input.slice(start, end)
   }
 
-  transform.arg = input => {
-    const start_ = start(input)
+  transform.arg = (input, vars) => {
+    const start_ = start(input, vars)
     if (jq.isEmpty(start_)) {
       return undefined
     }
 
-    return jq.product(end(input), start_,
+    return jq.product(end(input, vars), start_,
       (end, start) => [start, end])
   }
 
@@ -262,7 +275,21 @@ export const compileSlice = (start, end, optional) => {
 
 export const compileStream = (first, rest) => {
   const all = [first, ...rest]
-  return input => jq.concat(all.map(expr => expr(input)))
+  return (input, vars) => jq.concat(all.map(
+    expr => expr(input, vars)))
+}
+
+export const compileVariableExpr = (left, right, index) => {
+  return (input, vars) => jq.map(left(input, vars), left => {
+    const newVars = [...vars]
+    newVars[index] = left
+    Object.freeze(newVars)
+    return right(input, newVars)
+  })
+}
+
+export const compileVariableRef = (index) => {
+  return (input, vars) => vars[index]
 }
 
 const reduce = (left, rest, stop, fn) => {

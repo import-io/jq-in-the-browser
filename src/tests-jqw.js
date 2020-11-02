@@ -107,6 +107,18 @@ describe('Non-conforming behaviors', () => {
       jqwOutput: [1],
     },
 
+    // we don't want to allow a whitespace between "$" and a variable name, like JQ does
+    {
+      query: '1 as $foo | $ foo',
+      ourOutput: 'SyntaxError: Expected name but " " found.',
+      jqwOutput: [1],
+    },
+    {
+      query: '1 as $ foo | $foo',
+      ourOutput: 'SyntaxError: Expected name but " " found.',
+      jqwOutput: [1],
+    },
+
     // in non-equality comparisons, NaN should be considered equal to NaN
     // to ensure proper work of the sorting algorithm
     {
