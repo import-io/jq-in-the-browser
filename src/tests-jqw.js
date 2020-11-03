@@ -1,6 +1,6 @@
 import assert from 'assert'
 import jq_web from 'jq-web'
-import jq from './index.js'
+import * as jq from './index.js'
 import tests from './tests-jqw.json'
 
 // A fixed version of jq_web.json, which resolves the following issues:
@@ -83,11 +83,11 @@ tests.forEach(([feature, queries, inputs]) => {
               let message
               assert.throws(() => jqw(input, query), e => { message = e.message; return true })
 
-              const compiledQuery = jq(query)
+              const compiledQuery = jq.compile(query)
               assert.throws(() => substMessage(compiledQuery, input), { message })
             }
             else {
-              const ourOutput = jq(query)(input)
+              const ourOutput = jq.compile(query)(input)
               const jqwOutput = jqw(input, query)
               assert.deepStrictEqual(ourOutput, jqwOutput)
             }
@@ -198,7 +198,7 @@ describe('Non-conforming behaviors', () => {
       const actual = {}
 
       try {
-        actual.ourOutput = jq(query)(null)
+        actual.ourOutput = jq.compile(query)(null)
       }
       catch (e) {
         actual.ourOutput = e.toString()

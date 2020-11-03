@@ -2,7 +2,7 @@ import * as jq from './core.js'
 import { fn0, fn1 } from './functions.js'
 
 // bindings for binary operators
-export {
+export const {
   areEqual, // "==", "!="
   compare,  // "<=", "<", ">=", ">"
   add,      // "+"
@@ -10,7 +10,7 @@ export {
   multiply, // "*"
   divide,   // "/"
   modulo,   // "%"
-} from './core.js'
+} = jq
 
 export const compileAddMul = (first, rest) => {
   const reducer = (input, vars) => (left, next) =>

@@ -1,5 +1,5 @@
 import assert from 'assert'
-import jq from './index.js'
+import * as jq from './index.js'
 
 describe('Multi-line queries', () => {
   const queries = [
@@ -17,7 +17,7 @@ describe('Multi-line queries', () => {
 
   queries.forEach(query =>
     it('Query: ' + JSON.stringify(query), () => {
-      assert.deepStrictEqual(jq(query)(null), output)
+      assert.deepStrictEqual(jq.compile(query)(null), output)
     })
   )
 })
@@ -43,7 +43,7 @@ describe('Error location', () => {
 
   errors.forEach(({ query, start, end }) =>
     it('Query: ' + JSON.stringify(query), () => {
-      assert.throws(() => jq(query), { location: { start, end } })
+      assert.throws(() => jq.compile(query), { location: { start, end } })
     })
   )
 })
@@ -54,7 +54,7 @@ describe('Extension functions', () => {
     const input = { greeting: 'Hello, МИР! © 2020\nПривет, WORLD!' }
     const output = ['hello, мир! © 2020\nпривет, world!']
 
-    assert.deepStrictEqual(jq(query)(input), output)
+    assert.deepStrictEqual(jq.compile(query)(input), output)
   })
 
   it('upcase', () => {
@@ -62,7 +62,7 @@ describe('Extension functions', () => {
     const input = { greeting: 'Hello, МИР! © 2020\nПривет, WORLD!' }
     const output = ['HELLO, МИР! © 2020\nПРИВЕТ, WORLD!']
 
-    assert.deepStrictEqual(jq(query)(input), output)
+    assert.deepStrictEqual(jq.compile(query)(input), output)
   })
 })
 
@@ -149,7 +149,7 @@ describe('Compile-time errors', () => {
 
   tests.forEach(([query, error]) =>
     it(`Error '${error}' for '${query}'`, () => {
-      assert.throws(() => jq(query), { name: 'SyntaxError', message: error })
+      assert.throws(() => jq.compile(query), { name: 'SyntaxError', message: error })
     })
   )
 })
@@ -162,7 +162,7 @@ describe('Run-time errors', () => {
 
   tests.forEach(([query, error]) =>
     it(`Error '${error}' for '${query}'`, () => {
-      assert.throws(() => jq(query)(null), { message: error })
+      assert.throws(() => jq.compile(query)(null), { message: error })
     })
   )
 })
@@ -176,7 +176,7 @@ describe('Don\'t return cached instances of objects', () => {
 
   queries.forEach(query =>
     it('Query: ' + query, () => {
-      const compiledQuery = jq(query)
+      const compiledQuery = jq.compile(query)
       const output1 = compiledQuery(null)
       const output2 = compiledQuery(null)
 
