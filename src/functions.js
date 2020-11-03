@@ -10,7 +10,7 @@ export const fn1 = {}
 */
 fn0['ascii_downcase'] = (input) => {
   if (!jq.isString(input)) {
-    throw new Error('ascii_downcase input must be a string.')
+    throw new jq.DataError('ascii_downcase input must be a string.')
   }
 
   return input.replace(/[A-Z]/g, x => String.fromCharCode(x.charCodeAt(0) + 32))
@@ -23,7 +23,7 @@ fn0['ascii_downcase'] = (input) => {
 */
 fn0['ascii_upcase'] = (input) => {
   if (!jq.isString(input)) {
-    throw new Error('ascii_upcase input must be a string.')
+    throw new jq.DataError('ascii_upcase input must be a string.')
   }
 
   return input.replace(/[a-z]/g, x => String.fromCharCode(x.charCodeAt(0) - 32))
@@ -31,7 +31,7 @@ fn0['ascii_upcase'] = (input) => {
 
 fn0['downcase'] = (input) => {
   if (!jq.isString(input)) {
-    throw new Error('downcase input must be a string.')
+    throw new jq.DataError('downcase input must be a string.')
   }
 
   return input.toLowerCase()
@@ -135,7 +135,7 @@ fn0['keys'] = (input) => {
     return input.map((value, index) => index)
   }
   if (!jq.isObject(input)) {
-    throw new Error(`${jq._mtype_v(input)} has no keys.`)
+    throw new jq.DataError(`${jq._mtype_v(input)} has no keys.`)
   }
 
   return Object.keys(input).sort()
@@ -164,7 +164,7 @@ fn0['length'] = (input) => {
     return Math.abs(input)
   }
 
-  throw new Error(`${jq._mtype_v(input)} has no length.`)
+  throw new jq.DataError(`${jq._mtype_v(input)} has no length.`)
 }
 
 /*
@@ -220,7 +220,7 @@ fn0['reverse'] = (input) => {
     return [] // for JQ conformance
   }
   if (!jq.isArray(input)) {
-    throw new Error(`${jq._mtype_v(input)} cannot be reversed, as it is not an array.`)
+    throw new jq.DataError(`${jq._mtype_v(input)} cannot be reversed, as it is not an array.`)
   }
 
   return [...input].reverse()
@@ -251,7 +251,7 @@ fn0['to_entries'] = (input) => {
     return input.map((value, index) => ({ key: index, value }))
   }
   if (!jq.isObject(input)) {
-    throw new Error(`${jq._mtype_v(input)} has no keys.`)
+    throw new jq.DataError(`${jq._mtype_v(input)} has no keys.`)
   }
 
   const entries = Object.entries(input)
@@ -285,7 +285,7 @@ fn0['tonumber'] = (input) => {
     }
   }
 
-  throw new Error(`${jq._mtype_v(input)} cannot be parsed as a number.`)
+  throw new jq.DataError(`${jq._mtype_v(input)} cannot be parsed as a number.`)
 }
 
 fn0['tostring'] = (input) => {
@@ -302,7 +302,7 @@ fn0['true'] = () => {
 
 fn0['upcase'] = (input) => {
   if (!jq.isString(input)) {
-    throw new Error('upcase input must be a string.')
+    throw new jq.DataError('upcase input must be a string.')
   }
 
   return input.toUpperCase()

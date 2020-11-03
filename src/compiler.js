@@ -114,7 +114,7 @@ export const compileIndex = (index, optional) => {
     }
     if (input !== null && !jq.isArray(input) || !jq.isNumber(index)) {
       if (optional) return undefined
-      throw new Error(`Cannot index ${jq._mtype(input)} with ${jq._mtype(index)}.`)
+      throw new jq.DataError(`Cannot index ${jq._mtype(input)} with ${jq._mtype(index)}.`)
     }
     if (input === null || !Number.isInteger(index)) {
       return null
@@ -174,7 +174,7 @@ export const compileNegation = (count, right) => {
 
   return (input, vars) => jq.map(right(input, vars), right => {
     if (!jq.isNumber(right)) {
-      throw new Error(`${jq._mtype_v(right)} cannot be negated.`)
+      throw new jq.DataError(`${jq._mtype_v(right)} cannot be negated.`)
     }
     if (!count) {
       return right
@@ -243,11 +243,11 @@ export const compileSlice = (start, end, optional) => {
     }
     if (!jq.isArray(input) && !jq.isString(input)) {
       if (optional) return undefined
-      throw new Error(`Cannot index ${jq._mtype(input)} with object.`)
+      throw new jq.DataError(`Cannot index ${jq._mtype(input)} with object.`)
     }
     if (start !== null && !jq.isNumber(start) || end !== null && !jq.isNumber(end)) {
       if (optional) return undefined
-      throw new Error(`Start and end indices of an ${jq._mtype(input)} slice must be numbers.`)
+      throw new jq.DataError(`Start and end indices of an ${jq._mtype(input)} slice must be numbers.`)
     }
 
     start = start !== null

@@ -1,3 +1,6 @@
+export class DataError extends Error {}
+DataError.prototype.name = 'DataError'
+
 class Stream {
   constructor(items) {
     this.items = items
@@ -33,7 +36,7 @@ export const add = (a, b) => {
     }
   }
 
-  throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be added.`)
+  throw new DataError(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be added.`)
 }
 
 export const areEqual = (a, b) => {
@@ -90,7 +93,7 @@ export const areEqual = (a, b) => {
 
 export const checkKey = (key) => {
   if (!isString(key)) {
-    throw new Error(`Cannot use ${_mtype_v(key)} as object key.`)
+    throw new DataError(`Cannot use ${_mtype_v(key)} as object key.`)
   }
 
   return key
@@ -230,7 +233,7 @@ export const divide = (a, b) => {
     return a / b
   }
 
-  throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be divided.`)
+  throw new DataError(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be divided.`)
 }
 
 export const dotName = (value, name, optional) => {
@@ -240,7 +243,7 @@ export const dotName = (value, name, optional) => {
   if (!isObject(value)) {
     if (optional) return undefined
     const safeName = name.length < 30 ? `string "${name}"` : 'string'
-    throw new Error(`Cannot index ${_mtype(value)} with ${safeName}.`)
+    throw new DataError(`Cannot index ${_mtype(value)} with ${safeName}.`)
   }
 
   return has(value, name) ? value[name] : null
@@ -359,7 +362,7 @@ export const iterate = (value, optional) => {
   }
 
   if (optional) return undefined
-  throw new Error(`Cannot iterate over ${_mtype_v(value)}.`)
+  throw new DataError(`Cannot iterate over ${_mtype_v(value)}.`)
 }
 
 export const map = (stream, fn) => {
@@ -378,7 +381,7 @@ export const modulo = (a, b) => {
     return a % b + 0 // must return 0 instead of -0
   }
 
-  throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be divided (remainder).`)
+  throw new DataError(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be divided (remainder).`)
 }
 
 export const multiply = (a, b) => {
@@ -386,7 +389,7 @@ export const multiply = (a, b) => {
     return a * b
   }
 
-  throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be multiplied.`)
+  throw new DataError(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be multiplied.`)
 }
 
 export const product = (stream1, stream2, fn) => {
@@ -416,7 +419,7 @@ export const product = (stream1, stream2, fn) => {
 
 export const sortBy = (value, fn) => {
   if (!isArray(value)) {
-    throw new Error(`${_mtype_v(value)} cannot be sorted, as it is not an array.`)
+    throw new DataError(`${_mtype_v(value)} cannot be sorted, as it is not an array.`)
   }
   if (value.length <= 1) {
     return value
@@ -465,7 +468,7 @@ export const subtract = (a, b) => {
     return a - b
   }
 
-  throw new Error(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be subtracted.`)
+  throw new DataError(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be subtracted.`)
 }
 
 export const toArray = (stream) => {
