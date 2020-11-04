@@ -13,8 +13,9 @@ export const {
 } = jq
 
 export const compileAddMul = (first, rest) => {
-  const reducer = (input, vars) => (left, next) =>
-    jq.product(left, next.expr(input, vars), next.op)
+  const reducer = (input, vars) => (left, next) => {
+    return jq.product(left, next.expr(input, vars), next.op)
+  }
 
   return (input, vars) => reduce(
     first(input, vars), rest, jq.isEmpty, reducer(input, vars))
@@ -24,14 +25,15 @@ export const compileAlternative = (first, rest) => {
   const last = rest[rest.length - 1]
   --rest.length
 
-  const prep = (input, vars, expr) =>
-    jq.map(expr(input, vars), jq.ifTrue)
-
-  const stop = left =>
-    !jq.isEmpty(left)
-
-  const reducer = (input, vars) => (left, next) =>
-    prep(input, vars, next)
+  const prep = (input, vars, expr) => {
+    return jq.map(expr(input, vars), jq.ifTrue)
+  }
+  const stop = left => {
+    return !jq.isEmpty(left)
+  }
+  const reducer = (input, vars) => (left, next) => {
+    return prep(input, vars, next)
+  }
 
   return (input, vars) => {
     const result = reduce(
@@ -73,8 +75,9 @@ export const compileDotNameTransform = (name, optional) => {
 }
 
 export const compileFilter = (first, rest) => {
-  const reducer = (input, vars) => (left, next) =>
-    next(left, input, vars)
+  const reducer = (input, vars) => (left, next) => {
+    return next(left, input, vars)
+  }
 
   return (input, vars) => reduce(
     first(input, vars), rest, jq.isEmpty, reducer(input, vars))
@@ -136,12 +139,12 @@ export const compileIterateTransform = (optional) => {
 }
 
 export const compileLogicalAnd = (first, rest) => {
-  const prep = (input, vars, expr) =>
-    jq.map(expr(input, vars), jq.isTrue)
-
-  const stop = left =>
-    !jq.includes(left, true)
-
+  const prep = (input, vars, expr) => {
+    return jq.map(expr(input, vars), jq.isTrue)
+  }
+  const stop = left => {
+    return !jq.includes(left, true)
+  }
   const reducer = (input, vars) => (left, next) => {
     next = prep(input, vars, next)
     return jq.map(left, left => left && next)
@@ -152,12 +155,12 @@ export const compileLogicalAnd = (first, rest) => {
 }
 
 export const compileLogicalOr = (first, rest) => {
-  const prep = (input, vars, expr) =>
-    jq.map(expr(input, vars), jq.isTrue)
-
-  const stop = left =>
-    !jq.includes(left, false)
-
+  const prep = (input, vars, expr) => {
+    return jq.map(expr(input, vars), jq.isTrue)
+  }
+  const stop = left => {
+    return !jq.includes(left, false)
+  }
   const reducer = (input, vars) => (left, next) => {
     next = prep(input, vars, next)
     return jq.map(left, left => left || next)
@@ -224,8 +227,9 @@ export const compileOutput = (expr) => {
 }
 
 export const compilePipe = (first, rest) => {
-  const reducer = vars => (left, next) =>
-    jq.map(left, left => next(left, vars))
+  const reducer = vars => (left, next) => {
+    return jq.map(left, left => next(left, vars))
+  }
 
   return (input, vars) => reduce(
     first(input, vars), rest, jq.isEmpty, reducer(vars))

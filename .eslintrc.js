@@ -15,6 +15,7 @@ module.exports = {
     'brace-style': ['error', 'stroustrup', { allowSingleLine: true }],
     'consistent-return': 'error',
     'eqeqeq': 'error',
+    'implicit-arrow-linebreak': 'error',
     'no-var': 'error',
     'prefer-const': 'error',
     'quotes': ['error', 'single'],

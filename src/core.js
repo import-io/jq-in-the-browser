@@ -455,10 +455,11 @@ export const stringify = (value) => {
   }
 
   // for JQ conformance
-  const replacer = (key, value) =>
+  const replacer = (key, value) => (
     value ===  Infinity ?  Number.MAX_VALUE :
     value === -Infinity ? -Number.MAX_VALUE :
     value
+  )
 
   return JSON.stringify(value, replacer)
 }

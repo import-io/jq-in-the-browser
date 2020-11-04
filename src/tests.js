@@ -15,11 +15,11 @@ describe('Multi-line queries', () => {
 
   const output = [3]
 
-  queries.forEach(query =>
+  queries.forEach(query => {
     it('Query: ' + JSON.stringify(query), () => {
       assert.deepStrictEqual(jq.compile(query)(null), output)
     })
-  )
+  })
 })
 
 describe('Error location', () => {
@@ -41,11 +41,11 @@ describe('Error location', () => {
     },
   ]
 
-  errors.forEach(({ query, start, end }) =>
+  errors.forEach(({ query, start, end }) => {
     it('Query: ' + JSON.stringify(query), () => {
       assert.throws(() => jq.compile(query), { location: { start, end } })
     })
-  )
+  })
 })
 
 describe('Extension functions', () => {
@@ -147,11 +147,11 @@ describe('Compile-time errors', () => {
     ['if 1 then 2 eliffoo then 4 else 5 end', 'Expected space but "f" found.'],
   ]
 
-  tests.forEach(([query, error]) =>
+  tests.forEach(([query, error]) => {
     it(`Error '${error}' for '${query}'`, () => {
       assert.throws(() => jq.compile(query), { name: 'SyntaxError', message: error })
     })
-  )
+  })
 })
 
 describe('Run-time errors', () => {
@@ -160,11 +160,11 @@ describe('Run-time errors', () => {
     ['upcase', 'upcase input must be a string.'],
   ]
 
-  tests.forEach(([query, error]) =>
+  tests.forEach(([query, error]) => {
     it(`Error '${error}' for '${query}'`, () => {
       assert.throws(() => jq.compile(query)(null), { message: error })
     })
-  )
+  })
 })
 
 describe('Don\'t return cached instances of objects', () => {
@@ -174,7 +174,7 @@ describe('Don\'t return cached instances of objects', () => {
     '{}',
   ]
 
-  queries.forEach(query =>
+  queries.forEach(query => {
     it('Query: ' + query, () => {
       const compiledQuery = jq.compile(query)
       const output1 = compiledQuery(null)
@@ -185,5 +185,5 @@ describe('Don\'t return cached instances of objects', () => {
         assert.notStrictEqual(output2[0], output1[0])
       }
     })
-  )
+  })
 })

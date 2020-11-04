@@ -75,9 +75,9 @@ const substMessage = (query, input) => {
 tests.forEach(([feature, queries, inputs]) => {
   describe(feature, () => {
     const isErrorTest = feature.endsWith(' - errors')
-    queries.forEach((query) =>
-      describe('Query: ' + query, () =>
-        inputs.forEach((input) =>
+    queries.forEach((query) => {
+      describe('Query: ' + query, () => {
+        inputs.forEach((input) => {
           it('Input: ' + JSON.stringify(input), () => {
             if (isErrorTest) {
               let message
@@ -92,9 +92,9 @@ tests.forEach(([feature, queries, inputs]) => {
               assert.deepStrictEqual(ourOutput, jqwOutput)
             }
           })
-        )
-      )
-    )
+        })
+      })
+    })
   })
 })
 
@@ -193,7 +193,7 @@ describe('Non-conforming behaviors', () => {
     },
   ]
 
-  tests.forEach(({ query, ourOutput, jqwOutput }) =>
+  tests.forEach(({ query, ourOutput, jqwOutput }) => {
     it('Query: ' + query, () => {
       const actual = {}
 
@@ -216,5 +216,5 @@ describe('Non-conforming behaviors', () => {
 
       assert.deepStrictEqual(actual, { ourOutput, jqwOutput })
     })
-  )
+  })
 })
