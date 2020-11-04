@@ -68,12 +68,13 @@ export const compileDotName = (name, optional) => {
   return (input) => jq.dotName(input, name, optional)
 }
 
+export const compileDotNameTransform = (name, optional) => {
+  return (left) => jq.map(left, left => jq.dotName(left, name, optional))
+}
+
 export const compileFilter = (first, rest) => {
-  const reducer = (input, vars) => (left, next) => {
-    return jq.has(next, 'arg')
-      ? jq.product(left, next.arg(input, vars), next)
-      : jq.map(left, next) // vars are not passed to transforms
-  }
+  const reducer = (input, vars) => (left, next) =>
+    next(left, input, vars)
 
   return (input, vars) => reduce(
     first(input, vars), rest, jq.isEmpty, reducer(input, vars))
@@ -107,34 +108,31 @@ export const compileIfThenElse = (cond, left, right) => {
     cond => jq.isTrue(cond) ? left(input, vars) : right(input, vars))
 }
 
-export const compileIndex = (index, optional) => {
-  const transform = (input, index) => {
+export const compileIndexTransform = (index, optional) => {
+  return (left, input, vars) => jq.product(left, index(input, vars), (left, index) => {
     if (jq.isString(index)) {
-      return jq.dotName(input, index, optional)
+      return jq.dotName(left, index, optional)
     }
-    if (input !== null && !jq.isArray(input) || !jq.isNumber(index)) {
+    if (left !== null && !jq.isArray(left) || !jq.isNumber(index)) {
       if (optional) return undefined
-      throw new jq.DataError(`Cannot index ${jq._mtype(input)} with ${jq._mtype(index)}.`)
+      throw new jq.DataError(`Cannot index ${jq._mtype(left)} with ${jq._mtype(index)}.`)
     }
-    if (input === null || !Number.isInteger(index)) {
+    if (left === null || !Number.isInteger(index)) {
       return null
     }
-    if (index < 0 && (index += input.length) < 0) {
+    if (index < 0 && (index += left.length) < 0) {
       return null
     }
-    if (index >= input.length) {
+    if (index >= left.length) {
       return null
     }
 
-    return input[index]
-  }
-
-  transform.arg = index
-  return transform
+    return left[index]
+  })
 }
 
-export const compileIterator = (optional) => {
-  return input => jq.iterate(input, optional)
+export const compileIterateTransform = (optional) => {
+  return (left) => jq.iterate(left, optional)
 }
 
 export const compileLogicalAnd = (first, rest) => {
@@ -233,34 +231,11 @@ export const compilePipe = (first, rest) => {
     first(input, vars), rest, jq.isEmpty, reducer(vars))
 }
 
-export const compileSlice = (start, end, optional) => {
+export const compileSliceTransform = (start, end, optional) => {
   start ||= fn0.null
   end   ||= fn0.null
 
-  const transform = (input, [start, end]) => {
-    if (input === null) {
-      return null
-    }
-    if (!jq.isArray(input) && !jq.isString(input)) {
-      if (optional) return undefined
-      throw new jq.DataError(`Cannot index ${jq._mtype(input)} with object.`)
-    }
-    if (start !== null && !jq.isNumber(start) || end !== null && !jq.isNumber(end)) {
-      if (optional) return undefined
-      throw new jq.DataError(`Start and end indices of an ${jq._mtype(input)} slice must be numbers.`)
-    }
-
-    start = start !== null
-      ? Math.floor(start)
-      : 0
-    end = end !== null
-      ? Math.ceil(end)
-      : undefined
-
-    return input.slice(start, end)
-  }
-
-  transform.arg = (input, vars) => {
+  const range = (input, vars) => {
     const start_ = start(input, vars)
     if (jq.isEmpty(start_)) {
       return undefined
@@ -270,7 +245,28 @@ export const compileSlice = (start, end, optional) => {
       (end, start) => [start, end])
   }
 
-  return transform
+  return (left, input, vars) => jq.product(left, range(input, vars), (left, [start, end]) => {
+    if (left === null) {
+      return null
+    }
+    if (!jq.isArray(left) && !jq.isString(left)) {
+      if (optional) return undefined
+      throw new jq.DataError(`Cannot index ${jq._mtype(left)} with object.`)
+    }
+    if (start !== null && !jq.isNumber(start) || end !== null && !jq.isNumber(end)) {
+      if (optional) return undefined
+      throw new jq.DataError(`Start and end indices of an ${jq._mtype(left)} slice must be numbers.`)
+    }
+
+    start = start !== null
+      ? Math.floor(start)
+      : 0
+    end = end !== null
+      ? Math.ceil(end)
+      : undefined
+
+    return left.slice(start, end)
+  })
 }
 
 export const compileStream = (first, rest) => {

@@ -300,19 +300,24 @@ FunctionName 'function name'
 
 Transform
   = BracketTransform
-  / DotName
+  / DotNameTransform
 
 BracketTransform
   = "[" _ "]" optional: Opt {
-    return jq.compileIterator(optional)
+    return jq.compileIterateTransform(optional)
   }
   / "[" _ index: Expr _ "]" optional: Opt {
-    return jq.compileIndex(index, optional)
+    return jq.compileIndexTransform(index, optional)
   }
   / "[" _ start: Expr? _ ":" _ end: Expr? _ "]" optional: Opt & {
     return start || end // for JQ conformance
   } {
-    return jq.compileSlice(start, end, optional)
+    return jq.compileSliceTransform(start, end, optional)
+  }
+
+DotNameTransform
+  = "." name: (Name / String) optional: Opt {
+    return jq.compileDotNameTransform(name, optional)
   }
 
 Opt

@@ -140,6 +140,16 @@
     ]
   ],
   [
+    "Object Identifier-Index - streams",
+    [
+      ".[].foo",
+      ".[].\"foo\""
+    ],
+    [
+      [{ "foo": 1 }, { "foo": 2 }]
+    ]
+  ],
+  [
     "Object Identifier-Index on non-object - errors",
     [
       ".foo",
@@ -319,7 +329,7 @@
     ]
   ],
   [
-    "Stream",
+    "Streams",
     [
       "[.a], .b",
       "[.a], .b | .[1]",
