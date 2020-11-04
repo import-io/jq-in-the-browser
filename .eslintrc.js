@@ -12,6 +12,7 @@ module.exports = {
   },
   extends: 'eslint:recommended',
   rules: {
+    'brace-style': ['error', 'stroustrup', { allowSingleLine: true }],
     'consistent-return': 'error',
     'eqeqeq': 'error',
     'no-var': 'error',
