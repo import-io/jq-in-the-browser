@@ -26,11 +26,17 @@ const jqw = (json, filter) => {
   }
   catch (e) {
     let message = e.message
-    message = message.trimRight()
-    message = message.replace(/^jq: error \(at <stdin>:0\): /, '')
-    message += '.'
 
-    e.message = message
+    const match = message.match(/^jq: error: syntax error, (.*?) \(Unix shell quoting issues\?\)/)
+    if (match) {
+      message = 'Syntax error: ' + match[1]
+    }
+    else {
+      message = message.trimRight()
+      message = message.replace(/^jq: error \(at <stdin>:0\): /, '')
+    }
+
+    e.message = message + '.'
     throw e
   }
 
@@ -100,6 +106,18 @@ tests.forEach(([feature, queries, inputs]) => {
 
 describe('Non-conforming behaviors', () => {
   const tests = [
+    // we support constructs that JQ refuses to compile
+    {
+      query: '1? as $foo | $foo',
+      ourOutput: [1],
+      jqwOutput: 'Error: Syntax error: unexpected as, expecting $end.',
+    },
+    {
+      query: 'if 1 then 2 else 3 end as $foo | $foo',
+      ourOutput: [2],
+      jqwOutput: 'Error: Syntax error: unexpected as, expecting $end.',
+    },
+
     // we don't want to allow a whitespace between "." and a string literal, like JQ does
     {
       query: '{foo: 1} | . "foo"',
@@ -190,6 +208,43 @@ describe('Non-conforming behaviors', () => {
       query: '[1, 2, 3, 0] | map_values(select(. < 2, . < 3))',
       ourOutput: [[1, 2, 0]],
       jqwOutput: [[1, 2, 0, null]],
+    },
+
+    // we don't replicate JQ bugs for generalized optional operator
+    {
+      query: '-("a"?)',
+      ourOutput: 'DataError: string ("a") cannot be negated.',
+      jqwOutput: [],
+    },
+    {
+      query: '-"a"?',
+      ourOutput: 'DataError: string ("a") cannot be negated.',
+      jqwOutput: [],
+    },
+    {
+      query: '"a"? + 1',
+      ourOutput: 'DataError: string ("a") and number (1) cannot be added.',
+      jqwOutput: [],
+    },
+    {
+      query: '1 | false? or .a',
+      ourOutput: 'DataError: Cannot index number with string "a".',
+      jqwOutput: [],
+    },
+    {
+      query: '1 | .a + 2?',
+      ourOutput: 'DataError: Cannot index number with string "a".',
+      jqwOutput: [],
+    },
+    {
+      query: '([1], 2, [3])? | .[]',
+      ourOutput: 'DataError: Cannot iterate over number (2).',
+      jqwOutput: [1],
+    },
+    {
+      query: '([1], 2, [3] | .[])?',
+      ourOutput: [],
+      jqwOutput: [1],
     },
   ]
 

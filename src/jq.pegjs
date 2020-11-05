@@ -149,30 +149,17 @@ MulDivOp
   / "%" { return jq.modulo }
 
 Negation
-  = minuses: ("-" _)* right: (IfThenElse / VariableExpr) {
+  = minuses: ("-" _)* expr: VariableExpr {
     const count = minuses.length
     if (!count) {
-      return right
+      return expr
     }
 
-    return jq.compileNegation(count, right)
-  }
-
-IfThenElse
-  = "if" B$ _ cond: Expr _ "then" B$ _ left: Expr _ right: Else {
-    return jq.compileIfThenElse(cond, left, right)
-  }
-
-Else
-  = "else" B$ _ expr: Expr _ "end" B$ {
-    return expr
-  }
-  / "elif" B$ _ cond: Expr _ "then" B$ _ left: Expr _ right: Else {
-    return jq.compileIfThenElse(cond, left, right)
+    return jq.compileNegation(expr, count)
   }
 
 VariableExpr
-  = left: Filter tail: (_ "as" _ VariableDecl _ "|" _ Expr)? {
+  = left: Optional tail: (_ "as" _ VariableDecl _ "|" _ Expr)? {
     if (!tail) {
       return left
     }
@@ -190,6 +177,28 @@ VariableDecl
     }
 
     return index
+  }
+
+Optional
+  = expr: (IfThenElse / Filter) tags: (_ "?")* {
+    if (!tags.length) {
+      return expr
+    }
+
+    return jq.compileTryCatch(expr, null)
+  }
+
+IfThenElse
+  = "if" B$ _ cond: Expr _ "then" B$ _ left: Expr _ right: Else {
+    return jq.compileIfThenElse(cond, left, right)
+  }
+
+Else
+  = "else" B$ _ expr: Expr _ "end" B$ {
+    return expr
+  }
+  / "elif" B$ _ cond: Expr _ "then" B$ _ left: Expr _ right: Else {
+    return jq.compileIfThenElse(cond, left, right)
   }
 
 Filter

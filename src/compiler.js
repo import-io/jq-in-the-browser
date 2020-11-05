@@ -170,18 +170,18 @@ export const compileLogicalOr = (first, rest) => {
     prep(input, vars, first), rest, stop, reducer(input, vars))
 }
 
-export const compileNegation = (count, right) => {
+export const compileNegation = (expr, count) => {
   count %= 2
 
-  return (input, vars) => jq.map(right(input, vars), right => {
-    if (!jq.isNumber(right)) {
-      throw new jq.DataError(`${jq._mtype_v(right)} cannot be negated.`)
+  return (input, vars) => jq.map(expr(input, vars), value => {
+    if (!jq.isNumber(value)) {
+      throw new jq.DataError(`${jq._mtype_v(value)} cannot be negated.`)
     }
     if (!count) {
-      return right
+      return value
     }
 
-    return -right
+    return -value
   })
 }
 
@@ -236,8 +236,8 @@ export const compilePipe = (first, rest) => {
 }
 
 export const compileSliceTransform = (start, end, optional) => {
-  start ||= fn0.null
-  end   ||= fn0.null
+  start ??= fn0.null
+  end   ??= fn0.null
 
   const range = (input, vars) => {
     const start_ = start(input, vars)
@@ -277,6 +277,23 @@ export const compileStream = (first, rest) => {
   const all = [first, ...rest]
   return (input, vars) => jq.concat(all.map(
     expr => expr(input, vars)))
+}
+
+export const compileTryCatch = (left, right) => {
+  right ??= fn0.empty
+
+  return (input, vars) => {
+    try {
+      return left(input, vars)
+    }
+    catch (e) {
+      if (!e || e.constructor !== jq.DataError) {
+        throw e
+      }
+
+      return right(e.message, vars)
+    }
+  }
 }
 
 export const compileVariableExpr = (left, right, index) => {

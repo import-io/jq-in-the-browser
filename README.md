@@ -35,6 +35,7 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * Alternative operator: `//`
 * If-then-else expressions: `if A then B else C end`, `if A1 then B1 elif A2 then B2 else C end`
 * Variables: `1 as $x | $x + 2` (destructuring syntax is not supported)
+* Generalized optional operator: `(.foo + .bar)?`, `tonumber?`
 * Escape sequences (`\"`, `\\`, `\/`, `\b`, `\f`, `\n`, `\r`, `\t`) in string literals: `"foo\"bar"`, `"foo\nbar"`
 
 ## Supported functions

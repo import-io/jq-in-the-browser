@@ -755,47 +755,6 @@
     ]
   ],
   [
-    "If",
-    [
-      "if .t then .a else .b end",
-      "if .f then .a else .b end",
-      "if .t then .a elif .t then .a * 2 else .b end",
-      "if .f then .a elif .t then .a * 2 else .b end",
-      "if .t then .a elif .f then .a * 2 else .b end",
-      "if .f then .a elif .f then .a * 2 else .b end",
-      "if .t then if .t then .a * 2 else .b * 2 end else .b end",
-      "if .f then if .t then .a * 2 else .b * 2 end else .b end",
-      "if .t then if .f then .a * 2 else .b * 2 end else .b end",
-      "if .f then if .f then .a * 2 else .b * 2 end else .b end",
-      "if .t then .a else if .t then .a * 2 else .b * 2 end end",
-      "if .f then .a else if .t then .a * 2 else .b * 2 end end",
-      "if .t then .a else if .f then .a * 2 else .b * 2 end end",
-      "if .f then .a else if .f then .a * 2 else .b * 2 end end",
-      "if .a < .b or .t then .f | not else .b end",
-      "if .a < .b or .f then .a else .t | not end",
-      "if if .a < .b then .t else .f end then .a else .b end",
-      "if if .a < .b then .f else .t end then .a else .b end",
-      " -if .t then .a else .b end",
-      " -if .f then .a else .b end",
-      "if .t then -if .t then .a * 2 else .b * 2 end else .b end",
-      "if .f then .a else -if .t then .a * 2 else .b * 2 end end",
-      "if .t then .a, .a + 1 else .b, .b + 1 end",
-      "if .f then .a, .a + 1 else .b, .b + 1 end",
-      "if .t, .t then .a, .a + 1 else .b, .b + 1 end",
-      "if .f, .t then .a, .a + 1 else .b, .b + 1 end",
-      "if .t, .f then .a, .a + 1 else .b, .b + 1 end",
-      "if .f, .f then .a, .a + 1 else .b, .b + 1 end",
-      "if .t, .t then .a elif .t, .f then .a * 2 else .b end",
-      "if .f, .t then .a elif .f, .t then .a * 2 else .b end",
-      "if .t, .f then .a elif .t, .f then .a * 2 else .b end",
-      "if .f, .f then .a elif .f, .t then .a * 2 else .b end"
-    ],
-    [
-      { "f": false, "t": true, "a": 10, "b": -10 },
-      { "f": null, "t": 0, "a": 10, "b": -10 }
-    ]
-  ],
-  [
     "Variables",
     [
       "1 as $x | $x",
@@ -854,6 +813,67 @@
     ],
     [
       { "x": 10, "as": 100 }
+    ]
+  ],
+  [
+    "Generalized optional",
+    [
+      "., (.a + .b + .c)?, .[]",
+      "., (.a + .b + .c) ?, .[]",
+      "., (.a + .b + .c)??, .[]",
+      "., (.a + .b + .c)? ?, .[]",
+      "., (.a + .b + .c) ??, .[]",
+      "., (.a + .b + .c)???, .[]",
+      "., (.[] | tonumber?), .[]",
+      "., (.[] as $x | $x | tonumber?), .[]",
+      "., if .a.foo then .b else .c end?, .[]",
+      "., if .a then .b.foo else .c end?, .[]",
+      "., if .x then .b else .c.foo end?, .[]",
+      "., .a.foo??, .[]"
+    ],
+    [
+      { "a": "1", "b": [2], "c": "3" }
+    ]
+  ],
+  [
+    "If-then-else",
+    [
+      "if .t then .a else .b end",
+      "if .f then .a else .b end",
+      "if .t then .a elif .t then .a * 2 else .b end",
+      "if .f then .a elif .t then .a * 2 else .b end",
+      "if .t then .a elif .f then .a * 2 else .b end",
+      "if .f then .a elif .f then .a * 2 else .b end",
+      "if .t then if .t then .a * 2 else .b * 2 end else .b end",
+      "if .f then if .t then .a * 2 else .b * 2 end else .b end",
+      "if .t then if .f then .a * 2 else .b * 2 end else .b end",
+      "if .f then if .f then .a * 2 else .b * 2 end else .b end",
+      "if .t then .a else if .t then .a * 2 else .b * 2 end end",
+      "if .f then .a else if .t then .a * 2 else .b * 2 end end",
+      "if .t then .a else if .f then .a * 2 else .b * 2 end end",
+      "if .f then .a else if .f then .a * 2 else .b * 2 end end",
+      "if .a < .b or .t then .f | not else .b end",
+      "if .a < .b or .f then .a else .t | not end",
+      "if if .a < .b then .t else .f end then .a else .b end",
+      "if if .a < .b then .f else .t end then .a else .b end",
+      " -if .t then .a else .b end",
+      " -if .f then .a else .b end",
+      "if .t then -if .t then .a * 2 else .b * 2 end else .b end",
+      "if .f then .a else -if .t then .a * 2 else .b * 2 end end",
+      "if .t then .a, .a + 1 else .b, .b + 1 end",
+      "if .f then .a, .a + 1 else .b, .b + 1 end",
+      "if .t, .t then .a, .a + 1 else .b, .b + 1 end",
+      "if .f, .t then .a, .a + 1 else .b, .b + 1 end",
+      "if .t, .f then .a, .a + 1 else .b, .b + 1 end",
+      "if .f, .f then .a, .a + 1 else .b, .b + 1 end",
+      "if .t, .t then .a elif .t, .f then .a * 2 else .b end",
+      "if .f, .t then .a elif .f, .t then .a * 2 else .b end",
+      "if .t, .f then .a elif .t, .f then .a * 2 else .b end",
+      "if .f, .f then .a elif .f, .t then .a * 2 else .b end"
+    ],
+    [
+      { "f": false, "t": true, "a": 10, "b": -10 },
+      { "f": null, "t": 0, "a": 10, "b": -10 }
     ]
   ],
   [
