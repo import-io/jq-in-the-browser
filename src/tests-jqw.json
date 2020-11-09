@@ -1281,6 +1281,28 @@
     ]
   ],
   [
+    "ltrimstr, rtrimstr",
+    [
+      ".b as $b | .a[] | ltrimstr($b[])",
+      ".b as $b | .a[] | rtrimstr($b[])"
+    ],
+    [
+      { "a": [""], "b": [] },
+      { "a": [""], "b": [""] },
+      { "a": ["foobar"], "b": [] },
+      { "a": ["foobar"], "b": [""] },
+      { "a": ["foo"], "b": ["bar"] },
+      { "a": [""], "b": ["foobar"] },
+      { "a": ["foofoobarbar"], "b": ["foo"] },
+      { "a": ["foofoobarbar"], "b": ["bar"] },
+      { "a": ["foo"], "b": ["foobar"] },
+      { "a": ["bar"], "b": ["foobar"] },
+      { "a": ["foobar"], "b": ["foo", "bar"] },
+      { "a": ["foo", "bar"], "b": ["foo", "bar"] },
+      { "a": ["foo", null, false, 1, [], {}, "bar"], "b": ["f", "o", null, false, 1, [], {}, "b", "r"] }
+    ]
+  ],
+  [
     "map, map_values",
     [
       "map(.)",

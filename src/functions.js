@@ -102,10 +102,15 @@ fn0['isnormal'] = (input) => {
   ) // "";
 */
 fn1['join'] = (input, separator) => {
+  separator = separator(input)
+  if (jq.isEmpty(separator)) {
+    return undefined
+  }
+
   const isStringArray =
     jq.isArray(input) && input.every(jq.isString)
 
-  return jq.map(separator(input), separator => {
+  return jq.map(separator, separator => {
     // fast path
     if (isStringArray && (separator === null || jq.isString(separator))) {
       return input.join(separator ?? '')
@@ -167,6 +172,19 @@ fn0['length'] = (input) => {
   throw new jq.DataError(`${jq._mtype_v(input)} has no length.`)
 }
 
+fn1['ltrimstr'] = (input, prefix) => {
+  return jq.map(prefix(input), prefix => {
+    if (!jq.isString(input) || !jq.isString(prefix)) {
+      return input // JQ doesn't throw here
+    }
+    if (!prefix || !input.startsWith(prefix)) {
+      return input
+    }
+
+    return input.slice(prefix.length)
+  })
+}
+
 /*
   https://github.com/stedolan/jq/blob/master/src/builtin.jq#L3
   def map(f): [.[] | f];
@@ -224,6 +242,19 @@ fn0['reverse'] = (input) => {
   }
 
   return [...input].reverse()
+}
+
+fn1['rtrimstr'] = (input, suffix) => {
+  return jq.map(suffix(input), suffix => {
+    if (!jq.isString(input) || !jq.isString(suffix)) {
+      return input // JQ doesn't throw here
+    }
+    if (!suffix || !input.endsWith(suffix)) {
+      return input
+    }
+
+    return input.slice(0, -suffix.length)
+  })
 }
 
 /*
