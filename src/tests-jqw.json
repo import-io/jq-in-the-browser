@@ -674,20 +674,65 @@
       "3 * (-.3)"
     ],
     [
-      { "a": 3, "b": 0 },
       { "a": -3, "b": 1.1 }
     ]
   ],
   [
-    "Multiplication (numbers) - errors",
+    "Multiplication (strings)",
     [
-      ".a * .x",
-      ".x * .b",
+      "\"\" * .b",
+      ".b * \"\"",
+      ".a * .b | length",
+      ".b * .a | length",
+      "1.9 * .a * .b | length",
+      "1.9 * .b * .a | length"
+    ],
+    [
+      { "a": "foo", "b": 0 },
+      { "a": "foo", "b": 0.1 },
+      { "a": "foo", "b": 1 },
+      { "a": "foo", "b": 1.9 },
+      { "a": "foo", "b": 2.1 },
+      { "a": "foo", "b": 10 },
+      { "a": "foo", "b": -0.1 },
+      { "a": "foo", "b": -1 },
+      { "a": "foo", "b": -10 }
+    ]
+  ],
+  [
+    "Multiplication - errors",
+    [
       ".x * .y",
-      ". * .x",
+      ".x * true",
+      ".x * .b",
+      ".x * \"b\"",
       ".x * [.b]",
+      ".x * .",
+      "false * .x",
+      "false * true",
+      "false * .b",
+      "false * \"b\"",
+      "false * [.b]",
+      "false * .",
+      ".a * .x",
+      ".a * true",
       ".a * [.b]",
+      ".a * .",
+      "\"a\" * .x",
+      "\"a\" * true",
+      "\"a\" * \"b\"",
+      "\"a\" * [.b]",
+      "\"a\" * .",
+      "[.a] * .x",
+      "[.a] * true",
+      "[.a] * .b",
+      "[.a] * \"b\"",
+      "[.a] * [.b]",
+      "[.a] * .",
+      ". * .x",
+      ". * true",
       ". * .b",
+      ". * \"b\"",
       ". * [.b]"
     ],
     [

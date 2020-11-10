@@ -385,11 +385,36 @@ export const modulo = (a, b) => {
 }
 
 export const multiply = (a, b) => {
-  if (isNumber(a) && isNumber(b)) {
-    return a * b
+  if (isNumber(a)) {
+    if (isNumber(b)) {
+      return a * b
+    }
+    if (isString(b)) {
+      return multiplyString(b, a)
+    }
+  }
+  else if (isString(a)) {
+    if (isNumber(b)) {
+      return multiplyString(a, b)
+    }
   }
 
   throw new DataError(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be multiplied.`)
+}
+
+const multiplyString = (string, number) => {
+  if (number >= 2) {
+    try {
+      return string.repeat(number)
+    }
+    catch (e) {
+      throw e instanceof RangeError
+        ? new DataError('String too long.')
+        : e
+    }
+  }
+
+  return number > 0 ? string : null
 }
 
 export const product = (stream1, stream2, fn) => {

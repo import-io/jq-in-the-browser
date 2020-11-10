@@ -202,6 +202,27 @@ describe('Non-conforming behaviors', () => {
       jqwOutput: 'Error: Invalid literal at EOF at line 1, column 3 (while parsing \'nan\').',
     },
 
+    // we return null on multiplying a string by NaN or -Infinity;
+    // JQ does the same, but jq-web returns the original string
+    {
+      query: '"foo" * nan',
+      ourOutput: [null],
+      jqwOutput: ['foo'],
+    },
+    {
+      query: '"foo" * -infinite',
+      ourOutput: [null],
+      jqwOutput: ['foo'],
+    },
+
+    // we throw on multiplying a string by Infinity (as for any other very big number),
+    // while JQ returns null and jq-web returns the original string
+    {
+      query: '"foo" * infinite',
+      ourOutput: 'DataError: String too long.',
+      jqwOutput: ['foo'],
+    },
+
     // map_values() on an array should correctly handle mapping expressions that may produce
     // an empty stream; it should behave similar to map(), but JQ is buggy here
     {
