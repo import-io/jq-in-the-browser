@@ -111,12 +111,14 @@ describe('Compile-time errors', () => {
 
     ['and', /^Expected .+, function name,.+ but "a" found\.$/],
     ['as', /^Expected .+, function name,.+ but "a" found\.$/],
+    ['catch', /^Expected .+, function name,.+ but "c" found\.$/],
     ['elif', /^Expected .+, function name,.+ but "e" found\.$/],
     ['else', /^Expected .+, function name,.+ but "e" found\.$/],
     ['end', /^Expected .+, function name,.+ but "e" found\.$/],
     ['if', /^Expected .+ but end of input found\.$/],
     ['or', /^Expected .+, function name,.+ but "o" found\.$/],
     ['then', /^Expected .+, function name,.+ but "t" found\.$/],
+    ['try', /^Expected .+ but end of input found\.$/],
 
     ['1and 234', 'Invalid numeric literal "1and".'],
     ['1 and234', 'Expected space but "2" found.'],
@@ -145,6 +147,12 @@ describe('Compile-time errors', () => {
     ['if 1 then 2 else 3 endfoo', 'Expected space but "f" found.'],
     ['if 1 then 2 elif3 then 4 else 5 end', 'Expected space but "3" found.'],
     ['if 1 then 2 eliffoo then 4 else 5 end', 'Expected space but "f" found.'],
+
+    ['try 1 catch', /^Expected .+ but end of input found\.$/],
+    ['try1', 'Function "try1" is not defined.'],
+    ['tryfoo', 'Function "tryfoo" is not defined.'],
+    ['try 1 catch2', 'Expected space but "2" found.'],
+    ['try 1 catchfoo', 'Expected space but "f" found.'],
   ]
 
   tests.forEach(([query, error]) => {

@@ -755,6 +755,45 @@
     ]
   ],
   [
+    "Try-catch",
+    [
+      "try -.",
+      "try -. catch empty",
+      "try -. catch (. | rtrimstr(\".\"))",
+      "try -. catch (. | rtrimstr(\".\") + (\" 1\", \" 2\"))",
+      "try -. catch 2 + 3",
+      "try try -.",
+      "try try -. catch (. | rtrimstr(\".\"))",
+      "try try -. catch .b",
+      "try try -. catch .b catch (. | rtrimstr(\".\"))",
+      "try -. catch try (. | rtrimstr(\".\"))",
+      "try -. catch try .b",
+      "try -. catch try .b catch (. | rtrimstr(\".\"))",
+      "try . as $x | -$x",
+      "try . as $x | -$x catch (. | rtrimstr(\".\"))",
+      "try -. catch . as $x | $x | rtrimstr(\".\") + \"!\"",
+      "try if -. then . else .b end catch (. | rtrimstr(\".\"))",
+      "try -if . then . else .b end catch (. | rtrimstr(\".\"))",
+      "try -. catch .b?",
+      "try .b? catch .c"
+    ],
+    [
+      1,
+      "a"
+    ]
+  ],
+  [
+    "Try-catch - errors",
+    [
+      "try -. catch .b",
+      "try try -. catch .b catch .c",
+      "try -. catch try .b catch .c"
+    ],
+    [
+      "a"
+    ]
+  ],
+  [
     "Variables",
     [
       "1 as $x | $x",

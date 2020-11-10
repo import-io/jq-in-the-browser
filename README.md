@@ -33,9 +33,10 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * Comparisons: `==`, `!=`, `<`, `<=`, `>`, `>=`
 * Boolean operators: `and`, `or` (and `not` as a function)
 * Alternative operator: `//`
-* If-then-else expressions: `if A then B else C end`, `if A1 then B1 elif A2 then B2 else C end`
+* If-then-else: `if A then B else C end`, `if A1 then B1 elif A2 then B2 else C end`
 * Variables: `1 as $x | $x + 2` (destructuring syntax is not supported)
 * Generalized optional operator: `(.foo + .bar)?`, `tonumber?`
+* Try-catch: `try .a`, `try .a catch "N/A"`, `try .a catch ("Error: " + .)`
 * Escape sequences (`\"`, `\\`, `\/`, `\b`, `\f`, `\n`, `\r`, `\t`) in string literals: `"foo\"bar"`, `"foo\nbar"`
 
 ## Supported functions
@@ -77,10 +78,14 @@ The extension functions "downcase" and "upcase" are not present in standard JQ. 
 "ascii_downcase" and "ascii_upcase" in that they change casing for all Unicode letters, not only for ASCII
 letters (A-Z).
 
-## Operator precedence
+## Useful JQ links
 
-It is not documented in the [offical manual](https://stedolan.github.io/jq/manual/) but can be found here:
-https://github.com/stedolan/jq/blob/master/src/parser.y#L98.
+* [Manual for latest released version (1.6)](https://stedolan.github.io/jq/manual/v1.6/)
+* [Parser/grammar](https://github.com/stedolan/jq/blob/master/src/parser.y)
+* [Lexer](https://github.com/stedolan/jq/blob/master/src/lexer.l)
+* [Built-in functions (high-level, in JQ)](https://github.com/stedolan/jq/blob/master/src/builtin.jq)
+* [Built-in functions (low-level, in C)](https://github.com/stedolan/jq/blob/master/src/builtin.c)
+* [Other implementation details](https://github.com/stedolan/jq/blob/master/src/jv_aux.c)
 
 <hr>
 

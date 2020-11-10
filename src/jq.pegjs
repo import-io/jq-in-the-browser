@@ -2,12 +2,14 @@
   const Keywords = [
     'and',
     'as',
+    'catch',
     'elif',
     'else',
     'end',
     'if',
     'or',
     'then',
+    'try',
   ]
 
   const parsePipe = (first, rest) => {
@@ -149,13 +151,19 @@ MulDivOp
   / "%" { return jq.modulo }
 
 Negation
-  = minuses: ("-" _)* expr: VariableExpr {
+  = minuses: ("-" _)* expr: (TryCatch / VariableExpr) {
     const count = minuses.length
     if (!count) {
       return expr
     }
 
     return jq.compileNegation(expr, count)
+  }
+
+TryCatch
+  = "try" B$ _ left: Negation right: (_ "catch" B$ _ Negation)? {
+    right &&= right[4]
+    return jq.compileTryCatch(left, right)
   }
 
 VariableExpr

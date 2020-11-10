@@ -117,6 +117,16 @@ describe('Non-conforming behaviors', () => {
       ourOutput: [2],
       jqwOutput: 'Error: Syntax error: unexpected as, expecting $end.',
     },
+    {
+      query: 'try 1? catch .',
+      ourOutput: [1],
+      jqwOutput: 'Error: Syntax error: unexpected catch, expecting $end.',
+    },
+    {
+      query: 'try try 1 catch .? catch .',
+      ourOutput: [1],
+      jqwOutput: 'Error: Syntax error: unexpected catch, expecting $end.',
+    },
 
     // we don't want to allow a whitespace between "." and a string literal, like JQ does
     {
@@ -243,6 +253,48 @@ describe('Non-conforming behaviors', () => {
     },
     {
       query: '([1], 2, [3] | .[])?',
+      ourOutput: [],
+      jqwOutput: [1],
+    },
+
+    // we don't replicate JQ bugs for "try-catch" operator
+    {
+      query: '-(try "a")',
+      ourOutput: 'DataError: string ("a") cannot be negated.',
+      jqwOutput: [],
+    },
+    {
+      query: '(try "a") + 1',
+      ourOutput: 'DataError: string ("a") and number (1) cannot be added.',
+      jqwOutput: [],
+    },
+    {
+      query: 'try "a" + 1',
+      ourOutput: 'DataError: string ("a") and number (1) cannot be added.',
+      jqwOutput: [],
+    },
+    {
+      query: '1 | (try false) or .a',
+      ourOutput: 'DataError: Cannot index number with string "a".',
+      jqwOutput: [],
+    },
+    {
+      query: '1 | try false or .a',
+      ourOutput: 'DataError: Cannot index number with string "a".',
+      jqwOutput: [],
+    },
+    {
+      query: '1 | .a + try 2',
+      ourOutput: 'DataError: Cannot index number with string "a".',
+      jqwOutput: [],
+    },
+    {
+      query: 'try ([1], 2, [3]) | .[]',
+      ourOutput: 'DataError: Cannot iterate over number (2).',
+      jqwOutput: [1],
+    },
+    {
+      query: 'try ([1], 2, [3] | .[])',
       ourOutput: [],
       jqwOutput: [1],
     },
