@@ -229,8 +229,15 @@ export const convert = (array, fn) => {
 }
 
 export const divide = (a, b) => {
-  if (isNumber(a) && isNumber(b)) {
-    return a / b
+  if (isNumber(a)) {
+    if (isNumber(b)) {
+      return a / b
+    }
+  }
+  else if (isString(a)) {
+    if (isString(b)) {
+      return b ? a.split(b) : [...a] // take care not to split surrogate pairs if the separator is empty
+    }
   }
 
   throw new DataError(`${_mtype_v(a)} and ${_mtype_v(b)} cannot be divided.`)

@@ -31,6 +31,7 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * String/array concatenation with `+`: `"foo" + "bar"`, `[1, 2] + [3, 4]`
 * Object merging with `+`: `{a: 1} + {b: 2}`
 * String repetition with `*`: `"foo" * 3`, `5 * "bar"`
+* String splitting with `/`: `"foo,bar,baz" / ","`
 * Comparisons: `==`, `!=`, `<`, `<=`, `>`, `>=`
 * Boolean operators: `and`, `or` (and `not` as a function)
 * Alternative operator: `//`

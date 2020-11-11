@@ -319,6 +319,13 @@ describe('Non-conforming behaviors', () => {
       ourOutput: [],
       jqwOutput: [1],
     },
+
+    // we don't replicate other JQ bugs
+    {
+      query: '"" / "a"',
+      ourOutput: [['']],
+      jqwOutput: [[]],
+    },
   ]
 
   tests.forEach(({ query, ourOutput, jqwOutput }) => {
