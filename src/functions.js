@@ -1,14 +1,14 @@
 import * as jq from './core.js'
 
-export const fn0 = {}
-export const fn1 = {}
+const fn = {}
+export default fn
 
 /*
   https://github.com/stedolan/jq/blob/master/src/builtin.jq#L200
   def ascii_downcase:
     explode | map(if 65 <= . and . <= 90 then . + 32 else . end) | implode;
 */
-fn0['ascii_downcase'] = (input) => {
+fn['ascii_downcase/0'] = (input) => {
   if (!jq.isString(input)) {
     throw new jq.DataError('ascii_downcase input must be a string.')
   }
@@ -21,7 +21,7 @@ fn0['ascii_downcase'] = (input) => {
   def ascii_upcase:
     explode | map(if 97 <= . and . <= 122 then . - 32 else . end) | implode;
 */
-fn0['ascii_upcase'] = (input) => {
+fn['ascii_upcase/0'] = (input) => {
   if (!jq.isString(input)) {
     throw new jq.DataError('ascii_upcase input must be a string.')
   }
@@ -29,7 +29,7 @@ fn0['ascii_upcase'] = (input) => {
   return input.replace(/[a-z]/g, x => String.fromCharCode(x.charCodeAt(0) - 32))
 }
 
-fn0['downcase'] = (input) => {
+fn['downcase/0'] = (input) => {
   if (!jq.isString(input)) {
     throw new jq.DataError('downcase input must be a string.')
   }
@@ -37,11 +37,11 @@ fn0['downcase'] = (input) => {
   return input.toLowerCase()
 }
 
-fn0['empty'] = () => {
+fn['empty/0'] = () => {
   return undefined // an empty stream
 }
 
-fn0['false'] = () => {
+fn['false/0'] = () => {
   return false
 }
 
@@ -50,7 +50,7 @@ fn0['false'] = () => {
   def from_entries:
     map({(.key // .Key // .name // .Name): (if has("value") then .value else .Value end)}) | add | . //= {};
 */
-fn0['from_entries'] = (input) => {
+fn['from_entries/0'] = (input) => {
   const stream = jq.iterate(input)
   const result = {}
 
@@ -70,7 +70,7 @@ fn0['from_entries'] = (input) => {
   return result
 }
 
-fn0['infinite'] = () => {
+fn['infinite/0'] = () => {
   return Infinity
 }
 
@@ -78,19 +78,19 @@ fn0['infinite'] = () => {
   https://github.com/stedolan/jq/blob/master/src/builtin.jq#L35
   def isfinite: type == "number" and (isinfinite | not);
 */
-fn0['isfinite'] = (input) => {
+fn['isfinite/0'] = (input) => {
   return Number.isFinite(input) || Number.isNaN(input)
 }
 
-fn0['isinfinite'] = (input) => {
+fn['isinfinite/0'] = (input) => {
   return input === Infinity || input === -Infinity
 }
 
-fn0['isnan'] = (input) => {
+fn['isnan/0'] = (input) => {
   return Number.isNaN(input)
 }
 
-fn0['isnormal'] = (input) => {
+fn['isnormal/0'] = (input) => {
   return Number.isFinite(input) && input !== 0
 }
 
@@ -101,7 +101,7 @@ fn0['isnormal'] = (input) => {
     ($i | if type == "boolean" or type == "number" then tostring else . // "" end)
   ) // "";
 */
-fn1['join'] = (input, separator) => {
+fn['join/1'] = (input, separator) => {
   separator = separator(input)
   if (jq.isEmpty(separator)) {
     return undefined
@@ -125,7 +125,7 @@ fn1['join'] = (input, separator) => {
         result = jq.add(result, separator)
       }
       if (jq.isBoolean(value) || jq.isNumber(value)) {
-        value = fn0.tostring(value)
+        value = fn['tostring/0'](value)
       }
 
       result = jq.add(result, value)
@@ -135,7 +135,7 @@ fn1['join'] = (input, separator) => {
   })
 }
 
-fn0['keys'] = (input) => {
+fn['keys/0'] = (input) => {
   if (jq.isArray(input)) {
     return input.map((value, index) => index)
   }
@@ -146,16 +146,16 @@ fn0['keys'] = (input) => {
   return Object.keys(input).sort()
 }
 
-fn0['keys_unsorted'] = (input) => {
+fn['keys_unsorted/0'] = (input) => {
   if (!jq.isObject(input)) {
     // try to handle as an array
-    return fn0.keys(input)
+    return fn['keys/0'](input)
   }
 
   return Object.keys(input)
 }
 
-fn0['length'] = (input) => {
+fn['length/0'] = (input) => {
   if (input === null) {
     return 0
   }
@@ -172,7 +172,7 @@ fn0['length'] = (input) => {
   throw new jq.DataError(`${jq._mtype_v(input)} has no length.`)
 }
 
-fn1['ltrimstr'] = (input, prefix) => {
+fn['ltrimstr/1'] = (input, prefix) => {
   return jq.map(prefix(input), prefix => {
     if (!jq.isString(input) || !jq.isString(prefix)) {
       return input // JQ doesn't throw here
@@ -189,7 +189,7 @@ fn1['ltrimstr'] = (input, prefix) => {
   https://github.com/stedolan/jq/blob/master/src/builtin.jq#L3
   def map(f): [.[] | f];
 */
-fn1['map'] = (input, transform) => {
+fn['map/1'] = (input, transform) => {
   let temp = input
   temp = jq.iterate(temp)
   temp = jq.map(temp, transform)
@@ -200,10 +200,10 @@ fn1['map'] = (input, transform) => {
   https://github.com/stedolan/jq/blob/master/src/builtin.jq#L15
   def map_values(f): .[] |= f;
 */
-fn1['map_values'] = (input, transform) => {
+fn['map_values/1'] = (input, transform) => {
   if (!jq.isObject(input)) {
     // try to handle as an array
-    return fn1.map(input, value => jq.first(transform(value)))
+    return fn['map/1'](input, value => jq.first(transform(value)))
   }
 
   const result = {}
@@ -217,15 +217,15 @@ fn1['map_values'] = (input, transform) => {
   return result
 }
 
-fn0['nan'] = () => {
+fn['nan/0'] = () => {
   return NaN
 }
 
-fn0['not'] = (input) => {
+fn['not/0'] = (input) => {
   return !jq.isTrue(input)
 }
 
-fn0['null'] = () => {
+fn['null/0'] = () => {
   return null
 }
 
@@ -233,8 +233,8 @@ fn0['null'] = () => {
   https://github.com/stedolan/jq/blob/master/src/builtin.jq#L26
   def reverse: [.[length - 1 - range(0;length)]];
 */
-fn0['reverse'] = (input) => {
-  if (!fn0.length(input)) {
+fn['reverse/0'] = (input) => {
+  if (!fn['length/0'](input)) {
     return [] // for JQ conformance
   }
   if (!jq.isArray(input)) {
@@ -244,7 +244,7 @@ fn0['reverse'] = (input) => {
   return [...input].reverse()
 }
 
-fn1['rtrimstr'] = (input, suffix) => {
+fn['rtrimstr/1'] = (input, suffix) => {
   return jq.map(suffix(input), suffix => {
     if (!jq.isString(input) || !jq.isString(suffix)) {
       return input // JQ doesn't throw here
@@ -261,15 +261,15 @@ fn1['rtrimstr'] = (input, suffix) => {
   https://github.com/stedolan/jq/blob/master/src/builtin.jq#L4
   def select(f): if f then . else empty end;
 */
-fn1['select'] = (input, predicate) => {
+fn['select/1'] = (input, predicate) => {
   return jq.map(predicate(input), value => jq.isTrue(value) ? input : undefined)
 }
 
-fn0['sort'] = (input) => {
+fn['sort/0'] = (input) => {
   return jq.sortBy(input, jq.identity)
 }
 
-fn1['sort_by'] = (input, keySelector) => {
+fn['sort_by/1'] = (input, keySelector) => {
   return jq.sortBy(input, keySelector)
 }
 
@@ -277,7 +277,7 @@ fn1['sort_by'] = (input, keySelector) => {
   https://github.com/stedolan/jq/blob/master/src/builtin.jq#L23
   def to_entries: [keys_unsorted[] as $k | {key: $k, value: .[$k]}];
 */
-fn0['to_entries'] = (input) => {
+fn['to_entries/0'] = (input) => {
   if (jq.isArray(input)) {
     return input.map((value, index) => ({ key: index, value }))
   }
@@ -290,7 +290,7 @@ fn0['to_entries'] = (input) => {
   return entries
 }
 
-fn0['tonumber'] = (input) => {
+fn['tonumber/0'] = (input) => {
   if (jq.isNumber(input)) {
     return input
   }
@@ -319,7 +319,7 @@ fn0['tonumber'] = (input) => {
   throw new jq.DataError(`${jq._mtype_v(input)} cannot be parsed as a number.`)
 }
 
-fn0['tostring'] = (input) => {
+fn['tostring/0'] = (input) => {
   if (jq.isString(input)) {
     return input
   }
@@ -327,11 +327,11 @@ fn0['tostring'] = (input) => {
   return jq.stringify(input)
 }
 
-fn0['true'] = () => {
+fn['true/0'] = () => {
   return true
 }
 
-fn0['upcase'] = (input) => {
+fn['upcase/0'] = (input) => {
   if (!jq.isString(input)) {
     throw new jq.DataError('upcase input must be a string.')
   }
@@ -343,12 +343,11 @@ fn0['upcase'] = (input) => {
   https://github.com/stedolan/jq/blob/master/src/builtin.jq#L25
   def with_entries(f): to_entries | map(f) | from_entries;
 */
-fn1['with_entries'] = (input, transform) => {
+fn['with_entries/1'] = (input, transform) => {
   let temp = input
-  temp = fn0.to_entries(temp)
-  temp = fn1.map(temp, transform)
-  return fn0.from_entries(temp)
+  temp = fn['to_entries/0'](temp)
+  temp = fn['map/1'](temp, transform)
+  return fn['from_entries/0'](temp)
 }
 
-Object.freeze(fn0)
-Object.freeze(fn1)
+Object.freeze(fn)

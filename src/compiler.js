@@ -1,5 +1,5 @@
 import * as jq from './core.js'
-import { fn0, fn1 } from './functions.js'
+import jqfn from './functions.js'
 
 // bindings for binary operators
 export const {
@@ -84,24 +84,24 @@ export const compileFilter = (first, rest) => {
 }
 
 export const compileFunctionCall0 = (errorFn, name) => {
-  if (jq.has(fn0, name)) {
-    return fn0[name]
+  if (jq.has(jqfn, name + '/0')) {
+    return jqfn[name + '/0']
   }
 
-  return errorFn(jq.has(fn1, name)
+  return errorFn(jq.has(jqfn, name + '/1')
     ? `Function "${name}" requires a parameter.`
     : `Function "${name}" is not defined.`)
 }
 
 export const compileFunctionCall1 = (errorFn, name, arg) => {
-  if (jq.has(fn1, name)) {
-    const fn = fn1[name]
+  if (jq.has(jqfn, name + '/1')) {
+    const fn = jqfn[name + '/1']
     return arg.length === 2 // needs vars
       ? (input, vars) => fn(input, input => arg(input, vars))
       : (input) => fn(input, arg)
   }
 
-  return errorFn(jq.has(fn0, name)
+  return errorFn(jq.has(jqfn, name + '/0')
     ? `Function "${name}" accepts no parameters.`
     : `Function "${name}" is not defined.`)
 }
@@ -236,8 +236,8 @@ export const compilePipe = (first, rest) => {
 }
 
 export const compileSliceTransform = (start, end, optional) => {
-  start ??= fn0.null
-  end   ??= fn0.null
+  start ??= jqfn['null/0']
+  end   ??= jqfn['null/0']
 
   const range = (input, vars) => {
     const start_ = start(input, vars)
@@ -280,7 +280,7 @@ export const compileStream = (first, rest) => {
 }
 
 export const compileTryCatch = (left, right) => {
-  right ??= fn0.empty
+  right ??= jqfn['empty/0']
 
   return (input, vars) => {
     try {
