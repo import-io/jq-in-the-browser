@@ -301,11 +301,8 @@ VariableStart 'variable name'
   = "$"
 
 FunctionCall
-  = name: FunctionName _ "(" _ arg: Expr _ ")" {
-    return jq.compileFunctionCall1(error, name, arg)
-  }
-  / name: FunctionName {
-    return jq.compileFunctionCall0(error, name)
+  = name: FunctionName args: FunctionArgs {
+    return jq.compileFunctionCall(name, args, error)
   }
 
 FunctionName 'function name'
@@ -313,6 +310,15 @@ FunctionName 'function name'
     return !Keywords.includes(name)
   } {
     return name
+  }
+
+FunctionArgs
+  = _ "(" _ first: Expr rest: (_ ";" _ Expr)* _ ")" {
+    rest = rest.map(rest => rest[3])
+    return [first, ...rest]
+  }
+  / !(_ "(") {
+    return null
   }
 
 Transform

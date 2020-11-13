@@ -83,27 +83,27 @@ export const compileFilter = (first, rest) => {
     first(input, vars), rest, jq.isEmpty, reducer(input, vars))
 }
 
-export const compileFunctionCall0 = (errorFn, name) => {
-  if (jq.has(jqfn, name + '/0')) {
-    return jqfn[name + '/0']
+export const compileFunctionCall = (name, args, errorCallback) => {
+  const argCount = args ? args.length : 0
+  const fn = resolveFunction(name, argCount, errorCallback)
+
+  if (!argCount) {
+    return fn
   }
 
-  return errorFn(jq.has(jqfn, name + '/1')
-    ? `Function "${name}" requires a parameter.`
-    : `Function "${name}" is not defined.`)
-}
-
-export const compileFunctionCall1 = (errorFn, name, arg) => {
-  if (jq.has(jqfn, name + '/1')) {
-    const fn = jqfn[name + '/1']
-    return arg.length === 2 // needs vars
-      ? (input, vars) => fn(input, input => arg(input, vars))
-      : (input) => fn(input, arg)
+  if (!args.some(expr => expr.length > 1)) {
+    // none of the args needs vars
+    return input => fn(input, ...args)
   }
 
-  return errorFn(jq.has(jqfn, name + '/0')
-    ? `Function "${name}" accepts no parameters.`
-    : `Function "${name}" is not defined.`)
+  // capture vars for the args
+  const closure = (vars) => {
+    return args.map(expr => expr.length > 1 // needs vars
+      ? input => expr(input, vars)
+      : expr)
+  }
+
+  return (input, vars) => fn(input, ...closure(vars))
 }
 
 export const compileIfThenElse = (cond, left, right) => {
@@ -308,6 +308,54 @@ export const compileVariableExpr = (left, right, index) => {
 export const compileVariableRef = (index) => {
   return (input, vars) => vars[index]
 }
+
+export const resolveFunction = (name, argCount, errorCallback) => {
+  const key = name + '/' + argCount
+  if (jq.has(jqfn, key)) {
+    return jqfn[key]
+  }
+
+  let arities
+
+  const keyPrefix = name + '/'
+  for (const key of Object.keys(jqfn)) {
+    if (key.startsWith(keyPrefix)) {
+      arities ||= []
+      arities.push(Math.max(jqfn[key].length - 1, 0))
+    }
+  }
+
+  if (!arities) {
+    return errorCallback(`Function "${name}" is not defined.`)
+  }
+
+  arities.sort((a, b) => a - b)
+
+  if (arities.length > 2) {
+    const last = arities.pop()
+    arities = `${arities.join(', ')}, or ${last} parameters`
+  }
+  else {
+    arities = arities.join(' or ')
+    switch (arities) {
+      case '0':
+        arities = 'no parameters'
+        break
+      case '1':
+        arities = 'one parameter'
+        break
+      case '0 or 1':
+        arities = 'one or no parameters'
+        break
+      default:
+        arities += ' parameters'
+    }
+  }
+
+  return errorCallback(`Function "${name}" expects ${arities}.`)
+}
+
+// Private helpers
 
 const reduce = (left, rest, stop, fn) => {
   for (let i = 0, n = rest.length; i < n; ++i) {
