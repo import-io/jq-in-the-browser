@@ -116,6 +116,11 @@ describe('Compile-time errors', () => {
     ['select(!)', /^Expected .+ but "!" found\.$/],
     ['select', 'Function "select" expects one parameter.'],
     ['select(1;2)', 'Function "select" expects one parameter.'],
+    ['test(;)', /^Expected .+ but ";" found\.$/],
+    ['test(1;)', /^Expected .+ but "\)" found\.$/],
+    ['test(1;!)', /^Expected .+ but "!" found\.$/],
+    ['test', 'Function "test" expects 1 or 2 parameters.'],
+    ['test(1;2;3)', 'Function "test" expects 1 or 2 parameters.'],
 
     ['and', /^Expected .+, function name,.+ but "a" found\.$/],
     ['as', /^Expected .+, function name,.+ but "a" found\.$/],

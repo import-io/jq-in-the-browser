@@ -45,10 +45,12 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 
 * ascii_downcase
 * ascii_upcase
-* downcase (non-standard extension, see below)
+* capture **
+* downcase *
 * empty
 * false
 * from_entries
+* gsub **
 * infinite
 * isfinite
 * isinfinite
@@ -61,24 +63,35 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * ltrimstr
 * map
 * map_values
+* match ** ***
 * nan
 * not
 * null
 * reverse
 * rtrimstr
+* scan
 * select
 * sort
 * sort_by
+* split **
+* splits **
+* sub **
 * to_entries
 * tonumber
 * tostring
 * true
 * with_entries
-* upcase (non-standard extension, see below)
+* upcase *
 
-The extension functions "downcase" and "upcase" are not present in standard JQ. They differ from
-"ascii_downcase" and "ascii_upcase" in that they change casing for all Unicode letters, not only for ASCII
+\* The extension functions `downcase` and `upcase` are not present in standard JQ. They differ from
+`ascii_downcase` and `ascii_upcase` in that they change casing for all Unicode letters, not only for ASCII
 letters (A-Z).
+
+** Only `g`, `i`, `m`, `n` regular expression flags are supported. A runtime error will be generated for any
+other flag (including `l`, `p`, `s`, `x` flags supported in standard JQ).
+
+*** The `match` function doesn't return captures' names and offsets in its results (these fields will
+contain placeholder value `'<not supported>'`). Use `captures` function to access captures by their names.
 
 ## Useful JQ links
 

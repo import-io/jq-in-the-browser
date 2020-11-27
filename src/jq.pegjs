@@ -1,5 +1,5 @@
 {
-  const Keywords = [
+  const KEYWORDS = Object.freeze([
     'and',
     'as',
     'catch',
@@ -10,7 +10,7 @@
     'or',
     'then',
     'try',
-  ]
+  ])
 
   const parsePipe = (first, rest) => {
     if (!rest.length) {
@@ -307,7 +307,7 @@ FunctionCall
 
 FunctionName 'function name'
   = name: Name & {
-    return !Keywords.includes(name)
+    return !KEYWORDS.includes(name)
   } {
     return name
   }

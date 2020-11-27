@@ -754,9 +754,10 @@
     ]
   ],
   [
-    "Division (strings)",
+    "Division (strings) and split/1",
     [
-      ".a / .b"
+      ".a / .b",
+      ".b as $b | .a | split($b)"
     ],
     [
       { "a": "", "b": "" },
@@ -769,16 +770,19 @@
       { "a": "foobar", "b": "bar" },
       { "a": "foooooo", "b": "oo" },
       { "a": "foo bar baz", "b": " " },
-      { "a": "foo,bar,baz", "b": "," },
+      { "a": "foo.bar.baz", "b": "." },
+      { "a": "foo  bar  baz", "b": " " },
       { "a": "foo, bar, baz", "b": ", " },
       { "a": " foo bar baz ", "b": " " }
     ]
   ],
   [
-    "Division (strings with surrogate pairs)",
+    "Division (strings with surrogate pairs) and split/1",
     [
       "\"𝟘𝟙𝟚𝟛\" / \"\"",
-      "\"𝟘𝟙𝟚𝟛𝟘𝟙𝟚𝟛\" / \"𝟚\""
+      "\"𝟘𝟙𝟚𝟛𝟘𝟙𝟚𝟛\" / \"𝟚\"",
+      "\"𝟘𝟙𝟚𝟛\" | split(\"\")",
+      "\"𝟘𝟙𝟚𝟛𝟘𝟙𝟚𝟛\" | split(\"𝟚\")"
     ],
     [
       1
@@ -1186,6 +1190,74 @@
     [1, null]
   ],
   [
+    "capture",
+    [
+      "capture(\"\")",
+      "capture(\"\"; \"g\", \"n\", \"gn\")",
+      "capture(\"()\")",
+      "capture(\"()\"; \"g\", \"n\", \"gn\")",
+      "capture(\"(a*)\")",
+      "capture(\"(a*)\"; \"g\", \"n\", \"gn\")",
+      "capture(\"(a)*\")",
+      "capture(\"(a)*\"; \"g\", \"n\", \"gn\")",
+      "capture(\"(?<c>)\")",
+      "capture(\"(?<c>)\"; \"g\", \"n\", \"gn\")",
+      "capture(\"(?<c>a*)\")",
+      "capture(\"(?<c>a*)\"; \"g\", \"n\", \"gn\")",
+      "capture(\"(?<c>a)*\")",
+      "capture(\"(?<c>a)*\"; \"g\", \"n\", \"gn\")",
+      "capture(\"(b)\")",
+      "capture(\"(b)\"; null)",
+      "capture(\"(b)\"; \"\")",
+      "capture(\"(b)\"; \"g\")",
+      "capture([\"(b)\", null])",
+      "capture([\"(b)\", \"\"])",
+      "capture([\"(b)\", \"g\"])",
+      "capture(\"(?<c>b)\")",
+      "capture(\"(?<c>b)\"; null)",
+      "capture(\"(?<c>b)\"; \"\")",
+      "capture(\"(?<c>b)\"; \"g\")",
+      "capture([\"(?<c>b)\", null])",
+      "capture([\"(?<c>b)\", \"\"])",
+      "capture([\"(?<c>b)\", \"g\"])",
+      "capture(\"b\")",
+      "capture(\"b()\")",
+      "capture(\"b(a*)\")",
+      "capture(\"b(a)*\")",
+      "capture(\"b(?<c>)\")",
+      "capture(\"b(?<c>a*)\")",
+      "capture(\"b(?<c>a)*\")",
+      "capture(\"a(?<c>b)\", [\"a(?<c>b)\", \"g\"])",
+      "capture(\".(?<c>b)\"; \"g\", \"gm\")",
+      "capture(\"(?<c>aB?)\", \"(?<c>bB?)\"; \"gg\", \"gi\")",
+      ". + \"𝟘𝟙𝟚𝟛\" | capture(\".(?<c>.)\"; \"g\")"
+    ],
+    [
+      "",
+      "ababb\nbaabb"
+    ]
+  ],
+  [
+    "capture - errors",
+    [
+      "capture(null)",
+      "capture(1)",
+      "capture([])",
+      "capture([null])",
+      "capture([1])",
+      "capture([\"b\", 1])",
+      "capture([\"b\", \"z\"])",
+      "capture(\"b\"; 1)",
+      "capture(\"b\"; \"z\")",
+      "capture(\"b(\")",
+      "null | capture(\"b\")",
+      "   1 | capture(\"b\")"
+    ],
+    [
+      "ababb\nbaabb"
+    ]
+  ],
+  [
     "from_entries",
     [
       "from_entries"
@@ -1235,6 +1307,51 @@
       [{ "Name": false, "value": 1 }],
       { "x": { "value": 1 } },
       { "x": { "key": 1, "value": 1 } }
+    ]
+  ],
+  [
+    "gsub",
+    [
+      "gsub(\"\"; null; \"n\", \"gn\")",
+      "gsub(\"\"; \"x\"; \"n\", \"gn\")",
+      "gsub(\"x\"; 1)",
+      "gsub(\"(?<c>a)(?<d>b?)(?<e>B)?\"; null)",
+      "gsub(\"(?<c>a)(?<d>b?)(?<e>B)?\"; null; \"gg\")",
+      "gsub(\"(?<c>a)(?<d>b?)(?<e>B)?\"; null; \"gg\", \"gi\")",
+      "gsub(\"(?<c>a)(?<d>b?)(?<e>B)?\"; \"x\")",
+      "gsub(\"(?<c>a)(?<d>b?)(?<e>B)?\"; \"x\"; \"gg\")",
+      "gsub(\"(?<c>a)(?<d>b?)(?<e>B)?\"; \"x\"; \"gg\", \"gi\")",
+      "gsub(\"(?<c>a)(?<d>b?)(?<e>B)?\"; .c, .d, .e)",
+      "gsub(\"(?<c>a)(?<d>b?)(?<e>B)?\"; .c, .d, .e; \"gg\")",
+      "gsub(\"(?<c>a)(?<d>b?)(?<e>B)?\"; .c, .d, .e; \"gg\", \"gi\")",
+      "gsub(\"(?<c>a)(?<d>b?)(?<e>B)?\", \".(?<c>b)(?<d>a)(?<e>A)?\"; null)",
+      "gsub(\"(?<c>a)(?<d>b?)(?<e>B)?\", \".(?<c>b)(?<d>a)(?<e>A)?\"; null; \"gg\")",
+      "gsub(\"(?<c>a)(?<d>b?)(?<e>B)?\", \".(?<c>b)(?<d>a)(?<e>A)?\"; null; \"gg\", \"gimi\")",
+      "gsub(\"(?<c>a)(?<d>b?)(?<e>B)?\", \".(?<c>b)(?<d>a)(?<e>A)?\"; \"x\")",
+      "gsub(\"(?<c>a)(?<d>b?)(?<e>B)?\", \".(?<c>b)(?<d>a)(?<e>A)?\"; \"x\"; \"gg\")",
+      "gsub(\"(?<c>a)(?<d>b?)(?<e>B)?\", \".(?<c>b)(?<d>a)(?<e>A)?\"; \"x\"; \"gg\", \"gimi\")",
+      "gsub(\"(?<c>a)(?<d>b?)(?<e>B)?\", \".(?<c>b)(?<d>a)(?<e>A)?\"; .c, .d, .e)",
+      "gsub(\"(?<c>a)(?<d>b?)(?<e>B)?\", \".(?<c>b)(?<d>a)(?<e>A)?\"; .c, .d, .e; \"gg\")",
+      "gsub(\"(?<c>a)(?<d>b?)(?<e>B)?\", \".(?<c>b)(?<d>a)(?<e>A)?\"; .c, .d, .e; \"gg\", \"gimi\")",
+      ". + \"𝟘𝟙𝟚𝟛\" | gsub(\".(?<c>.)\"; \"(\" + .c + \")\"; \"g\")"
+    ],
+    [
+      "",
+      "ababb\nbaabb"
+    ]
+  ],
+  [
+    "gsub - errors",
+    [
+      "gsub(null; \"x\")",
+      "gsub(1; \"x\")",
+      "gsub(\"b\"; \"x\"; \"z\")",
+      "gsub(\"b(\"; \"x\")",
+      "null | gsub(\"b\"; \"x\")",
+      "   1 | gsub(\"b\"; \"x\")"
+    ],
+    [
+      "ababb\nbaabb"
     ]
   ],
   [
@@ -1473,6 +1590,73 @@
     ]
   ],
   [
+    "match",
+    [
+      "match(\"\")",
+      "match(\"\"; \"g\", \"n\", \"gn\")",
+      "match(\"()\")",
+      "match(\"()\"; \"g\", \"n\", \"gn\")",
+      "match(\"(a*)\")",
+      "match(\"(a*)\"; \"g\", \"n\", \"gn\")",
+      "match(\"(a)*\")",
+      "match(\"(a)*\"; \"g\", \"n\", \"gn\")",
+      "match(\"(?<c>)\")",
+      "match(\"(?<c>)\"; \"g\", \"n\", \"gn\")",
+      "match(\"(?<c>a*)\")",
+      "match(\"(?<c>a*)\"; \"g\", \"n\", \"gn\")",
+      "match(\"(?<c>a)*\")",
+      "match(\"(?<c>a)*\"; \"g\", \"n\", \"gn\")",
+      "match(\"(b)\")",
+      "match(\"(b)\"; null)",
+      "match(\"(b)\"; \"\")",
+      "match(\"(b)\"; \"g\")",
+      "match([\"(b)\", null])",
+      "match([\"(b)\", \"\"])",
+      "match([\"(b)\", \"g\"])",
+      "match(\"(?<c>b)\")",
+      "match(\"(?<c>b)\"; null)",
+      "match(\"(?<c>b)\"; \"\")",
+      "match(\"(?<c>b)\"; \"g\")",
+      "match([\"(?<c>b)\", null])",
+      "match([\"(?<c>b)\", \"\"])",
+      "match([\"(?<c>b)\", \"g\"])",
+      "match(\"b\")",
+      "match(\"b()\")",
+      "match(\"b(a*)\")",
+      "match(\"b(a)*\")",
+      "match(\"b(?<c>)\")",
+      "match(\"b(?<c>a*)\")",
+      "match(\"b(?<c>a)*\")",
+      "match(\"a(?<c>b)\", [\"a(?<c>b)\", \"g\"])",
+      "match(\".(?<c>b)\"; \"g\", \"gm\")",
+      "match(\"(?<c>aB?)\", \"(?<c>bB?)\"; \"gg\", \"gi\")"
+    ],
+    [
+      "",
+      "ababb\nbaabb"
+    ]
+  ],
+  [
+    "match - errors",
+    [
+      "match(null)",
+      "match(1)",
+      "match([])",
+      "match([null])",
+      "match([1])",
+      "match([\"b\", 1])",
+      "match([\"b\", \"z\"])",
+      "match(\"b\"; 1)",
+      "match(\"b\"; \"z\")",
+      "match(\"b(\")",
+      "null | match(\"b\")",
+      "   1 | match(\"b\")"
+    ],
+    [
+      "ababb\nbaabb"
+    ]
+  ],
+  [
     "nan",
     [
       "nan | isnan",
@@ -1548,6 +1732,53 @@
     ]
   ],
   [
+    "scan",
+    [
+      "scan(\"\")",
+      "scan(\"()\")",
+      "scan(\"(a*)\")",
+      "scan(\"(a)*\")",
+      "scan(\"(?<c>)\")",
+      "scan(\"(?<c>a*)\")",
+      "scan(\"(?<c>a)*\")",
+      "scan(\"(b)\")",
+      "scan(\"(?<c>b)\")",
+      "scan(\"b\")",
+      "scan(\"b()\")",
+      "scan(\"b(a*)\")",
+      "scan(\"b(a)*\")",
+      "scan(\"b(?<c>)\")",
+      "scan(\"b(?<c>a*)\")",
+      "scan(\"b(?<c>a)*\")",
+      "scan(\"a(?<c>b)\")",
+      "scan(\".(?<c>b)\")",
+      "scan(\"(?<c>aB?)\", \"(?<c>bB?)\")",
+      ". + \"𝟘𝟙𝟚𝟛\" | scan(\".(?<c>.)\")"
+    ],
+    [
+      "",
+      "ababb\nbaabb"
+    ]
+  ],
+  [
+    "scan - errors",
+    [
+      "scan(null)",
+      "scan(1)",
+      "scan([])",
+      "scan([null])",
+      "scan([1])",
+      "scan([\"b\", 1])",
+      "scan([\"b\", \"z\"])",
+      "scan(\"b(\")",
+      "null | scan(\"b\")",
+      "   1 | scan(\"b\")"
+    ],
+    [
+      "ababb\nbaabb"
+    ]
+  ],
+  [
     "select",
     [
       "select(.)",
@@ -1593,6 +1824,239 @@
       "sort_by(select(. < 5), select(. < 10))"
     ],
     [[10, 5, 1, 2]]
+  ],
+  [
+    "split/2",
+    [
+      "split(\"\"; null)",
+      "split(\"\"; \"g\", \"n\", \"gn\")",
+      "split(\"()\"; null)",
+      "split(\"()\"; \"g\", \"n\", \"gn\")",
+      "split(\"(a*)\"; null)",
+      "split(\"(a*)\"; \"g\", \"n\", \"gn\")",
+      "split(\"(a)*\"; null)",
+      "split(\"(a)*\"; \"g\", \"n\", \"gn\")",
+      "split(\"(?<c>)\"; null)",
+      "split(\"(?<c>)\"; \"g\", \"n\", \"gn\")",
+      "split(\"(?<c>a*)\"; null)",
+      "split(\"(?<c>a*)\"; \"g\", \"n\", \"gn\")",
+      "split(\"(?<c>a)*\"; null)",
+      "split(\"(?<c>a)*\"; \"g\", \"n\", \"gn\")",
+      "split(\"(b)\"; null)",
+      "split(\"(b)\"; \"\")",
+      "split(\"(b)\"; \"g\")",
+      "split(\"(?<c>b)\"; null)",
+      "split(\"(?<c>b)\"; \"\")",
+      "split(\"(?<c>b)\"; \"g\")",
+      "split(\"b\"; null)",
+      "split(\"b()\"; null)",
+      "split(\"b(a*)\"; null)",
+      "split(\"b(a)*\"; null)",
+      "split(\"b(?<c>)\"; null)",
+      "split(\"b(?<c>a*)\"; null)",
+      "split(\"b(?<c>a)*\"; null)",
+      "split(\"a(?<c>b)\"; null, \"g\")",
+      "split(\".(?<c>b)\"; \"g\", \"gm\")",
+      "split(\"(?<c>aB?)\", \"(?<c>bB?)\"; \"gg\", \"gi\")",
+      ". + \"𝟘𝟙𝟚𝟛\" | split(\".(?<c>.)\"; \"g\")"
+    ],
+    [
+      "",
+      "ababb\nbaabb"
+    ]
+  ],
+  [
+    "split/2 - errors",
+    [
+      "split(null; null)",
+      "split(1; null)",
+      "split([]; null)",
+      "split([null]; null)",
+      "split([1]; null)",
+      "split([\"b\", 1]; null)",
+      "split([\"b\", \"z\"]; null)",
+      "split(\"b(\"; null)",
+      "null | split(\"b\"; null)",
+      "   1 | split(\"b\"; null)"
+    ],
+    [
+      "ababb\nbaabb"
+    ]
+  ],
+  [
+    "splits",
+    [
+      "splits(\"\")",
+      "splits(\"\"; \"g\", \"n\", \"gn\")",
+      "splits(\"()\")",
+      "splits(\"()\"; \"g\", \"n\", \"gn\")",
+      "splits(\"(a*)\")",
+      "splits(\"(a*)\"; \"g\", \"n\", \"gn\")",
+      "splits(\"(a)*\")",
+      "splits(\"(a)*\"; \"g\", \"n\", \"gn\")",
+      "splits(\"(?<c>)\")",
+      "splits(\"(?<c>)\"; \"g\", \"n\", \"gn\")",
+      "splits(\"(?<c>a*)\")",
+      "splits(\"(?<c>a*)\"; \"g\", \"n\", \"gn\")",
+      "splits(\"(?<c>a)*\")",
+      "splits(\"(?<c>a)*\"; \"g\", \"n\", \"gn\")",
+      "splits(\"(b)\")",
+      "splits(\"(b)\"; null)",
+      "splits(\"(b)\"; \"\")",
+      "splits(\"(b)\"; \"g\")",
+      "splits(\"(?<c>b)\")",
+      "splits(\"(?<c>b)\"; null)",
+      "splits(\"(?<c>b)\"; \"\")",
+      "splits(\"(?<c>b)\"; \"g\")",
+      "splits(\"b\")",
+      "splits(\"b()\")",
+      "splits(\"b(a*)\")",
+      "splits(\"b(a)*\")",
+      "splits(\"b(?<c>)\")",
+      "splits(\"b(?<c>a*)\")",
+      "splits(\"b(?<c>a)*\")",
+      "splits(\"a(?<c>b)\"; null, \"g\")",
+      "splits(\".(?<c>b)\"; \"g\", \"gm\")",
+      "splits(\"(?<c>aB?)\", \"(?<c>bB?)\"; \"gg\", \"gi\")",
+      ". + \"𝟘𝟙𝟚𝟛\" | splits(\".(?<c>.)\"; \"g\")"
+    ],
+    [
+      "",
+      "ababb\nbaabb"
+    ]
+  ],
+  [
+    "splits - errors",
+    [
+      "splits(null)",
+      "splits(1)",
+      "splits([])",
+      "splits([null])",
+      "splits([1])",
+      "splits([\"b\", 1])",
+      "splits([\"b\", \"z\"])",
+      "splits(\"b(\")",
+      "null | splits(\"b\")",
+      "   1 | splits(\"b\")"
+    ],
+    [
+      "ababb\nbaabb"
+    ]
+  ],
+  [
+    "sub",
+    [
+      "sub(\"\"; null)",
+      "sub(\"\"; null; \"n\", \"gn\")",
+      "sub(\"\"; \"x\")",
+      "sub(\"\"; \"x\"; \"n\", \"gn\")",
+      "sub(\"x\"; 1)",
+      "sub(\"(?<c>a)(?<d>b?)(?<e>B)?\"; null)",
+      "sub(\"(?<c>a)(?<d>b?)(?<e>B)?\"; null; \"gg\")",
+      "sub(\"(?<c>a)(?<d>b?)(?<e>B)?\"; null; \"gg\", \"gi\")",
+      "sub(\"(?<c>a)(?<d>b?)(?<e>B)?\"; \"x\")",
+      "sub(\"(?<c>a)(?<d>b?)(?<e>B)?\"; \"x\"; \"gg\")",
+      "sub(\"(?<c>a)(?<d>b?)(?<e>B)?\"; \"x\"; \"gg\", \"gi\")",
+      "sub(\"(?<c>a)(?<d>b?)(?<e>B)?\"; .c, .d, .e)",
+      "sub(\"(?<c>a)(?<d>b?)(?<e>B)?\"; .c, .d, .e; \"gg\")",
+      "sub(\"(?<c>a)(?<d>b?)(?<e>B)?\"; .c, .d, .e; \"gg\", \"gi\")",
+      "sub(\"(?<c>a)(?<d>b?)(?<e>B)?\", \".(?<c>b)(?<d>a)(?<e>A)?\"; null)",
+      "sub(\"(?<c>a)(?<d>b?)(?<e>B)?\", \".(?<c>b)(?<d>a)(?<e>A)?\"; null; \"gg\")",
+      "sub(\"(?<c>a)(?<d>b?)(?<e>B)?\", \".(?<c>b)(?<d>a)(?<e>A)?\"; null; \"gg\", \"gimi\")",
+      "sub(\"(?<c>a)(?<d>b?)(?<e>B)?\", \".(?<c>b)(?<d>a)(?<e>A)?\"; \"x\")",
+      "sub(\"(?<c>a)(?<d>b?)(?<e>B)?\", \".(?<c>b)(?<d>a)(?<e>A)?\"; \"x\"; \"gg\")",
+      "sub(\"(?<c>a)(?<d>b?)(?<e>B)?\", \".(?<c>b)(?<d>a)(?<e>A)?\"; \"x\"; \"gg\", \"gimi\")",
+      "sub(\"(?<c>a)(?<d>b?)(?<e>B)?\", \".(?<c>b)(?<d>a)(?<e>A)?\"; .c, .d, .e)",
+      "sub(\"(?<c>a)(?<d>b?)(?<e>B)?\", \".(?<c>b)(?<d>a)(?<e>A)?\"; .c, .d, .e; \"gg\")",
+      "sub(\"(?<c>a)(?<d>b?)(?<e>B)?\", \".(?<c>b)(?<d>a)(?<e>A)?\"; .c, .d, .e; \"gg\", \"gimi\")",
+      ". + \"𝟘𝟙𝟚𝟛\" | sub(\".(?<c>.)\"; \"(\" + .c + \")\"; \"g\")"
+    ],
+    [
+      "",
+      "ababb\nbaabb"
+    ]
+  ],
+  [
+    "sub - errors",
+    [
+      "sub(null; \"x\"; null)",
+      "sub(1; \"x\"; null)",
+      "sub(\"b\"; \"x\"; \"z\")",
+      "sub(\"b(\"; \"x\")",
+      "null | sub(\"b\"; \"x\")",
+      "   1 | sub(\"b\"; \"x\")"
+    ],
+    [
+      "ababb\nbaabb"
+    ]
+  ],
+  [
+    "test",
+    [
+      "test(\"\")",
+      "test(\"\"; \"g\", \"n\", \"gn\")",
+      "test(\"()\")",
+      "test(\"()\"; \"g\", \"n\", \"gn\")",
+      "test(\"(a*)\")",
+      "test(\"(a*)\"; \"g\", \"n\", \"gn\")",
+      "test(\"(a)*\")",
+      "test(\"(a)*\"; \"g\", \"n\", \"gn\")",
+      "test(\"(?<c>)\")",
+      "test(\"(?<c>)\"; \"g\", \"n\", \"gn\")",
+      "test(\"(?<c>a*)\")",
+      "test(\"(?<c>a*)\"; \"g\", \"n\", \"gn\")",
+      "test(\"(?<c>a)*\")",
+      "test(\"(?<c>a)*\"; \"g\", \"n\", \"gn\")",
+      "test(\"(b)\")",
+      "test(\"(b)\"; null)",
+      "test(\"(b)\"; \"\")",
+      "test(\"(b)\"; \"g\")",
+      "test([\"(b)\", null])",
+      "test([\"(b)\", \"\"])",
+      "test([\"(b)\", \"g\"])",
+      "test(\"(?<c>b)\")",
+      "test(\"(?<c>b)\"; null)",
+      "test(\"(?<c>b)\"; \"\")",
+      "test(\"(?<c>b)\"; \"g\")",
+      "test([\"(?<c>b)\", null])",
+      "test([\"(?<c>b)\", \"\"])",
+      "test([\"(?<c>b)\", \"g\"])",
+      "test(\"b\")",
+      "test(\"b()\")",
+      "test(\"b(a*)\")",
+      "test(\"b(a)*\")",
+      "test(\"b(?<c>)\")",
+      "test(\"b(?<c>a*)\")",
+      "test(\"b(?<c>a)*\")",
+      "test(\"a(?<c>b)\", [\"a(?<c>b)\", \"g\"])",
+      "test(\".(?<c>b)\"; \"g\", \"gm\")",
+      "test(\"(?<c>aB?)\", \"(?<c>bB?)\"; \"gg\", \"gi\")",
+      ". + \"𝟘𝟙𝟚𝟛\" | test(\".(?<c>.)\"; \"g\")"
+    ],
+    [
+      "",
+      "ababb\nbaabb"
+    ]
+  ],
+  [
+    "test - errors",
+    [
+      "test(null)",
+      "test(1)",
+      "test([])",
+      "test([null])",
+      "test([1])",
+      "test([\"b\", 1])",
+      "test([\"b\", \"z\"])",
+      "test(\"b\"; 1)",
+      "test(\"b\"; \"z\")",
+      "test(\"b(\")",
+      "null | test(\"b\")",
+      "   1 | test(\"b\")"
+    ],
+    [
+      "ababb\nbaabb"
+    ]
   ],
   [
     "tonumber",

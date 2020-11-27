@@ -1,4 +1,5 @@
 import * as jq from './core.js'
+import * as jqre from './regexp.js'
 
 const fn = {}
 export default fn
@@ -27,6 +28,16 @@ fn['ascii_upcase/0'] = (input) => {
   }
 
   return input.replace(/[a-z]/g, x => String.fromCharCode(x.charCodeAt(0) - 32))
+}
+
+fn['capture/1'] = (input, args) => {
+  return jq.map(args(input), args => jqre.capturePolymorphic(input, args))
+}
+
+fn['capture/2'] = (input, re, flags) => {
+  return argumentProduct(input, re, flags, (re, flags) => {
+    return jqre.capture(input, re, flags)
+  })
 }
 
 fn['downcase/0'] = (input) => {
@@ -68,6 +79,16 @@ fn['from_entries/0'] = (input) => {
   })
 
   return result
+}
+
+fn['gsub/2'] = (input, re, replacer) => {
+  return jq.map(re(input), re => jqre.sub(input, re, replacer, null, true))
+}
+
+fn['gsub/3'] = (input, re, replacer, flags) => {
+  return argumentProduct(input, re, flags, (re, flags) => {
+    return jqre.sub(input, re, replacer, flags, true)
+  })
 }
 
 fn['infinite/0'] = () => {
@@ -207,14 +228,24 @@ fn['map_values/1'] = (input, transform) => {
   }
 
   const result = {}
-  for (const key of Object.keys(input)) {
-    const value = jq.first(transform(input[key]))
+  for (let [key, value] of Object.entries(input)) {
+    value = jq.first(transform(value))
     if (value !== undefined) {
       result[key] = value
     }
   }
 
   return result
+}
+
+fn['match/1'] = (input, args) => {
+  return jq.map(args(input), args => jqre.matchPolymorphic(input, args))
+}
+
+fn['match/2'] = (input, re, flags) => {
+  return argumentProduct(input, re, flags, (re, flags) => {
+    return jqre.match(input, re, flags)
+  })
 }
 
 fn['nan/0'] = () => {
@@ -257,6 +288,10 @@ fn['rtrimstr/1'] = (input, suffix) => {
   })
 }
 
+fn['scan/1'] = (input, re) => {
+  return jq.map(re(input), re => jqre.scan(input, re))
+}
+
 /*
   https://github.com/stedolan/jq/blob/master/src/builtin.jq#L4
   def select(f): if f then . else empty end;
@@ -271,6 +306,52 @@ fn['sort/0'] = (input) => {
 
 fn['sort_by/1'] = (input, keySelector) => {
   return jq.sortBy(input, keySelector)
+}
+
+fn['split/1'] = (input, separator) => {
+  return jq.map(separator(input), separator => {
+    if (!jq.isString(input) || !jq.isString(separator)) {
+      throw new jq.DataError('split input and separator must be strings.')
+    }
+
+    return jq.divide(input, separator)
+  })
+}
+
+fn['split/2'] = (input, re, flags) => {
+  return argumentProduct(input, re, flags, (re, flags) => {
+    return jq.toArray(jqre.splits(input, re, flags))
+  })
+}
+
+fn['splits/1'] = (input, re) => {
+  return jq.map(re(input), re => jqre.splits(input, re, null))
+}
+
+fn['splits/2'] = (input, re, flags) => {
+  return argumentProduct(input, re, flags, (re, flags) => {
+    return jqre.splits(input, re, flags)
+  })
+}
+
+fn['sub/2'] = (input, re, replacer) => {
+  return jq.map(re(input), re => jqre.sub(input, re, replacer, null))
+}
+
+fn['sub/3'] = (input, re, replacer, flags) => {
+  return argumentProduct(input, re, flags, (re, flags) => {
+    return jqre.sub(input, re, replacer, flags)
+  })
+}
+
+fn['test/1'] = (input, args) => {
+  return jq.map(args(input), args => jqre.testPolymorphic(input, args))
+}
+
+fn['test/2'] = (input, re, flags) => {
+  return argumentProduct(input, re, flags, (re, flags) => {
+    return jqre.test(input, re, flags)
+  })
 }
 
 /*
@@ -351,3 +432,14 @@ fn['with_entries/1'] = (input, transform) => {
 }
 
 Object.freeze(fn)
+
+// Private helpers
+
+const argumentProduct = (input, arg1, arg2, fn) => {
+  arg1 = arg1(input)
+  if (jq.isEmpty(arg1)) {
+    return undefined
+  }
+
+  return jq.product(arg1, arg2(input), fn)
+}

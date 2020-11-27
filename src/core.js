@@ -460,13 +460,13 @@ export const sortBy = (value, fn) => {
     return [...value].sort(compare)
   }
 
-  const indexes = new Array(value.length)
+  const indices = new Array(value.length)
   const keys = new Array(value.length)
   let someKeysAreStreams = false
 
   for (let i = 0, n = value.length; i < n; ++i) {
     const key = fn(value[i])
-    indexes[i] = i
+    indices[i] = i
     keys[i] = key
     someKeysAreStreams ||= key === undefined || isStream(key)
   }
@@ -475,9 +475,9 @@ export const sortBy = (value, fn) => {
     convert(keys, toArray)
   }
 
-  indexes.sort((a, b) => compare(keys[a], keys[b]))
-  convert(indexes, i => value[i])
-  return indexes
+  indices.sort((a, b) => compare(keys[a], keys[b]))
+  convert(indices, i => value[i])
+  return indices
 }
 
 export const stringify = (value) => {
@@ -515,7 +515,7 @@ export const toArray = (stream) => {
   return stream.items
 }
 
-const toStream = (array) => {
+export const toStream = (array) => {
   if (array.length === 0) {
     return undefined
   }

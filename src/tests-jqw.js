@@ -70,6 +70,18 @@ const substMessage = (query, input) => {
     else if ((m = e.message.match(/^string \("(.*)"\) cannot be parsed as a number\.$/))) {
       e.message = `Invalid literal at EOF at line 1, column ${m[1].length} (while parsing '${m[1]}').`
     }
+    else if ((m = e.message.match(/^Invalid regular expression: \/.*\/: Unterminated group\.$/))) {
+      e.message = 'Regex failure: end pattern with unmatched parenthesis.'
+    }
+    else if ((m = e.message.match(/^Invalid regular expression flags: "(.*)"\.$/))) {
+      e.message = `${m[1]} is not a valid modifier string.`
+    }
+    else if ((m = e.message.match(/^(.*) \(.*\) is not a string or array\.$/))) {
+      e.message = `${m[1]} not a string or array.`
+    }
+    else if (e.message === 'The array of regular expression parameters must not be empty.') {
+      e.message = 'array not a string or array.'
+    }
     else {
       e.message = e.message.replace(/\bascii_(downcase|upcase)\b/, 'explode')
     }
@@ -78,23 +90,67 @@ const substMessage = (query, input) => {
   }
 }
 
+const substUnsupportedCaptureProps = (jqwOutput) => {
+  for (const match of jqwOutput)
+  for (const capture of match.captures) {
+    capture.offset = '<not supported>'
+    capture.name   = '<not supported>'
+  }
+}
+
+// a fixed version of "gsub/3" JQ builtin, which properly handles flag streams
+const fixedGsub = `
+  def gsub_fixed(re; replacer; $flags): gsub(re; replacer; $flags);
+  def gsub(re; replacer; flags): gsub_fixed(re; replacer; flags);
+`
+
+// a fixed version of "split/2" JQ builtin, which properly handles flag streams
+const fixedSplit = `
+  def split_fixed(re; $flags): split(re; $flags);
+  def split(re; flags): split_fixed(re; flags);
+`
+
+// a fixed version of "splits/2" JQ builtin, which properly handles flag streams
+const fixedSplits = `
+  def splits_fixed(re; $flags): splits(re; $flags);
+  def splits(re; flags): splits_fixed(re; flags);
+`
+
+// a fixed version of "sub/3" JQ builtin, which properly handles flag streams
+const fixedSub = `
+  def sub_fixed(re; replacer; $flags): sub(re; replacer; $flags);
+  def sub(re; replacer; flags): sub_fixed(re; replacer; flags);
+`
+
 tests.forEach(([feature, queries, inputs]) => {
   describe(feature, () => {
-    const isErrorTest = feature.endsWith(' - errors')
-    queries.forEach((query) => {
+    queries.forEach(query => {
       describe('Query: ' + query, () => {
-        inputs.forEach((input) => {
+        const jqwQuery = (
+          feature === 'gsub'    ? fixedGsub :
+          feature === 'split/2' ? fixedSplit :
+          feature === 'splits'  ? fixedSplits :
+          feature === 'sub'     ? fixedSub :
+          ''
+        ) + query
+
+        inputs.forEach(input => {
           it('Input: ' + JSON.stringify(input), () => {
-            if (isErrorTest) {
+            if (feature.endsWith(' - errors')) {
               let message
-              assert.throws(() => jqw(input, query), e => { message = e.message; return true })
+              assert.throws(() => jqw(input, jqwQuery), e => { message = e.message; return true })
 
               const compiledQuery = jq.compile(query)
               assert.throws(() => substMessage(compiledQuery, input), { message })
             }
             else {
               const ourOutput = jq.compile(query)(input)
-              const jqwOutput = jqw(input, query)
+              const jqwOutput = jqw(input, jqwQuery)
+
+              if (feature === 'match') {
+                substUnsupportedCaptureProps(jqwOutput)
+              }
+
               assert.deepStrictEqual(ourOutput, jqwOutput)
             }
           })
@@ -325,6 +381,65 @@ describe('Non-conforming behaviors', () => {
       query: '"" / "a"',
       ourOutput: [['']],
       jqwOutput: [[]],
+    },
+    {
+      query: '"" | split("a")',
+      ourOutput: [['']],
+      jqwOutput: [[]],
+    },
+
+    // we generate proper error messages in "splits" function for invalid flags
+    {
+      query: '"a" | splits("b"; 1)',
+      ourOutput: 'DataError: number (1) is not a string.',
+      jqwOutput: 'Error: string ("g") and number (1) cannot be added.',
+    },
+    {
+      query: '"a" | split("b"; 1)',
+      ourOutput: 'DataError: number (1) is not a string.',
+      jqwOutput: 'Error: string ("g") and number (1) cannot be added.',
+    },
+    {
+      query: '"a" | splits("b"; "z")',
+      ourOutput: 'DataError: Invalid regular expression flags: "z".',
+      jqwOutput: 'Error: gz is not a valid modifier string.',
+    },
+    {
+      query: '"a" | split("b"; "z")',
+      ourOutput: 'DataError: Invalid regular expression flags: "z".',
+      jqwOutput: 'Error: gz is not a valid modifier string.',
+    },
+
+    // we generate proper error messages in "sub" and "gsub" functions
+    {
+      query: '"a" | sub("b"; "x"; 1)',
+      ourOutput: 'DataError: number (1) is not a string.',
+      jqwOutput: 'Error: Cannot index number with string "g".',
+    },
+    {
+      query: '"a" | gsub("b"; "x"; 1)',
+      ourOutput: 'DataError: number (1) is not a string.',
+      jqwOutput: 'Error: number (1) and string ("g") cannot be added.',
+    },
+    {
+      query: '"a" | sub("b"; "x"; "gz")',
+      ourOutput: 'DataError: Invalid regular expression flags: "gz".',
+      jqwOutput: 'Error: z is not a valid modifier string.',
+    },
+    {
+      query: '"a" | gsub("b"; "x"; "gz")',
+      ourOutput: 'DataError: Invalid regular expression flags: "gz".',
+      jqwOutput: 'Error: z is not a valid modifier string.',
+    },
+    {
+      query: '"abb" | sub("b"; 1; "g")',
+      ourOutput: 'DataError: string ("a") and number (1) cannot be added.',
+      jqwOutput: 'Error: string ("") and number (1) cannot be added.',
+    },
+    {
+      query: '"abb" | gsub("b"; 1)',
+      ourOutput: 'DataError: string ("a") and number (1) cannot be added.',
+      jqwOutput: 'Error: string ("") and number (1) cannot be added.',
     },
   ]
 
