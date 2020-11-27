@@ -397,8 +397,10 @@ Number 'number'
     return value
   }
 
-_
-  = $SpaceChar*
+_ 'whitespace'
+  = SpaceChar* ("#" [^\n]* SpaceChar*)? {
+    return text()
+  }
 
 SpaceChar 'space'
   = [ \n\t]

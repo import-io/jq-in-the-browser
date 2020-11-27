@@ -40,6 +40,7 @@ Push a tag named `release-<package_version>`, e.g. `release-1.0`. CircleCI will 
 * Generalized optional operator: `(.foo + .bar)?`, `tonumber?`
 * Try-catch: `try .a`, `try .a catch "N/A"`, `try .a catch ("Error: " + .)`
 * Escape sequences (`\"`, `\\`, `\/`, `\b`, `\f`, `\n`, `\r`, `\t`) in string literals: `"foo\"bar"`, `"foo\nbar"`
+* Comments: `.foo # this selects foo`
 
 ## Supported functions
 

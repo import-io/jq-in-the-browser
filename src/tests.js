@@ -11,6 +11,10 @@ describe('Multi-line queries', () => {
     '4\n-\t1',
     '4\n-1\t',
     '\t4\n-1',
+    '#5+\n1+2',
+    '1+#5+\n2',
+    '1+2\n#+5',
+    '\n#5+\n1+2',
   ]
 
   const output = [3]
@@ -92,10 +96,10 @@ describe('Compile-time errors', () => {
     ['$as', 'Variable "$as" is not defined.'],
     ['$if', 'Variable "$if" is not defined.'],
 
-    ['1 as', 'Expected space or variable name but end of input found.'],
-    ['1 as234', 'Expected space or variable name but "2" found.'],
-    ['1 asfoo', 'Expected space or variable name but "f" found.'],
-    ['1 as $foo', 'Expected "|" or space but end of input found.'],
+    ['1 as', 'Expected variable name but end of input found.'],
+    ['1 as234', 'Expected variable name but "2" found.'],
+    ['1 asfoo', 'Expected variable name but "f" found.'],
+    ['1 as $foo', 'Expected "|" but end of input found.'],
 
     ['(1 as $foo | 2) | $foo', 'Variable "$foo" is not defined.'],
     ['(1 as $foo | 2) + $foo', 'Variable "$foo" is not defined.'],
