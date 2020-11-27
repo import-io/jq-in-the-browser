@@ -216,6 +216,7 @@ export const compileObjectEntryFromVariable = (name, index) => {
 }
 
 export const compileOutput = (expr) => {
+  expr ??= jq.identity
   return input => {
     if (input === undefined) {
       return []

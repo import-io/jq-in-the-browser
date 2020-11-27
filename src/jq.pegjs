@@ -49,7 +49,8 @@
 }
 
 Output
-  = _ expr: Expr _ {
+  = _ expr: (Expr _)? {
+    expr &&= expr[0]
     return jq.compileOutput(expr)
   }
 
